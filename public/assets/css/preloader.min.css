@@ -1,0 +1,71 @@
+/* Basic Pace Loader Styles */
+.pace {
+    -webkit-pointer-events: none;
+    pointer-events: none;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+
+    z-index: 2000; /* Ensure it's on top */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+}
+
+/* Spinner Styling */
+.pace .pace-activity {
+    border: 3px solid #29d;
+    border-top-color: transparent; 
+    border-radius: 50%; 
+    width: 48px; 
+    height: 48px; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: spin 1s linear infinite;
+}
+
+/* Keyframes for Spinner Animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg); /* Starting point */
+    }
+    to {
+        transform: rotate(360deg); /* Full rotation */
+    }
+}
+
+/* Pace Progress Bar Styling */
+/* .pace .pace-progress {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+
+    position: absolute;
+    z-index: 2001; 
+    top: 0;
+    right: 100%; 
+    height: 2px; 
+    width: 100%; 
+    background: #29d; 
+} */
+
+/* Hiding Pace When Not Active */
+.pace.pace-inactive {
+    display: none; /* Hide when not loading */
+}
+
+/* Keeping the Background White When Pace is Active */
+body.pace-running {
+    background-color: #fff; /* White background */
+    transition: filter 0.3s; /* Smooth transition if blur is applied */
+}
