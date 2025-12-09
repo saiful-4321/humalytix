@@ -63,6 +63,104 @@
                 </li>
                 @endcanany
 
+                {{-- HRM System --}}
+                @canany(['hrm.employees.view', 'hrm.departments.view', 'hrm.branches.view', 'hrm.attendance.view', 'hrm.leaves.view', 'hrm.jobs.view', 'hrm.payroll.view', 'hrm.appraisals.view'])
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow">
+                        <i data-feather="users"></i>
+                        <span data-key="t-hrm">HRM System</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('hrm.dashboard') }}" data-key="t-hrm-dashboard">Dashboard</a></li>
+
+                        {{-- Organization --}}
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-organization">Organization</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                @can('hrm.departments.view')
+                                <li><a href="{{ route('hrm.departments.index') }}" data-key="t-departments">Departments</a></li>
+                                @endcan
+                                @can('hrm.branches.view')
+                                <li><a href="{{ route('hrm.branches.index') }}" data-key="t-branches">Branches</a></li>
+                                @endcan
+                            </ul>
+                        </li>
+
+                        {{-- Recruitment --}}
+                        @can('hrm.jobs.view')
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-recruitment">Recruitment</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="{{ route('hrm.jobs.index') }}" data-key="t-jobs">Job Postings</a></li>
+                                <li><a href="{{ route('hrm.candidates.index') }}" data-key="t-candidates">Candidates</a></li>
+                                <li><a href="{{ route('hrm.letters.index') }}" data-key="t-letters">Digital Letters</a></li>
+                            </ul>
+                        </li>
+                        @endcan
+
+                        {{-- Human Resource --}}
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-hr">Human Resource</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                @can('hrm.employees.view')
+                                <li><a href="{{ route('hrm.employees.index') }}" data-key="t-employees">Employees</a></li>
+                                @endcan
+                                <li><a href="{{ route('hrm.assets.index') }}" data-key="t-assets">Asset Management</a></li>
+                                <li><a href="{{ route('hrm.resignations.index') }}" data-key="t-resignations">Resignations</a></li>
+                            </ul>
+                        </li>
+
+                        {{-- Time & Leave --}}
+                        <li>
+                        {{-- Attendance & Shifts --}}
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-attendance-shifts">
+                                <i data-feather="clock"></i>
+                                <span data-key="t-attendance">Attendance</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                @can('hrm.attendance.view')
+                                <li><a href="{{ route('hrm.attendance.index') }}" data-key="t-daily-log">Daily Log</a></li>
+                                <li><a href="{{ route('hrm.attendance.my-attendance') }}" data-key="t-my-attendance">My Attendance</a></li>
+                                @endcan
+                                <li><a href="{{ route('hrm.shifts.index') }}" data-key="t-shifts">Shifts & Rosters</a></li>
+                            </ul>
+                        </li>
+
+                        {{-- Leave Management --}}
+                        @can('hrm.leaves.view')
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-leave-management">
+                                <i data-feather="calendar"></i>
+                                <span data-key="t-leaves">Leave Management</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="{{ route('hrm.leaves.index') }}" data-key="t-leave-requests">Leave Requests</a></li>
+                                <li><a href="{{ route('hrm.leaves.my-leaves') }}" data-key="t-my-leaves">My Leaves</a></li>
+                                <li><a href="{{ route('hrm.leaves.allocations.index') }}" data-key="t-allocations">Allocations</a></li>
+                                <hr class="my-1 border-light">
+                                <li><a href="{{ route('hrm.settings.leave-types.index') }}" data-key="t-policies">Leave Policies</a></li>
+                                <li><a href="{{ route('hrm.settings.approval-chains.index') }}" data-key="t-approval-chains">Approval Chains</a></li>
+                            </ul>
+                        </li>
+                        @endcan
+
+                        {{-- Payroll & Performance --}}
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-compensation">Compensation</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                @can('hrm.payroll.view')
+                                <li><a href="{{ route('hrm.payroll.index') }}" data-key="t-payroll">Payroll</a></li>
+                                @endcan
+                                @can('hrm.appraisals.view')
+                                <li><a href="{{ route('hrm.appraisals.index') }}" data-key="t-appraisals">Performance</a></li>
+                                @endcan
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                @endcanany
+
                 {{-- Logs --}}
                 @canany(['log-viewer', 'activity-log'])
                 <li>

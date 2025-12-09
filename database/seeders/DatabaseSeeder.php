@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Modules\HRM\database\seeders\HRMMediumDataSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,6 +16,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             PermissionsSeeder::class,
             SettingsSeeder::class,
+            HRMMediumDataSeeder::class,
         ]);
     }
 }
