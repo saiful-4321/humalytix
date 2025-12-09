@@ -222,6 +222,53 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-12 mb-4">
+                                <label class="form-label d-block mb-2">Auth Page Layout</label>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="auth_layout" id="auth_split" value="split" {{ old('auth_layout', $setting->auth_layout ?? 'split') == 'split' ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="auth_split">
+                                                Split Screen <br>
+                                                <small class="text-muted">Modern Split Design</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="auth_layout" id="auth_glass" value="glass" {{ old('auth_layout', $setting->auth_layout) == 'glass' ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="auth_glass">
+                                                Glassmorphism <br>
+                                                <small class="text-muted">Transparent Card</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="auth_layout" id="auth_classic" value="classic" {{ old('auth_layout', $setting->auth_layout) == 'classic' ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="auth_classic">
+                                                Classic <br>
+                                                <small class="text-muted">Centered Card</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-3">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="auth_layout" id="auth_card" value="card" {{ old('auth_layout', $setting->auth_layout) == 'card' ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="auth_card">
+                                                Corporate <br>
+                                                <small class="text-muted">Image + Card</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Step 3: Sidebar & Topbar -->

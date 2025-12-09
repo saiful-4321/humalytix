@@ -3,6 +3,7 @@
 namespace App\Modules\HRM\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\HRM\Models\LeaveAllocation;
 use App\Modules\HRM\Models\Leave;
 use App\Modules\HRM\Models\LeaveType;
 use App\Modules\HRM\Models\Employee;
@@ -181,6 +182,11 @@ class LeaveController extends Controller
             'rejected' => Leave::where('employee_id', $employee->id)->where('status', 'rejected')->count(),
         ];
 
-        return view('HRM::pages.leaves.my-leaves', compact('leaves', 'stats'));
+            $allocations = LeaveAllocation::with('leaveType')
+            ->where('employee_id', $employee->id)
+            ->where('year', now()->year)
+            ->get();
+
+        return view('HRM::pages.leaves.my-leaves', compact('leaves', 'stats', 'allocations'));
     }
 }

@@ -1,17 +1,52 @@
-$(document).ready(function() {  
+$(document).ready(function () {
 
-    // common modal
-    $('body').on("click", '[data-toggle="dynamicModal"]', function(e) {
+    // common offcanvas (converted from modal)
+    $('body').on("click", '[data-toggle="dynamicModal"]', function (e) {
         e.preventDefault();
-        $("#dynamicModal").remove();
-        var modal = $(this);
-        var url   = modal.data("remote") || modal.attr("route") || modal.attr("href");
-        var html = $('<div class="modal fade show" id="dynamicModal" tabindex="-1" aria-modal="true"  role="dialog" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="dynamicModalLabel" aria-hidden="true" style="display: block"></div>'); 
+        $("#dynamicOffcanvas").remove();
+
+        var trigger = $(this);
+        var url = trigger.data("remote") || trigger.attr("route") || trigger.attr("href");
+        var size = trigger.data("size") || "w-50";
+
+        var html = $('<div class="offcanvas offcanvas-end ' + size + '" tabindex="-1" id="dynamicOffcanvas" aria-labelledby="dynamicOffcanvasLabel"></div>');
         $("body").append(html);
-        html.modal({
-            easein: "flipInX"
+
+        var offcanvas = new bootstrap.Offcanvas(html[0]);
+        offcanvas.show();
+
+        html.load(url, function () {
+            var $container = $(this);
+            // Unwrap modal-dialog/content if present
+            if ($container.find('.modal-content').length > 0) {
+                var inner = $container.find('.modal-content').html();
+                $container.html(inner);
+            }
+
+            // Replace classes for Offcanvas structure
+            $container.find('.modal-header').removeClass('modal-header').addClass('offcanvas-header');
+            $container.find('.modal-title').removeClass('modal-title').addClass('offcanvas-title');
+            $container.find('.modal-body').removeClass('modal-body').addClass('offcanvas-body');
+            $container.find('.modal-footer').removeClass('modal-footer').addClass('offcanvas-footer p-3 border-top');
+
+            // Update Dismiss buttons
+            $container.find('[data-bs-dismiss="modal"]').attr('data-bs-dismiss', 'offcanvas');
+            $container.find('.btn-close').attr('data-bs-dismiss', 'offcanvas');
+
+            // Re-initialize plugins
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+            // Re-init other common plugins if needed (e.g. select2)
+            if ($container.find('.select2').length > 0) {
+                $container.find('.select2').select2({
+                    placeholder: 'Select an option',
+                    allowClear: true,
+                    width: '100%',
+                    dropdownParent: $container
+                });
+            }
         });
-        html.load(url); 
     });
 
     // close modal
@@ -21,7 +56,7 @@ $(document).ready(function() {
 
     // feather icons
     feather.replace();
-  
+
     // select2
     $(".select2").select2({
         placeholder: 'Select an option',
@@ -40,7 +75,7 @@ $(document).ready(function() {
     });
 
     // carousel
-    $('.carousel').carousel();  
+    $('.carousel').carousel();
 
     // tooltip
     $('[data-toggle="tooltip"]').tooltip();
@@ -63,7 +98,7 @@ $(document).ready(function() {
     $('.datetimepicker').flatpickr({
         enableTime: true,
         dateFormat: "YYYY-MM-DD HH:mm:ss",
-        altFormat:  "YYYY-MM-DD HH:mm:ss",
+        altFormat: "YYYY-MM-DD HH:mm:ss",
         allowInput: true,
         parseDate: (datestr, format) => {
             return moment(datestr, format, true).toDate();
@@ -79,7 +114,7 @@ $(document).ready(function() {
         dateFormat: "YYYY-MM-DD",
         altFormat: "YYYY-MM-DD",
         allowInput: true,
-        maxDate: "today", 
+        maxDate: "today",
         parseDate: (datestr, format) => {
             return moment(datestr, format, true).toDate();
         },
@@ -93,16 +128,16 @@ $(document).ready(function() {
     $('.datetimepicker-date').daterangepicker({
         autoUpdateInput: false,
         singleDatePicker: true,
-        showDropdowns: true,  
+        showDropdowns: true,
         locale: {
             format: 'YYYY-MM-DD',
             cancelLabel: 'Clear'
         }
     });
-    $('.datetimepicker-date').on('apply.daterangepicker', function(ev, picker) {
+    $('.datetimepicker-date').on('apply.daterangepicker', function (ev, picker) {
         $(this).val(picker.startDate.format('YYYY-MM-DD'));
     });
-    $('.datetimepicker-date').on('cancel.daterangepicker', function(ev, picker) {
+    $('.datetimepicker-date').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
 
@@ -110,27 +145,27 @@ $(document).ready(function() {
     $('.datetimepicker-time').daterangepicker({
         autoUpdateInput: false,
         singleDatePicker: true,
-        showDropdowns: true,  
+        showDropdowns: true,
         locale: {
             format: 'YYYY-MM-DD',
             cancelLabel: 'Clear'
         }
     });
-    $('.datetimepicker-time').on('apply.daterangepicker', function(ev, picker) {
+    $('.datetimepicker-time').on('apply.daterangepicker', function (ev, picker) {
         $(this).val(picker.startDate.format('YYYY-MM-DD'));
     });
-    $('.datetimepicker-time').on('cancel.daterangepicker', function(ev, picker) {
+    $('.datetimepicker-time').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
 
     // form common fix - change validation error on change
-    $("body").on("keyup change", "input,select", function() {
+    $("body").on("keyup change", "input,select", function () {
         $(this).removeClass("is-invalid");
     });
 });
 
 // dark & light mode
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const currentMode = localStorage.getItem('mode');
 
     if (currentMode) {
@@ -141,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    document.getElementById('mode-setting-btn').addEventListener('click', function() {
+    document.getElementById('mode-setting-btn').addEventListener('click', function () {
         const mode = localStorage.getItem('mode') === "dark" ? 'light' : 'dark';
         document.body.setAttribute('data-layout-mode', mode);
         localStorage.setItem('mode', mode);
@@ -156,17 +191,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 var copyElements = document.querySelectorAll(".copy");
-copyElements.forEach(function(copyElement) {
+copyElements.forEach(function (copyElement) {
     copyElement.style.cursor = 'copy';
     copyElement.setAttribute("title", "Copy");
 
-    copyElement.addEventListener("click", function() {
-        
+    copyElement.addEventListener("click", function () {
+
         var textToCopy = "";
         if ((/^(input|textarea)$/i).test(this.tagName.toLowerCase())) {
-            textToCopy = this.value; 
+            textToCopy = this.value;
         } else {
-            textToCopy = this.innerText; 
+            textToCopy = this.innerText;
         }
 
         var textarea = document.createElement("textarea");
@@ -179,11 +214,11 @@ copyElements.forEach(function(copyElement) {
         // Apply copied animation styles
         this.style.background = 'linear-gradient(45deg, #76787e, #082fef)';
 
-        setTimeout(function() {
+        setTimeout(function () {
             copyElement.style.transition = 'transform 0.3s';
             copyElement.style.background = '';
-        }, 600); 
-        
+        }, 600);
+
         copyElement.setAttribute("title", "Copied");
     });
 });
@@ -198,7 +233,7 @@ function lessSms(e) {
     $(e).parent().find('.show-more').show();
     $(e).hide();
 }
-  
+
 
 // alert
 function swalAlert(type = "success", message = "") {
@@ -228,7 +263,7 @@ function swalConfirmAlert(form) {
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, delete it!',
-        reverseButtons:true
+        reverseButtons: true
     }).then((result) => {
         if (result.value) {
             form.submit();
@@ -248,7 +283,7 @@ function deleteConfirm(input) {
         showCancelButton: true,
         confirmButtonColor: '#d33',
         confirmButtonText: 'Delete',
-        reverseButtons:true
+        reverseButtons: true
     }).then((result) => {
         if (result.value) {
             window.location.href = input.getAttribute("route");

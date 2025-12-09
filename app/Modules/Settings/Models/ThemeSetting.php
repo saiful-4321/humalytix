@@ -27,5 +27,6 @@ class ThemeSetting extends Model
         'layout_mode',
         'body_color',
         'body_custom_color',
+        'auth_layout',
     ];
 }

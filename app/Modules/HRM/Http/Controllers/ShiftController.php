@@ -4,57 +4,71 @@ namespace App\Modules\HRM\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\HRM\Models\Shift;
-use App\Modules\HRM\Models\Roster;
-use App\Modules\HRM\Models\Employee;
 use Illuminate\Http\Request;
 
 class ShiftController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:hrm.attendance.view')->only(['index']);
+        $this->middleware('permission:hrm.attendance.create')->only(['store']);
+        $this->middleware('permission:hrm.attendance.edit')->only(['update']);
+        $this->middleware('permission:hrm.attendance.delete')->only(['destroy']);
+    }
+
     public function index()
     {
-        $shifts = Shift::all();
-        $rosters = Roster::with(['employee', 'shift'])
-            ->whereDate('date', '>=', now())
-            ->orderBy('date')
-            ->paginate(50);
-        $employees = Employee::active()->get();
-        
-        return view('HRM::pages.shifts.index', compact('shifts', 'rosters', 'employees'));
+        $shifts = Shift::orderBy('start_time')->get();
+        return view('HRM::pages.shifts.index', compact('shifts'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50|unique:hrm_shifts,code',
             'start_time' => 'required',
             'end_time' => 'required',
-            'break_duration' => 'nullable|integer',
+            'grace_period_minutes' => 'required|integer|min:0',
+            'break_duration_minutes' => 'required|integer|min:0',
+            'half_day_hours' => 'required|numeric|min:0',
+            'full_day_hours' => 'required|numeric|min:0',
+            'is_active' => 'boolean',
         ]);
+
+        $validated['created_by'] = auth()->id();
 
         Shift::create($validated);
-        return back()->with('success', 'Shift created successfully!');
+
+        return redirect()->back()->with('success', 'Shift created successfully.');
     }
 
-    public function assignRoster(Request $request)
+    public function update(Request $request, Shift $shift)
     {
         $validated = $request->validate([
-            'employee_ids' => 'required|array',
-            'shift_id' => 'required|exists:hrm_shifts,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50|unique:hrm_shifts,code,' . $shift->id,
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'grace_period_minutes' => 'required|integer|min:0',
+            'break_duration_minutes' => 'required|integer|min:0',
+            'half_day_hours' => 'required|numeric|min:0',
+            'full_day_hours' => 'required|numeric|min:0',
+            'is_active' => 'boolean',
         ]);
 
-        $period = \Carbon\CarbonPeriod::create($validated['start_date'], $validated['end_date']);
-        
-        foreach ($validated['employee_ids'] as $empId) {
-            foreach ($period as $date) {
-                Roster::updateOrCreate(
-                    ['employee_id' => $empId, 'date' => $date->format('Y-m-d')],
-                    ['shift_id' => $validated['shift_id']]
-                );
-            }
-        }
+        $validated['updated_by'] = auth()->id();
+        // Handle checkbox
+        $validated['is_active'] = $request->has('is_active');
 
-        return back()->with('success', 'Roster assigned successfully!');
+        $shift->update($validated);
+
+        return redirect()->back()->with('success', 'Shift updated successfully.');
+    }
+
+    public function destroy(Shift $shift)
+    {
+        $shift->delete();
+        return redirect()->back()->with('success', 'Shift deleted successfully.');
     }
 }

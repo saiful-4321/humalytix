@@ -105,18 +105,34 @@
                             <div class="col-md-6 mb-3">
                                 <label for="logo_white" class="form-label">Logo White</label>
                                 <input type="file" class="form-control" id="logo_white" name="logo_white">
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" name="logo_white_height" placeholder="Height (e.g. 50px)" value="{{ old('logo_white_height', $setting->logo_white_height ?? '') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" name="logo_white_width" placeholder="Width (e.g. auto)" value="{{ old('logo_white_width', $setting->logo_white_width ?? '') }}">
+                                    </div>
+                                </div>
                                 @if($setting->logo_white)
                                     <div class="mt-2">
-                                        <img src="{{ asset($setting->logo_white) }}" alt="Logo White" height="50">
+                                        <img src="{{ asset($setting->logo_white) }}" alt="Logo White" style="height: {{ $setting->logo_white_height ?? '50px' }}; width: {{ $setting->logo_white_width ?? 'auto' }};">
                                     </div>
                                 @endif
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="logo_dark" class="form-label">Logo Dark</label>
                                 <input type="file" class="form-control" id="logo_dark" name="logo_dark">
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" name="logo_dark_height" placeholder="Height (e.g. 50px)" value="{{ old('logo_dark_height', $setting->logo_dark_height ?? '') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" name="logo_dark_width" placeholder="Width (e.g. auto)" value="{{ old('logo_dark_width', $setting->logo_dark_width ?? '') }}">
+                                    </div>
+                                </div>
                                 @if($setting->logo_dark)
                                     <div class="mt-2">
-                                        <img src="{{ asset($setting->logo_dark) }}" alt="Logo Dark" height="50">
+                                        <img src="{{ asset($setting->logo_dark) }}" alt="Logo Dark" style="height: {{ $setting->logo_dark_height ?? '50px' }}; width: {{ $setting->logo_dark_width ?? 'auto' }};">
                                     </div>
                                 @endif
                             </div>
@@ -126,18 +142,34 @@
                             <div class="col-md-6 mb-3">
                                 <label for="logo_white_small" class="form-label">Logo White Small</label>
                                 <input type="file" class="form-control" id="logo_white_small" name="logo_white_small">
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" name="logo_white_small_height" placeholder="Height (e.g. 50px)" value="{{ old('logo_white_small_height', $setting->logo_white_small_height ?? '') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" name="logo_white_small_width" placeholder="Width (e.g. auto)" value="{{ old('logo_white_small_width', $setting->logo_white_small_width ?? '') }}">
+                                    </div>
+                                </div>
                                 @if($setting->logo_white_small)
                                     <div class="mt-2">
-                                        <img src="{{ asset($setting->logo_white_small) }}" alt="Logo White Small" height="50">
+                                        <img src="{{ asset($setting->logo_white_small) }}" alt="Logo White Small" style="height: {{ $setting->logo_white_small_height ?? '50px' }}; width: {{ $setting->logo_white_small_width ?? 'auto' }};">
                                     </div>
                                 @endif
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="logo_dark_small" class="form-label">Logo Dark Small</label>
                                 <input type="file" class="form-control" id="logo_dark_small" name="logo_dark_small">
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" name="logo_dark_small_height" placeholder="Height (e.g. 50px)" value="{{ old('logo_dark_small_height', $setting->logo_dark_small_height ?? '') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" name="logo_dark_small_width" placeholder="Width (e.g. auto)" value="{{ old('logo_dark_small_width', $setting->logo_dark_small_width ?? '') }}">
+                                    </div>
+                                </div>
                                 @if($setting->logo_dark_small)
                                     <div class="mt-2">
-                                        <img src="{{ asset($setting->logo_dark_small) }}" alt="Logo Dark Small" height="50">
+                                        <img src="{{ asset($setting->logo_dark_small) }}" alt="Logo Dark Small" style="height: {{ $setting->logo_dark_small_height ?? '50px' }}; width: {{ $setting->logo_dark_small_width ?? 'auto' }};">
                                     </div>
                                 @endif
                             </div>

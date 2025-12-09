@@ -51,6 +51,11 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::post('/{employee}/skills', [\App\Modules\HRM\Http\Controllers\EmployeeSkillController::class, 'store'])->name('skills.store');
         Route::put('/{employee}/skills/{skill}', [\App\Modules\HRM\Http\Controllers\EmployeeSkillController::class, 'update'])->name('skills.update');
         Route::delete('/{employee}/skills/{skill}', [\App\Modules\HRM\Http\Controllers\EmployeeSkillController::class, 'destroy'])->name('skills.destroy');
+        
+        // Salary Management
+        Route::get('/{employee}/salary', [\App\Modules\HRM\Http\Controllers\EmployeeSalaryController::class, 'edit'])->name('salary.edit');
+        Route::put('/{employee}/salary', [\App\Modules\HRM\Http\Controllers\EmployeeSalaryController::class, 'update'])->name('salary.update');
+        Route::post('/salary/calculate', [\App\Modules\HRM\Http\Controllers\EmployeeSalaryController::class, 'calculateBreakdown'])->name('salary.calculate');
     });
 
     // Organization Structure
@@ -119,8 +124,75 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::get('/create', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'create'])->name('create');
         Route::post('/', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'store'])->name('store');
         Route::get('/{payroll}', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'show'])->name('show');
+        Route::get('/{payroll}/pdf', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'downloadPDF'])->name('download-pdf');
         Route::post('/{payroll}/process', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'process'])->name('process');
+        Route::delete('/{payroll}', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'destroy'])->name('destroy');
         Route::post('/bulk-generate', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'bulkGenerate'])->name('bulk-generate');
+    });
+    
+    // Loans & Advances
+    Route::prefix('loans')->name('loans.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\LoanController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Modules\HRM\Http\Controllers\LoanController::class, 'create'])->name('create');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\LoanController::class, 'store'])->name('store');
+        Route::get('/{loan}', [\App\Modules\HRM\Http\Controllers\LoanController::class, 'show'])->name('show');
+        Route::post('/{loan}/approve', [\App\Modules\HRM\Http\Controllers\LoanController::class, 'approve'])->name('approve');
+        Route::post('/{loan}/reject', [\App\Modules\HRM\Http\Controllers\LoanController::class, 'reject'])->name('reject');
+        Route::delete('/{loan}', [\App\Modules\HRM\Http\Controllers\LoanController::class, 'destroy'])->name('destroy');
+    });
+    
+    Route::prefix('advances')->name('advances.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\AdvanceController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Modules\HRM\Http\Controllers\AdvanceController::class, 'create'])->name('create');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\AdvanceController::class, 'store'])->name('store');
+        Route::post('/{advance}/approve', [\App\Modules\HRM\Http\Controllers\AdvanceController::class, 'approve'])->name('approve');
+        Route::post('/{advance}/reject', [\App\Modules\HRM\Http\Controllers\AdvanceController::class, 'reject'])->name('reject');
+        Route::delete('/{advance}', [\App\Modules\HRM\Http\Controllers\AdvanceController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Overtime
+    Route::prefix('overtime')->name('overtime.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\OvertimeController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Modules\HRM\Http\Controllers\OvertimeController::class, 'create'])->name('create');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\OvertimeController::class, 'store'])->name('store');
+        Route::post('/{overtime}/approve', [\App\Modules\HRM\Http\Controllers\OvertimeController::class, 'approve'])->name('approve');
+        Route::post('/{overtime}/reject', [\App\Modules\HRM\Http\Controllers\OvertimeController::class, 'reject'])->name('reject');
+        Route::delete('/{overtime}', [\App\Modules\HRM\Http\Controllers\OvertimeController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Bonuses
+    Route::prefix('bonuses')->name('bonuses.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\BonusController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Modules\HRM\Http\Controllers\BonusController::class, 'create'])->name('create');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\BonusController::class, 'store'])->name('store');
+        Route::post('/{bonus}/approve', [\App\Modules\HRM\Http\Controllers\BonusController::class, 'approve'])->name('approve');
+        Route::post('/{bonus}/reject', [\App\Modules\HRM\Http\Controllers\BonusController::class, 'reject'])->name('reject');
+        Route::delete('/{bonus}', [\App\Modules\HRM\Http\Controllers\BonusController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Reports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/salary-register', [\App\Modules\HRM\Http\Controllers\PayrollReportController::class, 'salaryRegister'])->name('salary-register');
+        Route::get('/export-excel', [\App\Modules\HRM\Http\Controllers\PayrollReportController::class, 'exportExcel'])->name('export-excel');
+    });
+    
+    // Bank Transfers
+    Route::prefix('bank-transfers')->name('bank-transfers.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\BankTransferController::class, 'index'])->name('index');
+        Route::post('/generate', [\App\Modules\HRM\Http\Controllers\BankTransferController::class, 'generate'])->name('generate');
+    });
+    
+    // Email Payslips
+    Route::post('/payroll/{payroll}/email', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'emailPayslip'])->name('payroll.email');
+    Route::post('/payroll/bulk-email', [\App\Modules\HRM\Http\Controllers\PayrollController::class, 'bulkEmailPayslips'])->name('payroll.bulk-email');
+    
+    // Gratuity
+    Route::prefix('gratuity')->name('gratuity.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'index'])->name('index');
+        Route::get('/calculator', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'calculator'])->name('calculator');
+        Route::post('/calculate', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'calculate'])->name('calculate');
+        Route::post('/{gratuity}/approve', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'approve'])->name('approve');
+        Route::post('/{gratuity}/pay', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'pay'])->name('pay');
     });
     
     // Recruitment & ATS
@@ -166,8 +238,12 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
     Route::prefix('shifts')->name('shifts.')->group(function () {
         Route::get('/', [\App\Modules\HRM\Http\Controllers\ShiftController::class, 'index'])->name('index');
         Route::post('/', [\App\Modules\HRM\Http\Controllers\ShiftController::class, 'store'])->name('store');
-        Route::post('/assign', [\App\Modules\HRM\Http\Controllers\ShiftController::class, 'assignRoster'])->name('assign');
+        Route::put('/{shift}', [\App\Modules\HRM\Http\Controllers\ShiftController::class, 'update'])->name('update');
+        Route::delete('/{shift}', [\App\Modules\HRM\Http\Controllers\ShiftController::class, 'destroy'])->name('destroy');
+        Route::post('/assign', [\App\Modules\HRM\Http\Controllers\ShiftController::class, 'assignRoster'])->name('assign'); // We kept this for API usage if needed
     });
+    
+    Route::resource('rosters', \App\Modules\HRM\Http\Controllers\RosterController::class)->only(['index', 'store']);
 
     // Performance Management
     Route::prefix('appraisals')->name('appraisals.')->group(function () {
@@ -257,7 +333,13 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\SettingsController::class, 'index'])->name('index');
         Route::resource('approval-chains', \App\Modules\HRM\Http\Controllers\ApprovalChainController::class);
         Route::resource('leave-types', \App\Modules\HRM\Http\Controllers\LeaveTypeController::class);
+        Route::resource('letter-templates', \App\Modules\HRM\Http\Controllers\LetterTemplateController::class);
+        Route::resource('salary-components', \App\Modules\HRM\Http\Controllers\SalaryComponentController::class);
+        Route::resource('salary-structures', \App\Modules\HRM\Http\Controllers\SalaryStructureController::class);
+        Route::resource('tax-slabs', \App\Modules\HRM\Http\Controllers\TaxSlabController::class);
+        Route::resource('holidays', \App\Modules\HRM\Http\Controllers\HolidayController::class);
     });
 });

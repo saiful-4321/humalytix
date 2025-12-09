@@ -1,9 +1,12 @@
 @extends("Main::layouts.app")
+
 @section("content")
 <div class="block-header">
     <div class="row">
-        <div class="col-lg-7 col-md-8 col-sm-12"><h2>Shifts & Rosters</h2></div>
-        <div class="col-lg-5 col-md-4 col-sm-12 text-right">
+        <div class="col-lg-5 col-md-8 col-sm-12">
+            <h2>Shift Management</h2>
+        </div>
+        <div class="col-lg-7 col-md-4 col-sm-12 text-right">
             <ul class="breadcrumb justify-content-end">
                 <li class="breadcrumb-item"><a href="{{ route('hrm.dashboard') }}">HRM</a></li>
                 <li class="breadcrumb-item active">Shifts</li>
@@ -11,95 +14,257 @@
         </div>
     </div>
 </div>
+
 @include("Main::widgets.message.sweet-alert")
+
 <div class="row clearfix">
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header"><h5 class="card-title mb-0">Manage Shifts</h5></div>
-            <div class="card-body">
-                <form action="{{ route('hrm.shifts.store') }}" method="POST">
-                    @csrf
-                    <div class="mb-3"><label>Shift Name</label><input type="text" name="name" class="form-control" required placeholder="e.g. Morning A"></div>
-                    <div class="row">
-                        <div class="col-6 mb-3"><label>Start Time</label><input type="time" name="start_time" class="form-control" required></div>
-                        <div class="col-6 mb-3"><label>End Time</label><input type="time" name="end_time" class="form-control" required></div>
-                    </div>
-                    <div class="mb-3"><label>Break (Min)</label><input type="number" name="break_duration" class="form-control" value="60"></div>
-                    <button class="btn btn-primary w-100">Create Shift</button>
-                </form>
-                <hr>
-                <div class="list-group">
-                    @foreach($shifts as $shift)
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>{{ $shift->name }}</strong><br>
-                            <small>{{ $shift->start_time }} - {{ $shift->end_time }}</small>
-                        </div>
-                        <span class="badge bg-light text-dark">{{ $shift->break_duration }}m Break</span>
-                    </div>
-                    @endforeach
+    <div class="col-lg-12">
+        <div class="card bg-white">
+            <div class="card-header border-bottom">
+                <div class="d-flex align-items-center justify-content-between py-1">
+                    <h6 class="font-weight-medium mb-0">Work Shifts</h6>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#createShiftOffcanvas">
+                        <i class="mdi mdi-plus me-1"></i> Add Shift
+                    </button>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Weekly Roster</h5>
-                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#assignRosterModal">Assign Roster</button>
-            </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead><tr><th>Date</th><th>Employee</th><th>Shift</th><th>Time</th></tr></thead>
-                        <tbody>
-                            @forelse($rosters as $roster)
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
                             <tr>
-                                <td>{{ $roster->date->format('D, d M') }}</td>
-                                <td>{{ $roster->employee->full_name }}</td>
-                                <td><span class="badge bg-info">{{ $roster->shift->name }}</span></td>
-                                <td>{{ $roster->shift->start_time }} - {{ $roster->shift->end_time }}</td>
+                                <th>Shift Name</th>
+                                <th>Schedule</th>
+                                <th>Duration</th>
+                                <th>Grace Period</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($shifts as $shift)
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">{{ $shift->name }}</div>
+                                    <small class="text-muted">{{ $shift->code }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ \Carbon\Carbon::parse($shift->start_time)->format('h:i A') }} - 
+                                        {{ \Carbon\Carbon::parse($shift->end_time)->format('h:i A') }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small">Work: {{ $shift->full_day_hours }}h</div>
+                                    <div class="small text-muted">Break: {{ $shift->break_duration_minutes }}m</div>
+                                </td>
+                                <td>{{ $shift->grace_period_minutes }} mins</td>
+                                <td>
+                                    @if($shift->is_active)
+                                        <span class="badge bg-success">Active</span>
+                                    @else
+                                        <span class="badge bg-danger">Inactive</span>
+                                    @endif
+                                </td>
+                                <td class="text-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="mdi mdi-dots-vertical font-size-18"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <button type="button" class="dropdown-item" 
+                                                    onclick="editShift({{ json_encode($shift) }})">
+                                                    <i class="bx bx-edit me-2"></i> Edit
+                                                </button>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form action="{{ route('hrm.shifts.destroy', $shift->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this shift?')">
+                                                        <i class="bx bx-trash me-2"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
                             </tr>
                             @empty
-                            <tr><td colspan="4" class="text-center">No upcoming rosters.</td></tr>
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="mdi mdi-clock-time-four-outline font-size-24 d-block mb-2"></i>
+                                    No shifts defined yet.
+                                </td>
+                            </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
-                {{ $rosters->links() }}
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="assignRosterModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('hrm.shifts.assign') }}" method="POST">
-                @csrf
-                <div class="modal-header"><h5 class="modal-title">Assign Roster</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label>Employees</label>
-                        <select name="employee_ids[]" class="form-select" multiple required style="height: 150px">
-                            @foreach($employees as $emp)<option value="{{ $emp->id }}">{{ $emp->full_name }}</option>@endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label>Shift</label>
-                        <select name="shift_id" class="form-select" required>
-                            @foreach($shifts as $shift)<option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->start_time }}-{{ $shift->end_time }})</option>@endforeach
-                        </select>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3"><label>From</label><input type="date" name="start_date" class="form-control" required></div>
-                        <div class="col-6 mb-3"><label>To</label><input type="date" name="end_date" class="form-control" required></div>
-                    </div>
+{{-- Create Shift Offcanvas --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="createShiftOffcanvas" style="width: 500px;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Create New Shift</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form action="{{ route('hrm.shifts.store') }}" method="POST">
+            @csrf
+            
+            <div class="mb-3">
+                <label class="form-label">Shift Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" required placeholder="e.g. Regular Shift">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Shift Code</label>
+                <input type="text" class="form-control" name="code" placeholder="e.g. REG-01">
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">Start Time <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control" name="start_time" required>
                 </div>
-                <div class="modal-footer"><button type="submit" class="btn btn-success">Assign</button></div>
-            </form>
-        </div>
+                <div class="col-6">
+                    <label class="form-label">End Time <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control" name="end_time" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">Grace Period (Min)</label>
+                    <input type="number" class="form-control" name="grace_period_minutes" value="15" min="0">
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Break Duration (Min)</label>
+                    <input type="number" class="form-control" name="break_duration_minutes" value="60" min="0">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">Full Day (Hours)</label>
+                    <input type="number" class="form-control" name="full_day_hours" value="8" step="0.5" min="0">
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Half Day (Hours)</label>
+                    <input type="number" class="form-control" name="half_day_hours" value="4" step="0.5" min="0">
+                </div>
+            </div>
+
+            <div class="mb-3 form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_active" value="1" id="activeCheck" checked>
+                <label class="form-check-label" for="activeCheck">Active Shift</label>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Shift</button>
+            </div>
+        </form>
     </div>
 </div>
+
+{{-- Edit Shift Offcanvas --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="editShiftOffcanvas" style="width: 500px;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Edit Shift</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form id="editShiftForm" method="POST">
+            @csrf
+            @method('PUT')
+            
+            <div class="mb-3">
+                <label class="form-label">Shift Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" id="edit_name" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Shift Code</label>
+                <input type="text" class="form-control" name="code" id="edit_code">
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">Start Time <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control" name="start_time" id="edit_start_time" required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label">End Time <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control" name="end_time" id="edit_end_time" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">Grace Period (Min)</label>
+                    <input type="number" class="form-control" name="grace_period_minutes" id="edit_grace_period" min="0">
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Break Duration (Min)</label>
+                    <input type="number" class="form-control" name="break_duration_minutes" id="edit_break_duration" min="0">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">Full Day (Hours)</label>
+                    <input type="number" class="form-control" name="full_day_hours" id="edit_full_day" step="0.5" min="0">
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Half Day (Hours)</label>
+                    <input type="number" class="form-control" name="half_day_hours" id="edit_half_day" step="0.5" min="0">
+                </div>
+            </div>
+
+            <div class="mb-3 form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_active" value="1" id="edit_is_active">
+                <label class="form-check-label" for="edit_is_active">Active Shift</label>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Shift</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function editShift(shift) {
+    document.getElementById('edit_name').value = shift.name;
+    document.getElementById('edit_code').value = shift.code;
+    
+    // Extract time properly (HH:mm)
+    document.getElementById('edit_start_time').value = shift.start_time.substring(0, 5);
+    document.getElementById('edit_end_time').value = shift.end_time.substring(0, 5);
+    
+    document.getElementById('edit_grace_period').value = shift.grace_period_minutes;
+    document.getElementById('edit_break_duration').value = shift.break_duration_minutes;
+    document.getElementById('edit_full_day').value = shift.full_day_hours;
+    document.getElementById('edit_half_day').value = shift.half_day_hours;
+    document.getElementById('edit_is_active').checked = shift.is_active ? true : false;
+    
+    // Set Action URL
+    let url = "{{ route('hrm.shifts.update', ':id') }}";
+    url = url.replace(':id', shift.id);
+    document.getElementById('editShiftForm').action = url;
+    
+    // Show Offcanvas
+    var bsOffcanvas = new bootstrap.Offcanvas(document.getElementById('editShiftOffcanvas'));
+    bsOffcanvas.show();
+}
+</script>
 @endsection

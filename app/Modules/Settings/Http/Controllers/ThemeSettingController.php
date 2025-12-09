@@ -44,6 +44,7 @@ class ThemeSettingController extends Controller
             'layout_mode' => 'nullable|string',
             'body_color' => 'nullable|string',
             'body_custom_color' => 'nullable|string',
+            'auth_layout' => 'nullable|string',
         ]);
 
         $setting = ThemeSetting::first();

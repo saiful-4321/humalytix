@@ -179,6 +179,16 @@ class Employee extends Model
         return $this->hasMany(AssetAssignment::class);
     }
 
+    public function salary()
+    {
+        return $this->hasOne(EmployeeSalary::class)->orderBy('effective_date', 'desc');
+    }
+
+    public function salaryHistory()
+    {
+        return $this->hasMany(EmployeeSalary::class)->orderBy('effective_date', 'desc');
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'created_by');

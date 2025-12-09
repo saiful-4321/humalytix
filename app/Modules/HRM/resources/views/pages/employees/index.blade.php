@@ -56,6 +56,26 @@
                 </div>
             </div>
 
+            <!-- Active Filters Section -->
+            @if(request()->hasAny(['search', 'department_id', 'branch_id', 'status']))
+                <x-Main::active-filters :url="route('hrm.employees.index')">
+                    <x-Main::active-filter-item key="search" label="Search" :value="request('search')" />
+                    <x-Main::active-filter-item key="department_id" label="Department" :value="$departments->where('id', request('department_id'))->first()->name ?? request('department_id')" />
+                    <x-Main::active-filter-item key="branch_id" label="Branch" :value="$branches->where('id', request('branch_id'))->first()->name ?? request('branch_id')" />
+                    <x-Main::active-filter-item key="status" label="Status" :value="ucfirst(str_replace('_', ' ', request('status')))" />
+                </x-Main::active-filters>
+            @endif
+
+            <!-- Active Filters Section -->
+            @if(request()->hasAny(['search', 'department_id', 'branch_id', 'status']))
+                <x-Main::active-filters :url="route('hrm.employees.index')">
+                    <x-Main::active-filter-item key="search" label="Search" :value="request('search')" />
+                    <x-Main::active-filter-item key="department_id" label="Department" :value="$departments->where('id', request('department_id'))->first()->name ?? request('department_id')" />
+                    <x-Main::active-filter-item key="branch_id" label="Branch" :value="$branches->where('id', request('branch_id'))->first()->name ?? request('branch_id')" />
+                    <x-Main::active-filter-item key="status" label="Status" :value="ucfirst(str_replace('_', ' ', request('status')))" />
+                </x-Main::active-filters>
+            @endif
+
             <div class="card-body p-0">
                 <div class="table-responsive rounded-10 border">
                     <table class="table table-hover mb-0">

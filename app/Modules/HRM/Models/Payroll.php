@@ -58,4 +58,9 @@ class Payroll extends Model
     {
         return $this->belongsTo(\App\Models\User::class, 'updated_by');
     }
+
+    public function items()
+    {
+        return $this->hasMany(PayrollItem::class, 'payroll_id');
+    }
 }
