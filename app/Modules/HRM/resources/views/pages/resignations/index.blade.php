@@ -18,7 +18,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="card-title">Resignation Requests</h5>
-                    <a href="{{ route('hrm.resignations.create') }}" class="btn btn-danger"><i class="bx bx-plus"></i> Submit Resignation</a>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="offcanvas" data-bs-target="#addResignationOffcanvas"><i class="bx bx-plus"></i> Submit Resignation</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -49,6 +49,53 @@
                 <div class="mt-3">{{ $resignations->links() }}</div>
             </div>
         </div>
+    </div>
+</div>
+                <div class="mt-3">{{ $resignations->links() }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="addResignationOffcanvas" aria-labelledby="addResignationLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="addResignationLabel">Submit Resignation</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form action="{{ route('hrm.resignations.store') }}" method="POST">
+            @csrf
+            
+            <div class="mb-3">
+                <label class="form-label">Employee <span class="text-danger">*</span></label>
+                <select name="employee_id" class="form-select" required>
+                    <option value="">Select Employee</option>
+                    @foreach($employees as $employee)
+                        <option value="{{ $employee->id }}">{{ $employee->full_name }} ({{ $employee->employee_code }})</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Resignation Date <span class="text-danger">*</span></label>
+                <input type="date" name="resignation_date" class="form-control" required value="{{ date('Y-m-d') }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Notice Date <span class="text-danger">*</span></label>
+                <input type="date" name="notice_date" class="form-control" required>
+                <small class="text-muted">The date when notice period ends</small>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Reason <span class="text-danger">*</span></label>
+                <textarea name="reason" class="form-control" rows="3" required placeholder="Reason for resignation..."></textarea>
+            </div>
+            
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

@@ -11,8 +11,10 @@ use App\Modules\HRM\Http\Requests\EmployeeRequest;
 use App\Modules\HRM\Services\EmployeeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use ZipArchive;
 
 class EmployeeController extends Controller
 {
@@ -36,7 +38,7 @@ class EmployeeController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Employee::with(['department', 'branch', 'reportingManager']);
+        $query = Employee::with(['department', 'branch', 'reportingManager', 'documents.documentType']);
 
         // Apply filters
         if ($request->filled('department_id')) {
@@ -49,6 +51,22 @@ class EmployeeController extends Controller
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('designation')) {
+            $query->where('designation', 'like', "%{$request->designation}%");
+        }
+
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->gender);
+        }
+
+        if ($request->filled('joining_date_start')) {
+            $query->whereDate('joining_date', '>=', $request->joining_date_start);
+        }
+
+        if ($request->filled('joining_date_end')) {
+            $query->whereDate('joining_date', '<=', $request->joining_date_end);
         }
 
         if ($request->filled('search')) {
@@ -90,14 +108,17 @@ class EmployeeController extends Controller
     /**
      * Store a newly created employee
      */
+    /**
+     * Store a newly created employee
+     */
     public function store(EmployeeRequest $request)
     {
         try {
             $employee = $this->employeeService->createEmployee($request->validated());
 
             return redirect()
-                ->route('hrm.employees.show', $employee)
-                ->with('success', 'Employee created successfully!');
+                ->route('hrm.employees.edit', ['employee' => $employee->id, 'step' => 'employment'])
+                ->with('success', 'Employee profile created! Please add employment details.');
         } catch (\Exception $e) {
             return redirect()
                 ->back()
@@ -139,6 +160,9 @@ class EmployeeController extends Controller
      */
     public function edit(Employee $employee)
     {
+        // Load employee relationships
+        $employee->load(['documents.documentType']);
+        
         $departments = Department::active()->orderBy('name')->get();
         $branches = Branch::active()->orderBy('name')->get();
         $businessUnits = BusinessUnit::active()->orderBy('name')->get();
@@ -146,13 +170,19 @@ class EmployeeController extends Controller
             ->where('id', '!=', $employee->id)
             ->orderBy('first_name')
             ->get();
+            
+        // Get current step from request, default to personal
+        $currentStep = request('step', 'personal');
 
+        $documentTypes = \App\Modules\HRM\Models\DocumentType::where('is_active', true)->orderBy('order')->get();
         return view('HRM::pages.employees.edit', compact(
             'employee',
             'departments',
             'branches',
             'businessUnits',
-            'managers'
+            'managers',
+            'currentStep',
+            'documentTypes'
         ));
     }
 
@@ -163,9 +193,31 @@ class EmployeeController extends Controller
     {
         try {
             $this->employeeService->updateEmployee($employee, $request->validated());
+            
+            $action = $request->input('action', 'save'); // save_continue, save_exit
+            $step = $request->input('form_step');
+            
+            if ($action === 'save_continue') {
+                $nextStep = match($step) {
+                    'personal' => 'employment',
+                    'employment' => 'salary',
+                    'salary' => 'kyc',
+                    'kyc' => 'documents',
+                    'documents' => 'personal',
+                    default => 'personal'
+                };
+                
+                if ($step === 'documents') {
+                     return redirect()->route('hrm.employees.show', $employee)->with('success', 'Employee updated successfully!');
+                }
+                
+                return redirect()
+                    ->route('hrm.employees.edit', ['employee' => $employee->id, 'step' => $nextStep])
+                    ->with('success', 'Saved! Please continue to the next step.');
+            }
 
             return redirect()
-                ->route('hrm.employees.show', $employee)
+                ->route('hrm.employees.index')
                 ->with('success', 'Employee updated successfully!');
         } catch (\Exception $e) {
             return redirect()
@@ -318,5 +370,45 @@ class EmployeeController extends Controller
                 ->back()
                 ->with('error', 'Import failed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Download all documents
+     */
+    public function downloadDocuments(Employee $employee)
+    {
+        $documents = $employee->documents;
+
+        if ($documents->isEmpty()) {
+            return back()->with('error', 'No documents found for this employee.');
+        }
+
+        $zip = new ZipArchive;
+        $fileName = 'documents-' . $employee->employee_code . '.zip';
+        $zipPath = storage_path('app/public/' . $fileName);
+        
+        // Ensure directory exists
+        if (!file_exists(dirname($zipPath))) {
+            mkdir(dirname($zipPath), 0755, true);
+        }
+
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+            foreach ($documents as $doc) {
+                // Check if file exists in public disk
+                if (Storage::disk('public')->exists($doc->file_path)) {
+                    $filePath = Storage::disk('public')->path($doc->file_path);
+                    $zip->addFile($filePath, basename($filePath));
+                }
+            }
+            $zip->close();
+        } else {
+             return back()->with('error', 'Failed to create zip file.');
+        }
+        
+        if (!file_exists($zipPath)) {
+            return back()->with('error', 'Failed to create zip file (not found).');
+        }
+
+        return response()->download($zipPath)->deleteFileAfterSend(true);
     }
 }

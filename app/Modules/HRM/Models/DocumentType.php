@@ -20,6 +20,7 @@ class DocumentType extends Model
         'description',
         'is_required',
         'is_active',
+        'urgency',
         'order',
         'created_by',
         'updated_by',

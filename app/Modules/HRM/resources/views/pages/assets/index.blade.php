@@ -80,13 +80,13 @@
                                 <td>
                                     @if($asset->currentAssignment)
                                     <div class="d-flex align-items-center">
-                                         <div class="avatar-xs me-2">
+                                             <div class="avatar-xs me-2">
                                             <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-12">
-                                                {{ substr($asset->currentAssignment->employee->first_name, 0, 1) }}
+                                                {{ substr(optional($asset->currentAssignment->employee)->first_name ?? 'U', 0, 1) }}
                                             </span>
                                         </div>
                                         <div>
-                                            <h6 class="mb-0 font-size-14">{{ $asset->currentAssignment->employee->full_name }}</h6>
+                                            <h6 class="mb-0 font-size-14">{{ optional($asset->currentAssignment->employee)->full_name ?? 'Unknown User' }}</h6>
                                             <small class="text-muted">{{ $asset->currentAssignment->assigned_date->format('d M, Y') }}</small>
                                         </div>
                                     </div>

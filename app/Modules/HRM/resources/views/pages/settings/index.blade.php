@@ -101,6 +101,16 @@
                             <i class="mdi mdi-chevron-right"></i>
                         </div>
                     </a>
+                    <a href="{{ route('hrm.document-types.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.document-types.*') ? 'active' : '' }}">
+                        <div class="d-flex align-items-center">
+                            <i class="mdi mdi-file-cog me-2 font-size-18"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 font-size-13">Document Types</h6>
+                                <small class="text-muted">Upload Categories</small>
+                            </div>
+                            <i class="mdi mdi-chevron-right"></i>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -120,6 +130,10 @@
                 <div class="d-flex justify-content-between mb-2">
                     <span class="font-size-13">Leave Types</span>
                     <span class="fw-bold">{{ \App\Modules\HRM\Models\LeaveType::count() }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="font-size-13">Document Types</span>
+                    <span class="fw-bold">{{ \App\Modules\HRM\Models\DocumentType::count() }}</span>
                 </div>
             </div>
         </div>

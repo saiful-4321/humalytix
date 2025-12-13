@@ -80,14 +80,9 @@
                                 @can('hrm.employees.view')
                                 <li><a href="{{ route('hrm.employees.index') }}" data-key="t-employees">Employees</a></li>
                                 @endcan
-                                @can('hrm.departments.view')
-                                <li><a href="{{ route('hrm.departments.index') }}" data-key="t-departments">Departments</a></li>
-                                @endcan
-                                @can('hrm.branches.view')
-                                <li><a href="{{ route('hrm.branches.index') }}" data-key="t-branches">Branches</a></li>
-                                @endcan
                                 <li><a href="{{ route('hrm.assets.index') }}" data-key="t-assets">Assets</a></li>
                                 <li><a href="{{ route('hrm.resignations.index') }}" data-key="t-resignations">Resignations</a></li>
+                                <li><a href="{{ route('hrm.departments.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
                         </li>
 
@@ -100,8 +95,7 @@
                                 <li><a href="{{ route('hrm.attendance.index') }}" data-key="t-daily-log">Daily Logs</a></li>
                                 @endcan
                                 <li><a href="{{ route('hrm.rosters.index') }}" data-key="t-rosters">Weekly Roster</a></li>
-                                <li><a href="{{ route('hrm.shifts.index') }}" data-key="t-shifts">Shift Setup</a></li>
-                                <li><a href="{{ route('hrm.settings.holidays.index') }}" data-key="t-holidays">Holiday Calendar</a></li>
+                                <li><a href="{{ route('hrm.shifts.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
                         </li>
 
@@ -113,6 +107,7 @@
                                 <li><a href="{{ route('hrm.leaves.my-leaves') }}" data-key="t-my-leaves">My Leaves</a></li>
                                 <li><a href="{{ route('hrm.leaves.index') }}" data-key="t-leave-requests">Leave Requests</a></li>
                                 <li><a href="{{ route('hrm.leaves.allocations.index') }}" data-key="t-allocations">Allocations</a></li>
+                                <li><a href="{{ route('hrm.settings.leave-types.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
                         </li>
                         @endcan
@@ -130,14 +125,24 @@
                                 <li><a href="{{ route('hrm.bonuses.index') }}" data-key="t-bonuses">Bonuses</a></li>
                                 <li><a href="{{ route('hrm.bank-transfers.index') }}" data-key="t-bank-transfers">Bank Transfer</a></li>
                                 <li><a href="{{ route('hrm.gratuity.calculator') }}" data-key="t-gratuity">Gratuity</a></li>
+                                <li><a href="{{ route('hrm.settings.salary-components.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
                         </li>
                         @endcan
 
                         {{-- Performance --}}
-                        @can('hrm.appraisals.view')
+                        {{-- Performance Management --}}
+                        @can('hrm.performance.view')
                         <li>
-                            <a href="{{ route('hrm.appraisals.index') }}" data-key="t-performance">Performance</a>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-performance">Performance</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="{{ route('hrm.kpis.index') }}" data-key="t-kpis">KPIs / KRAs</a></li>
+                                <li><a href="{{ route('hrm.okrs.index') }}" data-key="t-okrs">OKRs</a></li>
+                                <li><a href="{{ route('hrm.performance-goals.index') }}" data-key="t-goals">Goals</a></li>
+                                <li><a href="{{ route('hrm.appraisals-360.index') }}" data-key="t-appraisals-360">360° Appraisals</a></li>
+                                <li><a href="{{ route('hrm.competencies.index') }}" data-key="t-competencies">Competencies</a></li>
+                                <li><a href="{{ route('hrm.pips.index') }}" data-key="t-pips">PIPs</a></li>
+                            </ul>
                         </li>
                         @endcan
 
@@ -149,22 +154,14 @@
                                 <li><a href="{{ route('hrm.jobs.index') }}" data-key="t-jobs">Jobs</a></li>
                                 <li><a href="{{ route('hrm.candidates.index') }}" data-key="t-candidates">Candidates</a></li>
                                 <li><a href="{{ route('hrm.letters.index') }}" data-key="t-letters">Letters</a></li>
+                                <li><a href="{{ route('hrm.settings.letter-templates.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
                         </li>
                         @endcan
 
-                        {{-- Implementation Settings --}}
+                        {{-- Settings --}}
                         <li>
-                            <a href="javascript: void(0);" class="has-arrow" data-key="t-hrm-settings">Setup & Config</a>
-                            <ul class="sub-menu" aria-expanded="true">
-                                <li><a href="{{ route('hrm.settings.index') }}" data-key="t-settings-dashboard">General Settings</a></li>
-                                <li><a href="{{ route('hrm.settings.salary-components.index') }}" data-key="t-salary-components">Salary Components</a></li>
-                                <li><a href="{{ route('hrm.settings.salary-structures.index') }}" data-key="t-salary-structures">Salary Structures</a></li>
-                                <li><a href="{{ route('hrm.settings.tax-slabs.index') }}" data-key="t-tax-slabs">Tax Slabs</a></li>
-                                <li><a href="{{ route('hrm.settings.leave-types.index') }}" data-key="t-policies">Leave Policies</a></li>
-                                <li><a href="{{ route('hrm.settings.approval-chains.index') }}" data-key="t-approval-chains">Approval Chains</a></li>
-                                <li><a href="{{ route('hrm.settings.letter-templates.index') }}" data-key="t-letter-templates">Letter Templates</a></li>
-                            </ul>
+                            <a href="{{ route('hrm.settings.index') }}" data-key="t-hrm-settings">General Settings</a>
                         </li>
                     </ul>
                 </li>

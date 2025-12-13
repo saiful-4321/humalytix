@@ -40,6 +40,7 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::post('/{employee}/documents', [\App\Modules\HRM\Http\Controllers\EmployeeDocumentController::class, 'store'])->name('documents.store');
         Route::post('/{employee}/documents/{document}/verify', [\App\Modules\HRM\Http\Controllers\EmployeeDocumentController::class, 'verify'])->name('documents.verify');
         Route::get('/{employee}/documents/{document}/download', [\App\Modules\HRM\Http\Controllers\EmployeeDocumentController::class, 'download'])->name('documents.download');
+        Route::get('/{employee}/documents/download-all', [EmployeeController::class, 'downloadDocuments'])->name('documents.download-all');
         Route::delete('/{employee}/documents/{document}', [\App\Modules\HRM\Http\Controllers\EmployeeDocumentController::class, 'destroy'])->name('documents.destroy');
 
         // Employment History
@@ -69,6 +70,9 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::put('/{department}', [\App\Modules\HRM\Http\Controllers\DepartmentController::class, 'update'])->name('update');
         Route::delete('/{department}', [\App\Modules\HRM\Http\Controllers\DepartmentController::class, 'destroy'])->name('destroy');
     });
+
+    // Business Units
+    Route::resource('business-units', \App\Modules\HRM\Http\Controllers\BusinessUnitController::class);
     
     // Branches
     Route::prefix('branches')->name('branches.')->group(function () {
@@ -79,6 +83,16 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::get('/{branch}/edit', [\App\Modules\HRM\Http\Controllers\BranchController::class, 'edit'])->name('edit');
         Route::put('/{branch}', [\App\Modules\HRM\Http\Controllers\BranchController::class, 'update'])->name('update');
         Route::delete('/{branch}', [\App\Modules\HRM\Http\Controllers\BranchController::class, 'destroy'])->name('destroy');
+    });
+
+    // Document Types
+    Route::prefix('document-types')->name('document-types.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\DocumentTypeController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Modules\HRM\Http\Controllers\DocumentTypeController::class, 'create'])->name('create');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\DocumentTypeController::class, 'store'])->name('store');
+        Route::get('/{documentType}/edit', [\App\Modules\HRM\Http\Controllers\DocumentTypeController::class, 'edit'])->name('edit');
+        Route::put('/{documentType}', [\App\Modules\HRM\Http\Controllers\DocumentTypeController::class, 'update'])->name('update');
+        Route::delete('/{documentType}', [\App\Modules\HRM\Http\Controllers\DocumentTypeController::class, 'destroy'])->name('destroy');
     });
 
     // Attendance
@@ -214,10 +228,14 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
     });
 
     // Asset Management
+    // Asset Management
     Route::prefix('assets')->name('assets.')->group(function () {
         Route::get('/', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'index'])->name('index');
         Route::get('/create', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'create'])->name('create');
         Route::post('/', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'store'])->name('store');
+        Route::get('/{asset}/edit', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'edit'])->name('edit');
+        Route::put('/{asset}', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'update'])->name('update');
+        Route::delete('/{asset}', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'destroy'])->name('destroy');
         Route::get('/{asset}/assign', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'assign'])->name('assign');
         Route::post('/{asset}/assign', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'storeAssignment'])->name('store-assignment');
         Route::post('/{asset}/return', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'returnAsset'])->name('return');
@@ -330,6 +348,72 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
     //     Route::get('/recruitment', [ReportController::class, 'recruitment'])->name('recruitment');
     //     Route::get('/turnover', [ReportController::class, 'turnover'])->name('turnover');
     // });
+
+    // Performance Management System (PMS)
+    // KPIs/KRAs
+    Route::prefix('kpis')->name('kpis.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\KpiController::class, 'index'])->name('index');
+        Route::get('/{kpi}', [\App\Modules\HRM\Http\Controllers\KpiController::class, 'show'])->name('show');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\KpiController::class, 'store'])->name('store');
+        Route::put('/{kpi}', [\App\Modules\HRM\Http\Controllers\KpiController::class, 'update'])->name('update');
+        Route::delete('/{kpi}', [\App\Modules\HRM\Http\Controllers\KpiController::class, 'destroy'])->name('destroy');
+    });
+
+    // OKRs
+    Route::prefix('okrs')->name('okrs.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\OkrController::class, 'index'])->name('index');
+        Route::get('/{okr}', [\App\Modules\HRM\Http\Controllers\OkrController::class, 'show'])->name('show');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\OkrController::class, 'store'])->name('store');
+        Route::put('/{okr}', [\App\Modules\HRM\Http\Controllers\OkrController::class, 'update'])->name('update');
+        Route::post('/{okr}/progress', [\App\Modules\HRM\Http\Controllers\OkrController::class, 'updateProgress'])->name('update-progress');
+        Route::delete('/{okr}', [\App\Modules\HRM\Http\Controllers\OkrController::class, 'destroy'])->name('destroy');
+    });
+
+    // Performance Goals
+    Route::prefix('performance-goals')->name('performance-goals.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'index'])->name('index');
+        Route::get('/my-goals', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'myGoals'])->name('my-goals');
+        Route::get('/{performanceGoal}', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'show'])->name('show');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'store'])->name('store');
+        Route::put('/{performanceGoal}', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'update'])->name('update');
+        Route::post('/{performanceGoal}/progress', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'updateProgress'])->name('update-progress');
+        Route::delete('/{performanceGoal}', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'destroy'])->name('destroy');
+    });
+
+    // 360° Appraisals
+    Route::prefix('appraisals-360')->name('appraisals-360.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\Appraisal360Controller::class, 'index'])->name('index');
+        Route::get('/my-appraisals', [\App\Modules\HRM\Http\Controllers\Appraisal360Controller::class, 'myAppraisals'])->name('my-appraisals');
+        Route::get('/{appraisal360}', [\App\Modules\HRM\Http\Controllers\Appraisal360Controller::class, 'show'])->name('show');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\Appraisal360Controller::class, 'store'])->name('store');
+        Route::put('/{appraisal360}', [\App\Modules\HRM\Http\Controllers\Appraisal360Controller::class, 'update'])->name('update');
+        Route::post('/{appraisal360}/reviewers', [\App\Modules\HRM\Http\Controllers\Appraisal360Controller::class, 'addReviewers'])->name('add-reviewers');
+        Route::post('/reviewers/{reviewer}/submit', [\App\Modules\HRM\Http\Controllers\Appraisal360Controller::class, 'submitReview'])->name('submit-review');
+        Route::delete('/{appraisal360}', [\App\Modules\HRM\Http\Controllers\Appraisal360Controller::class, 'destroy'])->name('destroy');
+    });
+
+    // Competencies
+    Route::prefix('competencies')->name('competencies.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\CompetencyController::class, 'index'])->name('index');
+        Route::get('/{competency}', [\App\Modules\HRM\Http\Controllers\CompetencyController::class, 'show'])->name('show');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\CompetencyController::class, 'store'])->name('store');
+        Route::put('/{competency}', [\App\Modules\HRM\Http\Controllers\CompetencyController::class, 'update'])->name('update');
+        Route::delete('/{competency}', [\App\Modules\HRM\Http\Controllers\CompetencyController::class, 'destroy'])->name('destroy');
+    });
+
+    // Performance Improvement Plans (PIPs)
+    Route::prefix('pips')->name('pips.')->group(function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\PipController::class, 'index'])->name('index');
+        Route::get('/my-pips', [\App\Modules\HRM\Http\Controllers\PipController::class, 'myPips'])->name('my-pips');
+        Route::get('/{pip}', [\App\Modules\HRM\Http\Controllers\PipController::class, 'show'])->name('show');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\PipController::class, 'store'])->name('store');
+        Route::put('/{pip}', [\App\Modules\HRM\Http\Controllers\PipController::class, 'update'])->name('update');
+        Route::post('/{pip}/action-items', [\App\Modules\HRM\Http\Controllers\PipController::class, 'addActionItem'])->name('add-action-item');
+        Route::put('/action-items/{actionItem}', [\App\Modules\HRM\Http\Controllers\PipController::class, 'updateActionItem'])->name('update-action-item');
+        Route::post('/{pip}/reviews', [\App\Modules\HRM\Http\Controllers\PipController::class, 'addReview'])->name('add-review');
+        Route::post('/{pip}/status', [\App\Modules\HRM\Http\Controllers\PipController::class, 'updateStatus'])->name('update-status');
+        Route::delete('/{pip}', [\App\Modules\HRM\Http\Controllers\PipController::class, 'destroy'])->name('destroy');
+    });
 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {

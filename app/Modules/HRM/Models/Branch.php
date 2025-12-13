@@ -50,11 +50,6 @@ class Branch extends Model
         return $this->hasMany(Employee::class);
     }
 
-    public function departments(): HasMany
-    {
-        return $this->hasMany(Department::class);
-    }
-
     public function geofenceLocations(): HasMany
     {
         return $this->hasMany(GeofenceLocation::class);

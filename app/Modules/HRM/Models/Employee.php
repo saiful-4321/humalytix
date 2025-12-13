@@ -59,6 +59,14 @@ class Employee extends Model
         'photo',
         'created_by',
         'updated_by',
+        'payment_method',
+        'mfs_provider',
+        'mfs_account_number',
+        'father_name',
+        'mother_name',
+        'spouse_name',
+        'personal_email',
+        'gross_salary',
     ];
 
     protected $casts = [
@@ -67,6 +75,7 @@ class Employee extends Model
         'confirmation_date' => 'date',
         'probation_end_date' => 'date',
         'basic_salary' => 'decimal:2',
+        'gross_salary' => 'decimal:2',
     ];
 
     protected $appends = ['full_name'];
@@ -177,6 +186,13 @@ class Employee extends Model
     public function assetAssignments(): HasMany
     {
         return $this->hasMany(AssetAssignment::class);
+    }
+
+    public function assets()
+    {
+        return $this->belongsToMany(Asset::class, 'hrm_asset_assignments', 'employee_id', 'asset_id')
+            ->withPivot(['assigned_date', 'return_date', 'condition_at_assignment', 'condition_at_return', 'notes', 'assigned_by', 'returned_to'])
+            ->withTimestamps();
     }
 
     public function salary()

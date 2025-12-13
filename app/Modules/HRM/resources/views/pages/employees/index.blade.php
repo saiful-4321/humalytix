@@ -81,13 +81,11 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Employee Code</th>
-                                <th>Name</th>
-                                <th>Department</th>
-                                <th>Branch</th>
-                                <th>Designation</th>
-                                <th>Employment Type</th>
-                                <th>Joining Date</th>
+                                <th>Employee</th>
+                                <th>Contact & Info</th>
+                                <th>Workstation</th>
+                                <th>Designation & Type</th>
+                                <th>Documents</th>
                                 <th>Status</th>
                                 <th class="text-center">Actions</th>
                             </tr>
@@ -95,7 +93,6 @@
                         <tbody>
                             @forelse($employees as $employee)
                             <tr>
-                                <td><strong>{{ $employee->employee_code }}</strong></td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @if($employee->photo)
@@ -109,20 +106,55 @@
                                         @endif
                                         <div>
                                             <div class="font-weight-medium">{{ $employee->full_name }}</div>
-                                            <small class="text-muted">{{ $employee->email }}</small>
+                                            <small class="text-muted">{{ $employee->employee_code }}</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{ $employee->department->name ?? 'N/A' }}</td>
-                                <td>{{ $employee->branch->name ?? 'N/A' }}</td>
-                                <td>{{ $employee->designation }}</td>
-                                <td><span class="badge bg-soft-info text-info">{{ ucfirst(str_replace('_', ' ', $employee->employment_type)) }}</span></td>
-                                <td>{{ $employee->joining_date?->format('d M, Y') }}</td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <small><i class="mdi mdi-email me-1"></i> {{ $employee->email }}</small>
+                                        <small><i class="mdi mdi-phone me-1"></i> {{ $employee->phone ?? 'N/A' }}</small>
+                                        @if($employee->blood_group)
+                                        <small><i class="mdi mdi-water me-1"></i> {{ $employee->blood_group }}</small>
+                                        @endif
+                                        @if($employee->joining_date)
+                                        <small class="text-muted">Joined: {{ $employee->joining_date->format('d M, Y') }}</small>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="badge bg-light text-dark mb-1">{{ $employee->department->name ?? 'No Dept' }}</span>
+                                        <small class="text-muted">{{ $employee->branch->name ?? 'No Branch' }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span>{{ $employee->designation }}</span>
+                                        <small class="text-muted">{{ ucfirst(str_replace('_', ' ', $employee->employment_type)) }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach($employee->documents as $doc)
+                                        <a href="{{ route('hrm.employees.documents.download', ['employee' => $employee->id, 'document' => $doc->id]) }}" 
+                                           class="text-secondary" 
+                                           data-bs-toggle="tooltip" 
+                                           data-bs-placement="top" 
+                                           title="{{ $doc->title ?? $doc->documentType->name ?? 'Document' }}">
+                                            <i class="bx bx-file font-size-18"></i>
+                                        </a>
+                                        @endforeach
+                                        @if($employee->documents->isEmpty())
+                                        <small class="text-muted">-</small>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td>{!! $employee->status_badge !!}</td>
                                 <td class="text-center">
-                                    <div class="btn-group" role="group">
+                                    <!-- <div class="btn-group" role="group"> -->
                                         @can('hrm.employees.view')
-                                        <a href="{{ route('hrm.employees.show', $employee) }}" class="btn btn-sm btn-soft-info" title="View">
+                                        <a href="{{ route('hrm.employees.show', $employee) }}" class="btn btn-sm btn-soft-info pe-2" title="View">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
                                         @endcan
@@ -131,6 +163,9 @@
                                             <i class="mdi mdi-pencil"></i>
                                         </a>
                                         @endcan
+                                        <a href="{{ route('hrm.employees.documents.download-all', $employee) }}" class="btn btn-sm btn-soft-success pe-2" title="Download Docs" onclick="return confirm('Download all documents for {{ $employee->full_name }}?')">
+                                            <i class="mdi mdi-download"></i>
+                                        </a>
                                         @can('hrm.employees.delete')
                                         <form action="{{ route('hrm.employees.destroy', $employee) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this employee?')">
                                             @csrf
@@ -140,7 +175,7 @@
                                             </button>
                                         </form>
                                         @endcan
-                                    </div>
+                                    <!-- </div> -->
                                 </td>
                             </tr>
                             @empty
@@ -214,6 +249,33 @@
                     <option value="notice_period" {{ request('status') == 'notice_period' ? 'selected' : '' }}>Notice Period</option>
                     <option value="resigned" {{ request('status') == 'resigned' ? 'selected' : '' }}>Resigned</option>
                 </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="designation_filter" class="form-label">Designation</label>
+                <input type="text" class="form-control" id="designation_filter" name="designation" value="{{ request('designation') }}" placeholder="e.g. Engineer">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Gender</label>
+                <select name="gender" class="form-select">
+                    <option value="">All</option>
+                    <option value="male" {{ request('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                    <option value="female" {{ request('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                    <option value="other" {{ request('gender') == 'other' ? 'selected' : '' }}>Other</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Joining Date Range</label>
+                <div class="input-group mb-2">
+                    <span class="input-group-text">From</span>
+                    <input type="date" class="form-control" name="joining_date_start" value="{{ request('joining_date_start') }}">
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text">To</span>
+                    <input type="date" class="form-control" name="joining_date_end" value="{{ request('joining_date_end') }}">
+                </div>
             </div>
 
             <div class="d-grid gap-2">

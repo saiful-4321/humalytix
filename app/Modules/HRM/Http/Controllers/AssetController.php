@@ -115,4 +115,32 @@ class AssetController extends Controller
 
         return redirect()->route('hrm.assets.index')->with('success', 'Asset returned successfully!');
     }
+    public function edit(Asset $asset)
+    {
+        return view('HRM::pages.assets.edit', compact('asset'));
+    }
+
+    public function update(Request $request, Asset $asset)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|unique:hrm_assets,code,'.$asset->id,
+            'type' => 'required|string',
+            'serial_number' => 'nullable|string',
+            'purchase_date' => 'nullable|date',
+            'purchase_cost' => 'nullable|numeric',
+            'condition' => 'required|string',
+            'status' => 'required|string',
+        ]);
+
+        $asset->update($validated);
+        return redirect()->route('hrm.assets.index')->with('success', 'Asset updated successfully!');
+    }
+
+    public function destroy(Asset $asset)
+    {
+        $asset->delete();
+        return redirect()->route('hrm.assets.index')->with('success', 'Asset deleted successfully!');
+    }
+
 }

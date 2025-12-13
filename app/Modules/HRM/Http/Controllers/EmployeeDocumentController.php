@@ -52,7 +52,7 @@ class EmployeeDocumentController extends Controller
     public function verify(Employee $employee, EmployeeDocument $document)
     {
         $document->update([
-            'is_verified' => true,
+            'verification_status' => 'verified',
             'verified_by' => auth()->id(),
             'verified_at' => now(),
         ]);
@@ -75,7 +75,7 @@ class EmployeeDocumentController extends Controller
         $document->delete();
 
         return redirect()
-            ->route('hrm.employees.show', $employee)
+            ->back()
             ->with('success', 'Document deleted successfully!');
     }
 

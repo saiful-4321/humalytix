@@ -73,9 +73,46 @@ class EmployeeService
                 $data['photo'] = $this->uploadPhoto($data['photo']);
             }
 
+            // Handle documents before removing from array
+            if (isset($data['documents']) && is_array($data['documents'])) {
+                foreach ($data['documents'] as $doc) {
+                    // Ensure both file and title exist
+                    if (isset($doc['file']) && $doc['file'] && isset($doc['title'])) {
+                        try {
+                            $path = $doc['file']->store('employees/documents', 'public');
+                            
+                            // Prepare document data
+                            $documentData = [
+                                'file_path' => $path,
+                                'document_number' => $doc['title'],
+                                'uploaded_by' => auth()->id(),
+                            ];
+                            
+                            // Add document_type_id if provided
+                            if (isset($doc['document_type_id']) && $doc['document_type_id']) {
+                                $documentData['document_type_id'] = $doc['document_type_id'];
+                            }
+                            
+                            $employee->documents()->create($documentData);
+                        } catch (\Exception $e) {
+                            \Log::error('Failed to upload document: ' . $e->getMessage());
+                        }
+                    }
+                }
+                
+                // Remove documents from data array to prevent it from being saved to employee table
+                unset($data['documents']);
+            }
+
+            // Remove photo from data if it's null (not uploaded in this request)
+            if (!isset($data['photo']) || $data['photo'] === null) {
+                unset($data['photo']);
+            }
+
+            // Update employee with remaining data
             $employee->update($data);
 
-            return $employee->load(['department', 'branch', 'reportingManager']);
+            return $employee->load(['department', 'branch', 'reportingManager', 'documents.documentType']);
         });
     }
 

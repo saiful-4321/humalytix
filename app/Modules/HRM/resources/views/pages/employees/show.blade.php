@@ -21,9 +21,9 @@
 <div class="row clearfix">
     <!-- Employee Header Card -->
     <div class="col-lg-12">
-        <div class="card">
+        <div class="card bg-white">
             <div class="card-body">
-                <div class="row align-items-center">
+                <div class="row align-items-center p-3">
                     <div class="col-md-2 text-center">
                         @if($employee->photo)
                         <img src="{{ asset('storage/' . $employee->photo) }}" alt="{{ $employee->full_name }}" class="rounded-circle" width="120" height="120">
@@ -64,7 +64,7 @@
 
     <!-- Tabs -->
     <div class="col-lg-12">
-        <div class="card">
+        <div class="card bg-white">
             <div class="card-body">
                 <ul class="nav nav-tabs nav-tabs-custom nav-justified" role="tablist">
                     <li class="nav-item">

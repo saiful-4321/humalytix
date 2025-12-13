@@ -178,7 +178,8 @@
             <div class="page-content">
                 <div class="container-fluid">
 
-                    @include("Main::widgets.message.alert")
+                    <!-- @include("Main::widgets.message.alert") -->
+                    
 
                     {{-- page content --}}
                     @yield('content')
@@ -186,7 +187,7 @@
                     @if(($theme['footer_enabled'] ?? 1) == 1)
                         @include("Main::includes.footer")
                     @endif
-                    <!-- end main content-->
+                    
                 </div>
             </div>
         </div>

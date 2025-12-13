@@ -19,7 +19,8 @@ class ResignationController extends Controller
     public function index()
     {
         $resignations = Resignation::with('employee')->orderBy('created_at', 'desc')->paginate(20);
-        return view('HRM::pages.resignations.index', compact('resignations'));
+        $employees = Employee::active()->get();
+        return view('HRM::pages.resignations.index', compact('resignations', 'employees'));
     }
 
     public function create()
