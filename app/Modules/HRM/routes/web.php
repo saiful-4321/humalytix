@@ -16,6 +16,20 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         return view('HRM::pages.dashboard.index');
     })->name('dashboard');
 
+    // Employee Self-Service (ESS)
+    Route::prefix('ess')->name('ess.')->group(function () {
+        Route::get('/dashboard', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'dashboard'])->name('dashboard');
+        Route::get('/profile', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'profile'])->name('profile');
+        Route::put('/profile', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/attendance', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'attendance'])->name('attendance');
+        Route::post('/attendance/regularize', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'regularizeAttendance'])->name('attendance.regularize');
+        Route::get('/payslips', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'payslips'])->name('payslips');
+        Route::get('/assets', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'assets'])->name('assets');
+        Route::get('/salary-certificate', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'salaryCertificate'])->name('salary-certificate');
+        Route::post('/salary-certificate', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'requestSalaryCertificate'])->name('salary-certificate.request');
+        Route::get('/holidays', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'holidays'])->name('holidays');
+    });
+
     // Employee Management
     Route::prefix('employees')->name('employees.')->group(function () {
         Route::get('/', [EmployeeController::class, 'index'])->name('index');

@@ -7,56 +7,15 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="mb-1">Performance Goals</h4>
-            <p class="text-muted mb-0">Track and manage employee performance goals</p>
+            <p class="text-muted mb-0">Track employee goals and progress</p>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createGoalOffcanvas">
-            <i class="bx bx-plus"></i> Add Goal
-        </button>
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">Employee</label>
-                    <select name="employee_id" class="form-select">
-                        <option value="">All Employees</option>
-                        @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>
-                                {{ $emp->full_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">All Status</option>
-                        <option value="not_started" {{ request('status') == 'not_started' ? 'selected' : '' }}>Not Started</option>
-                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Priority</label>
-                    <select name="priority" class="form-select">
-                        <option value="">All Priorities</option>
-                        <option value="critical">Critical</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Search goals..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-secondary me-2"><i class="bx bx-search"></i> Filter</button>
-                    <a href="{{ route('hrm.performance-goals.index') }}" class="btn btn-outline-secondary"><i class="bx bx-reset"></i></a>
-                </div>
-            </form>
+        <div class="d-flex gap-2">
+            <button class="btn btn-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                <i class="bx bx-filter-alt me-1"></i> Filter
+            </button>
+            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createGoalOffcanvas">
+                <i class="bx bx-plus me-1"></i> Add Goal
+            </button>
         </div>
     </div>
 
@@ -66,59 +25,67 @@
             @if($goals->isEmpty())
                 <div class="text-center py-5">
                     <i class="bx bx-trophy display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No performance goals found</p>
-                    <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createGoalOffcanvas">
-                        <i class="bx bx-plus"></i> Create First Goal
-                    </button>
+                    <p class="text-muted mt-3">No active goals found</p>
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Goal</th>
                                 <th>Employee</th>
+                                <th>Timeline</th>
                                 <th>Priority</th>
-                                <th>Progress</th>
-                                <th>Due Date</th>
                                 <th>Status</th>
+                                <th>Progress</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($goals as $goal)
-                            <tr class="{{ $goal->isOverdue() ? 'table-danger' : '' }}">
+                            <tr>
                                 <td>
-                                    <strong>{{ $goal->title }}</strong>
+                                    <div class="fw-bold">{{ $goal->title }}</div>
                                     @if($goal->kpi)
-                                        <br><small class="text-muted"><i class="bx bx-link"></i> {{ $goal->kpi->name }}</small>
+                                        <small class="text-muted"><i class="bx bx-target-lock"></i> {{ $goal->kpi->name }}</small>
                                     @endif
                                 </td>
                                 <td>{{ $goal->employee->full_name }}</td>
-                                <td>{!! $goal->priority_badge !!}</td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                            <div class="progress-bar" style="width: {{ $goal->progress }}%"></div>
-                                        </div>
-                                        <small>{{ $goal->progress }}%</small>
+                                    <small>
+                                        {{ $goal->start_date->format('M d') }} - {{ $goal->due_date->format('M d, Y') }}
+                                        @if($goal->isOverdue())
+                                            <span class="text-danger fw-bold ms-1">Overdue</span>
+                                        @endif
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ $goal->priority == 'high' || $goal->priority == 'critical' ? 'danger' : ($goal->priority == 'medium' ? 'warning' : 'info') }}">
+                                        {{ ucfirst($goal->priority) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ $goal->status == 'completed' ? 'success' : ($goal->status == 'in_progress' ? 'primary' : 'secondary') }}">
+                                        {{ ucfirst(str_replace('_', ' ', $goal->status)) }}
+                                    </span>
+                                </td>
+                                <td style="width: 150px;">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ $goal->progress }}%"></div>
                                     </div>
+                                    <small>{{ $goal->progress }}%</small>
                                 </td>
-                                <td>
-                                    {{ $goal->due_date->format('M d, Y') }}
-                                    @if($goal->isOverdue())
-                                        <br><small class="text-danger">Overdue</small>
-                                    @endif
-                                </td>
-                                <td>{!! $goal->status_badge !!}</td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-primary edit-goal" 
-                                            data-id="{{ $goal->id }}"
-                                            data-bs-toggle="offcanvas" 
-                                            data-bs-target="#editGoalOffcanvas">
+                                    <a href="{{ route('hrm.performance-goals.show', $goal) }}" class="btn btn-sm btn-icon btn-outline-primary">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-icon edit-goal" 
+                                        data-id="{{ $goal->id }}"
+                                        data-bs-toggle="offcanvas" 
+                                        data-bs-target="#editGoalOffcanvas">
                                         <i class="bx bx-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger delete-goal" data-id="{{ $goal->id }}">
+                                    <button class="btn btn-sm btn-icon text-danger delete-goal" data-id="{{ $goal->id }}">
                                         <i class="bx bx-trash"></i>
                                     </button>
                                 </td>
@@ -130,6 +97,52 @@
                 <div class="mt-3">{{ $goals->links() }}</div>
             @endif
         </div>
+    </div>
+</div>
+
+<!-- Filter Offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Filter Options</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="GET" action="{{ route('hrm.performance-goals.index') }}">
+            <div class="mb-3">
+                <label class="form-label">Employee</label>
+                <select name="employee_id" class="form-select">
+                    <option value="">All Employees</option>
+                    @foreach($employees as $emp)
+                        <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>
+                            {{ $emp->full_name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="not_started" {{ request('status') == 'not_started' ? 'selected' : '' }}>Not Started</option>
+                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-select">
+                    <option value="">All Priorities</option>
+                    <option value="low" {{ request('priority') == 'low' ? 'selected' : '' }}>Low</option>
+                    <option value="medium" {{ request('priority') == 'medium' ? 'selected' : '' }}>Medium</option>
+                    <option value="high" {{ request('priority') == 'high' ? 'selected' : '' }}>High</option>
+                    <option value="critical" {{ request('priority') == 'critical' ? 'selected' : '' }}>Critical</option>
+                </select>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{{ route('hrm.performance-goals.index') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
     </div>
 </div>
 

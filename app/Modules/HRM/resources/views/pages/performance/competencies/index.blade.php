@@ -6,36 +6,16 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="mb-1">Competency Framework</h4>
-            <p class="text-muted mb-0">Manage competencies for performance appraisals</p>
+            <h4 class="mb-1">Competencies</h4>
+            <p class="text-muted mb-0">Manage core, functional, and leadership competencies</p>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createCompetencyOffcanvas">
-            <i class="bx bx-plus"></i> Add Competency
-        </button>
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Type</label>
-                    <select name="type" class="form-select">
-                        <option value="">All Types</option>
-                        <option value="core" {{ request('type') == 'core' ? 'selected' : '' }}>Core</option>
-                        <option value="functional" {{ request('type') == 'functional' ? 'selected' : '' }}>Functional</option>
-                        <option value="leadership" {{ request('type') == 'leadership' ? 'selected' : '' }}>Leadership</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Search competencies..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-secondary me-2"><i class="bx bx-search"></i> Filter</button>
-                    <a href="{{ route('hrm.competencies.index') }}" class="btn btn-outline-secondary"><i class="bx bx-reset"></i></a>
-                </div>
-            </form>
+        <div class="d-flex gap-2">
+            <button class="btn btn-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                <i class="bx bx-filter-alt me-1"></i> Filter
+            </button>
+            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createCompetencyOffcanvas">
+                <i class="bx bx-plus me-1"></i> Add Competency
+            </button>
         </div>
     </div>
 
@@ -46,18 +26,14 @@
                 <div class="text-center py-5">
                     <i class="bx bx-medal display-1 text-muted"></i>
                     <p class="text-muted mt-3">No competencies found</p>
-                    <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createCompetencyOffcanvas">
-                        <i class="bx bx-plus"></i> Create First Competency
-                    </button>
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Name</th>
                                 <th>Type</th>
-                                <th>Description</th>
                                 <th>Status</th>
                                 <th class="text-end">Actions</th>
                             </tr>
@@ -65,26 +41,36 @@
                         <tbody>
                             @foreach($competencies as $competency)
                             <tr>
-                                <td><strong>{{ $competency->name }}</strong></td>
                                 <td>
-                                    <span class="badge bg-{{ $competency->type == 'core' ? 'primary' : ($competency->type == 'functional' ? 'info' : 'warning') }}">
-                                        {{ ucfirst($competency->type) }}
-                                    </span>
+                                    <div class="fw-bold">{{ $competency->name }}</div>
+                                    @if($competency->description)
+                                        <small class="text-muted">{{ Str::limit($competency->description, 60) }}</small>
+                                    @endif
                                 </td>
-                                <td>{{ Str::limit($competency->description, 60) }}</td>
+                                <td>
+                                    @php
+                                        $badgeColor = match($competency->type) {
+                                            'core' => 'primary',
+                                            'functional' => 'info',
+                                            'leadership' => 'warning',
+                                            default => 'secondary'
+                                        };
+                                    @endphp
+                                    <span class="badge bg-{{ $badgeColor }}">{{ ucfirst($competency->type) }}</span>
+                                </td>
                                 <td>
                                     <span class="badge bg-{{ $competency->is_active ? 'success' : 'danger' }}">
                                         {{ $competency->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-primary edit-competency" 
-                                            data-id="{{ $competency->id }}"
-                                            data-bs-toggle="offcanvas" 
-                                            data-bs-target="#editCompetencyOffcanvas">
+                                    <button class="btn btn-sm btn-icon edit-competency" 
+                                        data-id="{{ $competency->id }}"
+                                        data-bs-toggle="offcanvas" 
+                                        data-bs-target="#editCompetencyOffcanvas">
                                         <i class="bx bx-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger delete-competency" data-id="{{ $competency->id }}">
+                                    <button class="btn btn-sm btn-icon text-danger delete-competency" data-id="{{ $competency->id }}">
                                         <i class="bx bx-trash"></i>
                                     </button>
                                 </td>
@@ -96,6 +82,35 @@
                 <div class="mt-3">{{ $competencies->links() }}</div>
             @endif
         </div>
+    </div>
+</div>
+
+<!-- Filter Offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Filter Options</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="GET" action="{{ route('hrm.competencies.index') }}">
+            <div class="mb-3">
+                <label class="form-label">Type</label>
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="core" {{ request('type') == 'core' ? 'selected' : '' }}>Core</option>
+                    <option value="functional" {{ request('type') == 'functional' ? 'selected' : '' }}>Functional</option>
+                    <option value="leadership" {{ request('type') == 'leadership' ? 'selected' : '' }}>Leadership</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ request('search') }}">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{{ route('hrm.competencies.index') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
     </div>
 </div>
 

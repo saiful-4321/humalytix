@@ -63,6 +63,25 @@
                 </li>
                 @endcanany
 
+                {{-- Employee Self Service --}}
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow">
+                        <i data-feather="user"></i>
+                        <span data-key="t-ess">Self Service</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('hrm.ess.dashboard') }}" data-key="t-ess-dashboard">Dashboard</a></li>
+                        <li><a href="{{ route('hrm.ess.profile') }}" data-key="t-my-profile">My Profile</a></li>
+                        <li><a href="{{ route('hrm.ess.attendance') }}" data-key="t-my-attendance">Attendance & Reg.</a></li>
+                        <li><a href="{{ route('hrm.leaves.my-leaves') }}" data-key="t-my-leaves">My Leaves</a></li>
+                        <li><a href="{{ route('hrm.ess.payslips') }}" data-key="t-my-payslips">Payslips</a></li>
+                        <li><a href="{{ route('hrm.ess.assets') }}" data-key="t-my-assets">My Assets</a></li>
+                        <li><a href="{{ route('hrm.performance-goals.my-goals') }}" data-key="t-my-goals">Performance Goals</a></li>
+                        <li><a href="{{ route('hrm.ess.holidays') }}" data-key="t-holidays">Holiday Calendar</a></li>
+                        <li><a href="{{ route('hrm.ess.salary-certificate') }}" data-key="t-salary-cert">Salary Certificate</a></li>
+                    </ul>
+                </li>
+
                 {{-- HRM System --}}
                 @canany(['hrm.employees.view', 'hrm.departments.view', 'hrm.branches.view', 'hrm.attendance.view', 'hrm.leaves.view', 'hrm.jobs.view', 'hrm.payroll.view', 'hrm.appraisals.view'])
                 <li>

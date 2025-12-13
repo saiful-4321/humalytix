@@ -7,46 +7,16 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="mb-1">KPIs / KRAs Management</h4>
-            <p class="text-muted mb-0">Manage Key Performance Indicators and Key Result Areas</p>
+            <h4 class="mb-1">KPIs & KRAs</h4>
+            <p class="text-muted mb-0">Key Performance Indicators and Key Result Areas</p>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createKpiOffcanvas">
-            <i class="bx bx-plus"></i> Add KPI/KRA
-        </button>
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('hrm.kpis.index') }}" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">Type</label>
-                    <select name="type" class="form-select">
-                        <option value="">All Types</option>
-                        <option value="kpi" {{ request('type') == 'kpi' ? 'selected' : '' }}>KPI</option>
-                        <option value="kra" {{ request('type') == 'kra' ? 'selected' : '' }}>KRA</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Department</label>
-                    <select name="department_id" class="form-select">
-                        <option value="">All Departments</option>
-                        @foreach($departments as $dept)
-                            <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>
-                                {{ $dept->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Search KPI/KRA..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-secondary me-2"><i class="bx bx-search"></i> Filter</button>
-                    <a href="{{ route('hrm.kpis.index') }}" class="btn btn-outline-secondary"><i class="bx bx-reset"></i></a>
-                </div>
-            </form>
+        <div class="d-flex gap-2">
+            <button class="btn btn-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                <i class="bx bx-filter-alt me-1"></i> Filter
+            </button>
+            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createKpiOffcanvas">
+                <i class="bx bx-plus me-1"></i> Add KPI / KRA
+            </button>
         </div>
     </div>
 
@@ -56,14 +26,11 @@
             @if($kpis->isEmpty())
                 <div class="text-center py-5">
                     <i class="bx bx-target-lock display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No KPIs/KRAs found</p>
-                    <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createKpiOffcanvas">
-                        <i class="bx bx-plus"></i> Create First KPI/KRA
-                    </button>
+                    <p class="text-muted mt-3">No KPIs or KRAs found</p>
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Name</th>
@@ -71,8 +38,7 @@
                                 <th>Department</th>
                                 <th>Target</th>
                                 <th>Frequency</th>
-                                <th>Weightage</th>
-                                <th>Status</th>
+                                <th>Weight</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
@@ -80,29 +46,31 @@
                             @foreach($kpis as $kpi)
                             <tr>
                                 <td>
-                                    <strong>{{ $kpi->name }}</strong>
+                                    <div class="fw-bold">{{ $kpi->name }}</div>
                                     @if($kpi->description)
-                                        <br><small class="text-muted">{{ Str::limit($kpi->description, 50) }}</small>
+                                        <small class="text-muted">{{ Str::limit($kpi->description, 50) }}</small>
                                     @endif
                                 </td>
-                                <td><span class="badge bg-{{ $kpi->type == 'kpi' ? 'primary' : 'info' }}">{{ strtoupper($kpi->type) }}</span></td>
-                                <td>{{ $kpi->department->name ?? 'N/A' }}</td>
-                                <td>{{ $kpi->target_value }} {{ $kpi->measurement_unit }}</td>
-                                <td><span class="badge bg-secondary">{{ ucfirst($kpi->frequency) }}</span></td>
-                                <td><span class="badge bg-dark">{{ $kpi->weightage }}%</span></td>
                                 <td>
-                                    <span class="badge bg-{{ $kpi->is_active ? 'success' : 'danger' }}">
-                                        {{ $kpi->is_active ? 'Active' : 'Inactive' }}
+                                    <span class="badge bg-{{ $kpi->type == 'kpi' ? 'primary' : 'info' }}">
+                                        {{ strtoupper($kpi->type) }}
                                     </span>
                                 </td>
+                                <td>{{ $kpi->department->name ?? 'Global' }}</td>
+                                <td>
+                                    {{ $kpi->target_value }} 
+                                    <small class="text-muted">{{ $kpi->measurement_unit }}</small>
+                                </td>
+                                <td>{{ ucfirst($kpi->frequency) }}</td>
+                                <td>{{ $kpi->weightage }}%</td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-primary edit-kpi" 
-                                            data-id="{{ $kpi->id }}"
-                                            data-bs-toggle="offcanvas" 
-                                            data-bs-target="#editKpiOffcanvas">
+                                    <button class="btn btn-sm btn-icon edit-kpi" 
+                                        data-id="{{ $kpi->id }}"
+                                        data-bs-toggle="offcanvas" 
+                                        data-bs-target="#editKpiOffcanvas">
                                         <i class="bx bx-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger delete-kpi" data-id="{{ $kpi->id }}">
+                                    <button class="btn btn-sm btn-icon text-danger delete-kpi" data-id="{{ $kpi->id }}">
                                         <i class="bx bx-trash"></i>
                                     </button>
                                 </td>
@@ -111,12 +79,57 @@
                         </tbody>
                     </table>
                 </div>
-
-                <div class="mt-3">
-                    {{ $kpis->links() }}
-                </div>
+                <div class="mt-3">{{ $kpis->links() }}</div>
             @endif
         </div>
+    </div>
+</div>
+
+<!-- Filter Offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Filter Options</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="GET" action="{{ route('hrm.kpis.index') }}">
+            <div class="mb-3">
+                <label class="form-label">Type</label>
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="kpi" {{ request('type') == 'kpi' ? 'selected' : '' }}>KPI</option>
+                    <option value="kra" {{ request('type') == 'kra' ? 'selected' : '' }}>KRA</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Department</label>
+                <select name="department_id" class="form-select">
+                    <option value="">All Departments</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>
+                            {{ $dept->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Frequency</label>
+                <select name="frequency" class="form-select">
+                    <option value="">All Frequencies</option>
+                    <option value="monthly" {{ request('frequency') == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                    <option value="quarterly" {{ request('frequency') == 'quarterly' ? 'selected' : '' }}>Quarterly</option>
+                    <option value="annually" {{ request('frequency') == 'annually' ? 'selected' : '' }}>Annually</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ request('search') }}">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{{ route('hrm.kpis.index') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
     </div>
 </div>
 
