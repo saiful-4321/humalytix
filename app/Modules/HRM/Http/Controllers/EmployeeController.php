@@ -116,6 +116,27 @@ class EmployeeController extends Controller
         try {
             $employee = $this->employeeService->createEmployee($request->validated());
 
+            // 1. Create User Logic
+            if ($request->has('create_user')) {
+                $email = $employee->email;
+                if ($email && !\App\Models\User::where('email', $email)->exists()) {
+                    $user = \App\Models\User::create([
+                        'name' => $employee->full_name,
+                        'email' => $email,
+                        'password' => bcrypt('12345678'), // Default
+                        'mobile' => $employee->mobile,
+                        'status' => 'Active',
+                    ]);
+                    // Assign default role if exists
+                    $role = \App\Modules\Main\Models\Role::where('name', 'User')->first();
+                    if ($role) {
+                        $user->assignRole($role->name);
+                    }
+                    
+                    $employee->update(['user_id' => $user->id]);
+                }
+            }
+
             return redirect()
                 ->route('hrm.employees.edit', ['employee' => $employee->id, 'step' => 'employment'])
                 ->with('success', 'Employee profile created! Please add employment details.');
@@ -410,5 +431,55 @@ class EmployeeController extends Controller
         }
 
         return response()->download($zipPath)->deleteFileAfterSend(true);
+    }
+
+    public function assignUser(Employee $employee)
+    {
+        $data = (object)[
+            'item' => $employee,
+            'page' => 'Assign User',
+            'method' => 'Assign',
+            'action' => route('hrm.employees.store-user-assignment', $employee->id),
+            'users' => \App\Models\User::whereNotIn('id', \App\Modules\HRM\Models\Employee::whereNotNull('user_id')->pluck('user_id'))->select('id', 'name', 'email')->get(),
+        ];
+        return view('HRM::pages.employees.assign-user', compact('data'));
+    }
+
+    public function storeUserAssignment(Request $request, Employee $employee)
+    {
+        $request->validate([
+            'action_type' => 'required',
+            'user_id' => 'required_if:action_type,link',
+            'email' => 'required_if:action_type,create',
+            'password' => 'required_if:action_type,create',
+        ]);
+
+        try {
+            if ($request->action_type == 'create') {
+                 if (\App\Models\User::where('email', $request->email)->exists()) {
+                     return \App\Modules\Main\Utilities\JsonResponse::internalError('Email already exists');
+                 }
+                 $user = \App\Models\User::create([
+                     'name' => $employee->full_name,
+                     'email' => $request->email,
+                     'password' => bcrypt($request->password),
+                     'mobile' => $employee->phone ?? null,
+                     'status' => 'Active'
+                 ]);
+                 $role = \App\Modules\Main\Models\Role::where('name', 'User')->first();
+                 if ($role) $user->syncRoles([$role->name]);
+            } else {
+                 $user = \App\Models\User::findOrFail($request->user_id);
+            }
+
+            Employee::where('user_id', $user->id)->update(['user_id' => null]);
+            $employee->update(['user_id' => $user->id]);
+
+            return \App\Modules\Main\Utilities\JsonResponse::success('User assigned successfully!');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error($e);
+            return \App\Modules\Main\Utilities\JsonResponse::internalError('Something went wrong: ' . $e->getMessage());
+        }
     }
 }

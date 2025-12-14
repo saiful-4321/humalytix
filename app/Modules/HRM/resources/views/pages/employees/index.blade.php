@@ -166,6 +166,9 @@
                                         <a href="{{ route('hrm.employees.documents.download-all', $employee) }}" class="btn btn-sm btn-soft-success pe-2" title="Download Docs" onclick="return confirm('Download all documents for {{ $employee->full_name }}?')">
                                             <i class="mdi mdi-download"></i>
                                         </a>
+                                        <a href="javascript:void(0)" route="{{ route('hrm.employees.assign-user', $employee) }}" data-toggle="dynamicModal" class="btn btn-sm btn-soft-warning pe-2" title="Assign User">
+                                            <i class="mdi mdi-account-plus"></i>
+                                        </a>
                                         @can('hrm.employees.delete')
                                         <form action="{{ route('hrm.employees.destroy', $employee) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this employee?')">
                                             @csrf

@@ -30,6 +30,11 @@ class EmployeeService
                 $data['photo'] = $this->uploadPhoto($data['photo']);
             }
 
+            // Set default status if not provided
+            if (!isset($data['status'])) {
+                $data['status'] = 'probation';
+            }
+
             // Create employee
             $employee = Employee::create($data);
 

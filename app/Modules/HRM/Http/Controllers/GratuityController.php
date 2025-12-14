@@ -14,13 +14,32 @@ class GratuityController extends Controller
     public function index()
     {
         $gratuities = EmployeeGratuity::with(['employee'])->latest()->paginate(20);
-        return view('HRM::pages.gratuity.index', compact('gratuities'));
+        $config = GratuityConfig::firstOrCreate(
+            ['is_active' => true],
+            [
+                'name' => 'Default Gratuity Policy',
+                'min_service_years' => 5,
+                'multiplier' => 1.0,
+                'max_gratuity_amount' => null,
+                'formula_description' => 'Latest Basic Salary * Years of Service * Multiplier',
+            ]
+        );
+        return view('HRM::pages.gratuity.index', compact('gratuities', 'config'));
     }
     
     public function calculator()
     {
         $employees = Employee::active()->orderBy('first_name')->get();
-        $config = GratuityConfig::where('is_active', true)->first();
+        $config = GratuityConfig::firstOrCreate(
+            ['is_active' => true],
+            [
+                'name' => 'Default Gratuity Policy',
+                'min_service_years' => 5,
+                'multiplier' => 1.0,
+                'max_gratuity_amount' => null,
+                'formula_description' => 'Latest Basic Salary * Years of Service * Multiplier',
+            ]
+        );
         
         return view('HRM::pages.gratuity.calculator', compact('employees', 'config'));
     }
@@ -121,5 +140,43 @@ class GratuityController extends Controller
         ]);
         
         return back()->with('success', 'Gratuity marked as paid.');
+    }
+
+    public function config()
+    {
+        $config = GratuityConfig::firstOrCreate(
+            ['is_active' => true],
+            [
+                'name' => 'Default Gratuity Policy',
+                'min_service_years' => 5,
+                'multiplier' => 1.0, // 1 basic salary per year
+                'calculation_formula' => 'basic * service_years * multiplier',
+                'formula_description' => 'Latest Basic Salary * Years of Service * Multiplier',
+            ]
+        );
+        return view('HRM::pages.gratuity.config', compact('config'));
+    }
+
+    public function storeConfig(Request $request)
+    {
+        $validated = $request->validate([
+            'min_service_years' => 'required|numeric|min:0',
+            'multiplier' => 'required|numeric|min:0',
+            'max_gratuity_amount' => 'nullable|numeric|min:0',
+            'formula_description' => 'nullable|string',
+        ]);
+        
+        $config = GratuityConfig::orderBy('id', 'desc')->first();
+        
+        if ($config) {
+            $config->update($validated);
+        } else {
+            GratuityConfig::create(array_merge($validated, [
+                'name' => 'Default Gratuity Policy',
+                'is_active' => true
+            ]));
+        }
+
+        return back()->with('success', 'Gratuity configuration updated successfully.');
     }
 }

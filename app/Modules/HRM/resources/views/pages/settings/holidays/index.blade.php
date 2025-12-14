@@ -81,16 +81,18 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <button class="btn btn-sm btn-link text-primary" onclick="editHoliday({{ json_encode($holiday) }})">
-                                    <i class="bx bx-edit font-size-18"></i>
-                                </button>
-                                <form action="{{ route('hrm.settings.holidays.destroy', $holiday->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-link text-danger" onclick="return confirm('Delete this holiday?')">
-                                        <i class="bx bx-trash font-size-18"></i>
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button class="btn btn-sm btn-soft-info" onclick="editHoliday({{ json_encode($holiday) }})">
+                                        <i class="mdi mdi-pencil-outline"></i>
                                     </button>
-                                </form>
+                                    <form action="{{ route('hrm.settings.holidays.destroy', $holiday->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-soft-danger" onclick="return confirm('Delete this holiday?')">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @empty

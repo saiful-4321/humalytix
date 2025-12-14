@@ -72,15 +72,17 @@
                                         @endif
                                     </td>
                                     <td class="text-end">
-                                        <button class="btn btn-sm btn-link text-primary" onclick="editSlab({{ $slab }})">
-                                            <i class="bx bx-edit font-size-16"></i>
-                                        </button>
-                                        <form action="{{ route('hrm.settings.tax-slabs.destroy', $slab->id) }}" method="POST" class="d-inline">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-link text-danger" onclick="return confirm('Delete this tax slab?')">
-                                                <i class="bx bx-trash font-size-16"></i>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-sm btn-soft-info" onclick="editSlab({{ $slab }})">
+                                                <i class="mdi mdi-pencil-outline"></i>
                                             </button>
-                                        </form>
+                                            <form action="{{ route('hrm.settings.tax-slabs.destroy', $slab->id) }}" method="POST">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-soft-danger" onclick="return confirm('Delete this tax slab?')">
+                                                    <i class="mdi mdi-delete-outline"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 @empty

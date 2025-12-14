@@ -11,7 +11,8 @@ use App\Modules\HRM\Models\Payroll;
 use App\Modules\HRM\Models\Asset;
 use App\Modules\HRM\Models\LetterRequest;
 use App\Modules\HRM\Models\Holiday;
-use App\Modules\HRM\Models\Leave; // Correct model for leave applications
+use App\Modules\HRM\Models\Leave; 
+use App\Modules\HRM\Models\ExpenseClaim;
 use Illuminate\Support\Facades\DB;
 use App\Modules\HRM\Enums\AttendanceStatusEnum;
 
@@ -162,5 +163,41 @@ class EmployeeServiceController extends Controller
             ->get();
             
         return view('HRM::pages.ess.holidays', compact('holidays'));
+    }
+    public function expenses()
+    {
+        $employee = $this->getEmployee();
+        
+        $expenses = ExpenseClaim::where('employee_id', $employee->id)
+            ->orderBy('date', 'desc')
+            ->paginate(20);
+
+        return view('HRM::pages.ess.expenses', compact('employee', 'expenses'));
+    }
+
+    public function storeExpense(Request $request)
+    {
+        $employee = $this->getEmployee();
+        
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'title' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'category' => 'nullable|string',
+            'description' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        ]);
+
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->store('expenses', 'public');
+            $validated['attachment'] = $path;
+        }
+
+        $validated['employee_id'] = $employee->id;
+        $validated['status'] = 'pending';
+
+        ExpenseClaim::create($validated);
+
+        return back()->with('success', 'Expense claim submitted successfully!');
     }
 }

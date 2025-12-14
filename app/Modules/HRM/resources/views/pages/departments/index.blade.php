@@ -102,23 +102,21 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-link text-muted font-size-16 p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="mdi mdi-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="{{ route('hrm.departments.show', $dept->id) }}"><i class="bx bx-show me-2"></i> View Details</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('hrm.departments.edit', $dept->id) }}"><i class="bx bx-edit me-2"></i> Edit</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form action="{{ route('hrm.departments.destroy', $dept->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure?')"><i class="bx bx-trash me-2"></i> Delete</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <form action="{{ route('hrm.departments.destroy', $dept->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{{ route('hrm.departments.show', $dept->id) }}" class="btn btn-sm btn-soft-primary">
+                                            <i class="mdi mdi-eye-outline"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-soft-info" data-bs-toggle="offcanvas" data-bs-target="#editDepartmentOffcanvas{{ $dept->id }}">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        <button type="submit" class="btn btn-sm btn-soft-danger" onclick="return confirm('Are you sure?')">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </div>
+                                </form>
                             </td>
                         </tr>
                         @empty
@@ -251,4 +249,80 @@
             </form>
         </div>
     </div>
+
+    {{-- Edit Offcanvases Loop --}}
+    @foreach($departments as $dept)
+    <div class="offcanvas offcanvas-end w-50" tabindex="-1" id="editDepartmentOffcanvas{{ $dept->id }}" aria-labelledby="editDeptLabel{{ $dept->id }}">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="editDeptLabel{{ $dept->id }}">Edit Department</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form action="{{ route('hrm.departments.update', $dept->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <div class="mb-3">
+                    <label class="form-label">Department Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="name" value="{{ $dept->name }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Department Code</label>
+                    <input type="text" class="form-control" name="code" value="{{ $dept->code }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Parent Department</label>
+                    <select class="form-select select2" name="parent_id">
+                        <option value="">None (Root Department)</option>
+                        @foreach($parentDepartments as $pDept)
+                            @if($pDept->id != $dept->id)
+                                <option value="{{ $pDept->id }}" {{ $dept->parent_id == $pDept->id ? 'selected' : '' }}>{{ $pDept->name }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Department Head</label>
+                    <select class="form-select select2" name="head_employee_id">
+                        <option value="">Select Department Head</option>
+                        @foreach($employees as $emp)
+                        <option value="{{ $emp->id }}" {{ $dept->head_employee_id == $emp->id ? 'selected' : '' }}>
+                            {{ $emp->full_name }} ({{ $emp->designation }})
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Cost Center</label>
+                    <select class="form-select select2" name="cost_center_id">
+                        <option value="">Select Cost Center</option>
+                        @foreach($costCenters as $cc)
+                        <option value="{{ $cc->id }}" {{ $dept->cost_center_id == $cc->id ? 'selected' : '' }}>{{ $cc->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" name="description" rows="3">{{ $dept->description }}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" value="1" {{ $dept->is_active ? 'checked' : '' }}>
+                        <label class="form-check-label">Active Status</label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Update Department</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endforeach
 @endsection

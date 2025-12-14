@@ -76,11 +76,28 @@
                         <li><a href="{{ route('hrm.leaves.my-leaves') }}" data-key="t-my-leaves">My Leaves</a></li>
                         <li><a href="{{ route('hrm.ess.payslips') }}" data-key="t-my-payslips">Payslips</a></li>
                         <li><a href="{{ route('hrm.ess.assets') }}" data-key="t-my-assets">My Assets</a></li>
+                        <li><a href="{{ route('hrm.ess.expenses') }}" data-key="t-my-expenses">My Expenses</a></li>
                         <li><a href="{{ route('hrm.performance-goals.my-goals') }}" data-key="t-my-goals">Performance Goals</a></li>
                         <li><a href="{{ route('hrm.ess.holidays') }}" data-key="t-holidays">Holiday Calendar</a></li>
                         <li><a href="{{ route('hrm.ess.salary-certificate') }}" data-key="t-salary-cert">Salary Certificate</a></li>
                     </ul>
                 </li>
+
+                {{-- Manager Self Service --}}
+                @if(auth()->check() && auth()->user()->employee && auth()->user()->employee->subordinates()->exists())
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow">
+                        <i data-feather="briefcase"></i>
+                        <span data-key="t-mss">Manager Portal</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('hrm.mss.dashboard') }}" data-key="t-mss-dashboard">Dashboard</a></li>
+                        <li><a href="{{ route('hrm.mss.team') }}" data-key="t-mss-team">My Team</a></li>
+                        <li><a href="{{ route('hrm.mss.approvals') }}" data-key="t-mss-approvals">Approvals</a></li>
+                        <li><a href="{{ route('hrm.mss.roster') }}" data-key="t-mss-roster">Manage Roster</a></li>
+                    </ul>
+                </li>
+                @endif
 
                 {{-- HRM System --}}
                 @canany(['hrm.employees.view', 'hrm.departments.view', 'hrm.branches.view', 'hrm.attendance.view', 'hrm.leaves.view', 'hrm.jobs.view', 'hrm.payroll.view', 'hrm.appraisals.view'])
@@ -100,6 +117,9 @@
                                 <li><a href="{{ route('hrm.employees.index') }}" data-key="t-employees">Employees</a></li>
                                 @endcan
                                 <li><a href="{{ route('hrm.assets.index') }}" data-key="t-assets">Assets</a></li>
+                                @can('hrm.skills.view')
+                                <li><a href="{{ route('hrm.skills.index') }}" data-key="t-skills">Skills</a></li>
+                                @endcan
                                 <li><a href="{{ route('hrm.resignations.index') }}" data-key="t-resignations">Resignations</a></li>
                                 <li><a href="{{ route('hrm.departments.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
@@ -136,14 +156,13 @@
                         <li>
                             <a href="javascript: void(0);" class="has-arrow" data-key="t-payroll">Payroll</a>
                             <ul class="sub-menu" aria-expanded="true">
-                                <li><a href="{{ route('hrm.payroll.index') }}" data-key="t-payroll-main">Run Payroll</a></li>
-                                <li><a href="{{ route('hrm.reports.salary-register') }}" data-key="t-salary-register">Salary Register</a></li>
-                                <li><a href="{{ route('hrm.loans.index') }}" data-key="t-loans">Loans</a></li>
-                                <li><a href="{{ route('hrm.advances.index') }}" data-key="t-advances">Advances</a></li>
-                                <li><a href="{{ route('hrm.overtime.index') }}" data-key="t-overtime">Overtime</a></li>
+                                <li><a href="{{ route('hrm.payroll.index') }}" data-key="t-payroll-process">Process Payroll</a></li>
+                                <li><a href="{{ route('hrm.reports.salary-register') }}" data-key="t-salary-sheet">Salary Sheet</a></li>
+                                <li><a href="{{ route('hrm.bank-transfers.index') }}" data-key="t-bank-transfer">Bank Transfer</a></li>
                                 <li><a href="{{ route('hrm.bonuses.index') }}" data-key="t-bonuses">Bonuses</a></li>
-                                <li><a href="{{ route('hrm.bank-transfers.index') }}" data-key="t-bank-transfers">Bank Transfer</a></li>
-                                <li><a href="{{ route('hrm.gratuity.calculator') }}" data-key="t-gratuity">Gratuity</a></li>
+                                <li><a href="{{ route('hrm.overtime.index') }}" data-key="t-overtime">Overtime</a></li>
+                                <li><a href="{{ route('hrm.loans.index') }}" data-key="t-loans">Loans & Advances</a></li>
+                                <li><a href="{{ route('hrm.gratuity.index') }}" data-key="t-gratuity">Gratuity</a></li>
                                 <li><a href="{{ route('hrm.settings.salary-components.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
                         </li>

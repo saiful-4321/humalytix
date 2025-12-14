@@ -67,12 +67,18 @@
                                 <i class="bx bx-check-circle text-success font-size-18" title="Active"></i>
                             </td>
                             <td>
-                                <a href="{{ route('hrm.settings.leave-types.edit', $type->id) }}" class="btn btn-sm btn-link text-primary"><i class="bx bx-edit font-size-18"></i></a>
-                                <form action="{{ route('hrm.settings.leave-types.destroy', $type->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-link text-danger" onclick="return confirm('Are you sure?')"><i class="bx bx-trash font-size-18"></i></button>
-                                </form>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-soft-info" data-bs-toggle="offcanvas" data-bs-target="#editPolicyOffcanvas{{ $type->id }}">
+                                        <i class="mdi mdi-pencil-outline"></i>
+                                    </button>
+                                    <form action="{{ route('hrm.settings.leave-types.destroy', $type->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-soft-danger" onclick="return confirm('Are you sure?')">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -172,7 +178,8 @@
 
     <script>
         function toggleLimit(checkbox) {
-            const input = document.querySelector('input[name="days_per_year"]');
+            const container = checkbox.closest('form');
+            const input = container.querySelector('input[name="days_per_year"]');
             if (checkbox.checked) {
                 input.readOnly = true;
                 input.value = 0;
@@ -181,4 +188,87 @@
             }
         }
     </script>
+
+    {{-- Edit Offcanvases Loop --}}
+    @foreach($leaveTypes as $type)
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="editPolicyOffcanvas{{ $type->id }}" style="width: 500px;">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Edit Leave Policy</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form action="{{ route('hrm.settings.leave-types.update', $type->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <h6 class="text-primary mb-3">Basic Info</h6>
+                <div class="mb-3">
+                    <label class="form-label">Policy Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="name" value="{{ $type->name }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Code <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="code" value="{{ $type->code }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" name="description" rows="2">{{ $type->description }}</textarea>
+                </div>
+
+                <h6 class="text-primary mb-3 mt-4">Rules & Entitlement</h6>
+                <div class="row align-items-center mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_unlimited" onchange="toggleLimit(this)" {{ $type->is_unlimited ? 'checked' : '' }}>
+                            <label class="form-check-label">Unlimited Leave</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Days Per Year</label>
+                        <input type="number" class="form-control" name="days_per_year" value="{{ $type->days_per_year }}" min="0" {{ $type->is_unlimited ? 'readonly' : '' }}>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_paid" {{ $type->is_paid ? 'checked' : '' }}>
+                            <label class="form-check-label">Paid Leave</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="requires_attachment" {{ $type->requires_attachment ? 'checked' : '' }}>
+                            <label class="form-check-label">Attach Req?</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Carry Forward Limit</label>
+                    <input type="number" class="form-control" name="carry_forward_limit" value="{{ $type->carry_forward_limit }}" min="0">
+                </div>
+
+                <h6 class="text-primary mb-3 mt-4">Workflow</h6>
+                <div class="mb-3">
+                    <label class="form-label">Approval Chain</label>
+                    <select class="form-select" name="approval_chain_id">
+                        <option value="">Standard (Direct Manager)</option>
+                        @foreach($approvalChains as $chain)
+                        <option value="{{ $chain->id }}" {{ $type->approval_chain_id == $chain->id ? 'selected' : '' }}>
+                            {{ $chain->name }} ({{ $chain->levels_count ?? $chain->levels->count() }} Levels)
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Update Policy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endforeach
 @endsection

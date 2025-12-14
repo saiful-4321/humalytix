@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
         User::insert([
             [
                 'name' => 'Super Administrator',
-                'email' => 'superadmin@mistrivai.com',
+                'email' => 'superadmin@test.com',
                 'password' => Hash::make('12345678'), // It's better to hash the password
                 'mobile' => '01644331161',
                 'nid' => '1234567890',
@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Admin',
-                'email' => 'admin@mistrivai.com',
+                'email' => 'admin@test.com',
                 'password' => Hash::make('12345678'), // It's better to hash the password
                 'mobile' => '01731632434',
                 'nid' => '1234567890',

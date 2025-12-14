@@ -56,28 +56,17 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
-                                        <i class="mdi mdi-dots-vertical font-size-18"></i>
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button type="button" class="btn btn-sm btn-soft-info" onclick="editShift({{ json_encode($shift) }})">
+                                        <i class="mdi mdi-pencil-outline"></i>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <button type="button" class="dropdown-item" 
-                                                onclick="editShift({{ json_encode($shift) }})">
-                                                <i class="bx bx-edit me-2"></i> Edit
-                                            </button>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form action="{{ route('hrm.shifts.destroy', $shift->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this shift?')">
-                                                    <i class="bx bx-trash me-2"></i> Delete
-                                                </button>
-                                            </form>
-                                        </li>
-                                    </ul>
+                                    <form action="{{ route('hrm.shifts.destroy', $shift->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-soft-danger" onclick="return confirm('Delete this shift?')">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

@@ -26,7 +26,7 @@
                         $route = Route::currentRouteName();
                         $section = '';
 
-                        if (Str::startsWith($route, ['hrm.departments', 'hrm.branches', 'hrm.business-units', 'hrm.document-types'])) {
+                        if (Str::startsWith($route, ['hrm.departments', 'hrm.branches', 'hrm.business-units', 'hrm.document-types', 'hrm.skills'])) {
                             $section = 'people';
                         } elseif (Str::startsWith($route, ['hrm.settings.leave-types', 'hrm.settings.approval-chains'])) {
                             $section = 'leave';
@@ -55,6 +55,9 @@
                         </a>
                         <a href="{{ route('hrm.document-types.index') }}" class="list-group-item list-group-item-action {{ Str::startsWith($route, 'hrm.document-types') ? 'active' : '' }}">
                             <i class="bx bx-file me-2 align-middle font-size-16"></i> Document Types
+                        </a>
+                        <a href="{{ route('hrm.skills.index') }}" class="list-group-item list-group-item-action {{ Str::startsWith($route, 'hrm.skills') ? 'active' : '' }}">
+                            <i class="bx bx-file me-2 align-middle font-size-16"></i> Skills
                         </a>
                     @elseif($section === 'leave')
                         <div class="p-3 border-bottom bg-light">

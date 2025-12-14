@@ -100,23 +100,21 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-link text-muted font-size-16 p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="mdi mdi-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="{{ route('hrm.branches.show', $branch->id) }}"><i class="bx bx-show me-2"></i> View Details</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('hrm.branches.edit', $branch->id) }}"><i class="bx bx-edit me-2"></i> Edit</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form action="{{ route('hrm.branches.destroy', $branch->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure?')"><i class="bx bx-trash me-2"></i> Delete</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <form action="{{ route('hrm.branches.destroy', $branch->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{{ route('hrm.branches.show', $branch->id) }}" class="btn btn-sm btn-soft-primary">
+                                            <i class="mdi mdi-eye-outline"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-soft-info" data-bs-toggle="offcanvas" data-bs-target="#editBranchOffcanvas{{ $branch->id }}">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        <button type="submit" class="btn btn-sm btn-soft-danger" onclick="return confirm('Are you sure?')">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </div>
+                                </form>
                             </td>
                         </tr>
                         @empty
@@ -254,4 +252,84 @@
             </form>
         </div>
     </div>
+
+    {{-- Edit Offcanvases Loop --}}
+    @foreach($branches as $branch)
+    <div class="offcanvas offcanvas-end w-50" tabindex="-1" id="editBranchOffcanvas{{ $branch->id }}" aria-labelledby="editBranchLabel{{ $branch->id }}">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="editBranchLabel{{ $branch->id }}">Edit Branch</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form action="{{ route('hrm.branches.update', $branch->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <h5 class="font-size-14 text-uppercase mb-3">Basic Information</h5>
+                <div class="mb-3">
+                    <label class="form-label">Branch Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="name" value="{{ $branch->name }}" required>
+                </div>
+
+                <div class="row">
+                     <div class="col-md-6 mb-3">
+                        <label class="form-label">Branch Code</label>
+                        <input type="text" class="form-control" name="code" value="{{ $branch->code }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Branch Manager</label>
+                        <select class="form-select select2" name="manager_id">
+                            <option value="">Select Manager</option>
+                            @foreach($managers as $mgr)
+                            <option value="{{ $mgr->id }}" {{ $branch->manager_id == $mgr->id ? 'selected' : '' }}>
+                                {{ $mgr->full_name }} ({{ $mgr->designation }})
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" value="1" {{ $branch->is_active ? 'checked' : '' }}>
+                        <label class="form-check-label">Active Status</label>
+                    </div>
+                </div>
+
+                <h5 class="font-size-14 text-uppercase mb-3 mt-4">Location Details</h5>
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <textarea class="form-control" name="address" rows="2">{{ $branch->address }}</textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control" name="city" value="{{ $branch->city }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Country</label>
+                        <input type="text" class="form-control" name="country" value="{{ $branch->country }}">
+                    </div>
+                </div>
+
+                <h5 class="font-size-14 text-uppercase mb-3 mt-4">Geofence Settings (Optional)</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Latitude</label>
+                        <input type="number" step="any" class="form-control" name="latitude" value="{{ $branch->latitude }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Longitude</label>
+                        <input type="number" step="any" class="form-control" name="longitude" value="{{ $branch->longitude }}">
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Update Branch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endforeach
 @endsection

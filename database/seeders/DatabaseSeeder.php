@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             PermissionsSeeder::class,
             SettingsSeeder::class,
-            HRMMediumDataSeeder::class,
+            \App\Modules\HRM\database\seeders\HRMSeeder::class,
         ]);
     }
 }

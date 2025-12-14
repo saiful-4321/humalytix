@@ -132,20 +132,20 @@ class CompletePayrollSeeder extends Seeder
         
         $slabs = [
             // Male
-            ['gender' => 'male', 'min_income' => 0, 'max_income' => 350000, 'tax_rate' => 0, 'fixed_deduction' => 0],
-            ['gender' => 'male', 'min_income' => 350000, 'max_income' => 450000, 'tax_rate' => 5, 'fixed_deduction' => 0],
-            ['gender' => 'male', 'min_income' => 450000, 'max_income' => 750000, 'tax_rate' => 10, 'fixed_deduction' => 5000],
-            ['gender' => 'male', 'min_income' => 750000, 'max_income' => 1150000, 'tax_rate' => 15, 'fixed_deduction' => 35000],
-            ['gender' => 'male', 'min_income' => 1150000, 'max_income' => 1650000, 'tax_rate' => 20, 'fixed_deduction' => 95000],
-            ['gender' => 'male', 'min_income' => 1650000, 'max_income' => null, 'tax_rate' => 25, 'fixed_deduction' => 195000],
+            ['gender' => 'male', 'min_income' => 0, 'max_income' => 350000, 'tax_rate' => 0, 'deduction_amount' => 0],
+            ['gender' => 'male', 'min_income' => 350000, 'max_income' => 450000, 'tax_rate' => 5, 'deduction_amount' => 0],
+            ['gender' => 'male', 'min_income' => 450000, 'max_income' => 750000, 'tax_rate' => 10, 'deduction_amount' => 5000],
+            ['gender' => 'male', 'min_income' => 750000, 'max_income' => 1150000, 'tax_rate' => 15, 'deduction_amount' => 35000],
+            ['gender' => 'male', 'min_income' => 1150000, 'max_income' => 1650000, 'tax_rate' => 20, 'deduction_amount' => 95000],
+            ['gender' => 'male', 'min_income' => 1650000, 'max_income' => null, 'tax_rate' => 25, 'deduction_amount' => 195000],
             
             // Female
-            ['gender' => 'female', 'min_income' => 0, 'max_income' => 400000, 'tax_rate' => 0, 'fixed_deduction' => 0],
-            ['gender' => 'female', 'min_income' => 400000, 'max_income' => 500000, 'tax_rate' => 5, 'fixed_deduction' => 0],
-            ['gender' => 'female', 'min_income' => 500000, 'max_income' => 800000, 'tax_rate' => 10, 'fixed_deduction' => 5000],
-            ['gender' => 'female', 'min_income' => 800000, 'max_income' => 1200000, 'tax_rate' => 15, 'fixed_deduction' => 35000],
-            ['gender' => 'female', 'min_income' => 1200000, 'max_income' => 1700000, 'tax_rate' => 20, 'fixed_deduction' => 95000],
-            ['gender' => 'female', 'min_income' => 1700000, 'max_income' => null, 'tax_rate' => 25, 'fixed_deduction' => 195000],
+            ['gender' => 'female', 'min_income' => 0, 'max_income' => 400000, 'tax_rate' => 0, 'deduction_amount' => 0],
+            ['gender' => 'female', 'min_income' => 400000, 'max_income' => 500000, 'tax_rate' => 5, 'deduction_amount' => 0],
+            ['gender' => 'female', 'min_income' => 500000, 'max_income' => 800000, 'tax_rate' => 10, 'deduction_amount' => 5000],
+            ['gender' => 'female', 'min_income' => 800000, 'max_income' => 1200000, 'tax_rate' => 15, 'deduction_amount' => 35000],
+            ['gender' => 'female', 'min_income' => 1200000, 'max_income' => 1700000, 'tax_rate' => 20, 'deduction_amount' => 95000],
+            ['gender' => 'female', 'min_income' => 1700000, 'max_income' => null, 'tax_rate' => 25, 'deduction_amount' => 195000],
         ];
         
         foreach ($slabs as $slab) {
@@ -248,10 +248,9 @@ class CompletePayrollSeeder extends Seeder
         GratuityConfig::firstOrCreate(
             ['name' => 'Default Gratuity Policy'],
             [
-                'description' => 'Standard gratuity calculation for employees',
                 'min_service_years' => 5,
                 'multiplier' => 0.5,
-                'calculation_formula' => 'last_basic_salary',
+                'calculation_type' => 'fixed_formula',
                 'formula_description' => 'Last Basic Salary × Service Years × 0.5',
                 'max_gratuity_amount' => 500000,
                 'is_active' => true,
@@ -264,9 +263,9 @@ class CompletePayrollSeeder extends Seeder
         $this->command->info('💵 Seeding Commission Schemes...');
         
         $schemes = [
-            ['name' => 'Sales Commission - Tier 1', 'description' => 'Basic sales commission', 'commission_type' => 'percentage', 'rate' => 5.00, 'min_target' => 0, 'max_target' => 100000, 'is_active' => true],
-            ['name' => 'Sales Commission - Tier 2', 'description' => 'Mid-level sales commission', 'commission_type' => 'percentage', 'rate' => 7.50, 'min_target' => 100000, 'max_target' => 500000, 'is_active' => true],
-            ['name' => 'Sales Commission - Tier 3', 'description' => 'Premium sales commission', 'commission_type' => 'percentage', 'rate' => 10.00, 'min_target' => 500000, 'max_target' => null, 'is_active' => true],
+            ['name' => 'Sales Commission - Tier 1', 'description' => 'Basic sales commission', 'calculation_type' => 'percentage', 'rate' => 5.00, 'threshold_amount' => 0, 'is_active' => true],
+            ['name' => 'Sales Commission - Tier 2', 'description' => 'Mid-level sales commission', 'calculation_type' => 'percentage', 'rate' => 7.50, 'threshold_amount' => 100000, 'is_active' => true],
+            ['name' => 'Sales Commission - Tier 3', 'description' => 'Premium sales commission', 'calculation_type' => 'percentage', 'rate' => 10.00, 'threshold_amount' => 500000, 'is_active' => true],
         ];
         
         foreach ($schemes as $scheme) {

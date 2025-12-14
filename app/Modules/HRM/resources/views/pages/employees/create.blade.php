@@ -152,6 +152,17 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="create_user" name="create_user" value="1" checked>
+                                <label class="form-check-label" for="create_user">
+                                    Create User Login Account (Default Password: 12345678)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary">
                             Save & Continue <i class="bx bx-chevron-right"></i>

@@ -67,6 +67,22 @@
         </div>
     </div> 
 
+    <div class="col-md-6 mb-2">
+        {{ Form::label('employee_id', 'Link Employee (Optional)') }}
+        <div class="form-group">
+            <select name="employee_id" class="form-control select2">
+                <option value="">Select Employee</option>
+                @if(isset($data->employees))
+                    @foreach($data->employees as $emp)
+                        <option value="{{ $emp->id }}" {{ (old('employee_id') ?? ($data->item->employee_id ?? '')) == $emp->id ? 'selected' : '' }}>
+                            {{ $emp->first_name }} {{ $emp->last_name }} ({{ $emp->employee_code }})
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+    </div>
+
     {{-- EDIT MODE --}}
     @if (!empty($data->item))
 
@@ -95,5 +111,32 @@
 
 {{-- reload scripts for dynamic content  --}}
 <script src="{{ asset('assets/js/common.js') }}"></script>
+<script>
+    setTimeout(function() {
+        // Fix for Select2 search focus inside Bootstrap Modal
+        var $allModals = $('.modal');
+        $allModals.removeAttr('tabindex');
+
+        $('.select2').each(function() {
+            var $modal = $(this).closest('.modal');
+            if ($modal.length === 0) {
+                $modal = $('#commonModal'); 
+            }
+            
+            if ($(this).hasClass("select2-hidden-accessible")) {
+                $(this).select2('destroy');
+            }
+
+            if ($modal.length > 0) {
+                $(this).select2({
+                    dropdownParent: $modal,
+                    width: '100%'
+                });
+            } else {
+                 $(this).select2({ width: '100%' });
+            }
+        });
+    }, 500); 
+</script>
 
 @endsection

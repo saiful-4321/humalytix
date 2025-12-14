@@ -13,7 +13,9 @@ class SalaryStructureController extends Controller
     public function index()
     {
         $structures = SalaryStructure::with('components')->get();
-        return view('HRM::pages.settings.salary_structures.index', compact('structures'));
+        $earnings = SalaryComponent::where('type', 'earning')->where('is_active', true)->get();
+        $deductions = SalaryComponent::where('type', 'deduction')->where('is_active', true)->get();
+        return view('HRM::pages.settings.salary_structures.index', compact('structures', 'earnings', 'deductions'));
     }
 
     public function create()

@@ -10,7 +10,8 @@ class HRMSeeder extends Seeder
     {
         $this->call([
             HRMPermissionSeeder::class,
-            HRMDemoDataSeeder::class,
+            PerfectPayrollSeeder::class, // Replaces HRMDemoDataSeeder and includes CompletePayrollSeeder
+            SkillSeeder::class,
         ]);
     }
 }

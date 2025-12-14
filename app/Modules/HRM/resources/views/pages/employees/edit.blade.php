@@ -328,16 +328,7 @@
                                 </div>
                             </div>
 
-                            <script>
-                                document.getElementById('payment_method').addEventListener('change', function() {
-                                    const mfsDetails = document.getElementById('mfs_details');
-                                    if (this.value === 'mfs') {
-                                        mfsDetails.style.display = 'flex';
-                                    } else {
-                                        mfsDetails.style.display = 'none';
-                                    }
-                                });
-                            </script>
+
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -482,11 +473,9 @@
                                                                     <a href="{{ route('hrm.employees.documents.download', ['employee' => $employee->id, 'document' => $existingDoc->id]) }}" class="btn btn-sm btn-outline-primary" target="_blank" title="Download">
                                                                         <i class="bx bx-download"></i>
                                                                     </a>
-                                                                    <form action="{{ route('hrm.employees.documents.destroy', ['employee' => $employee->id, 'document' => $existingDoc->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this document?')">
-                                                                        @csrf
-                                                                        @method('DELETE')
-                                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bx bx-trash"></i></button>
-                                                                    </form>
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" onclick="confirmDeleteDocument('{{ route('hrm.employees.documents.destroy', ['employee' => $employee->id, 'document' => $existingDoc->id]) }}')">
+                                                                        <i class="bx bx-trash"></i>
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         @else
@@ -529,11 +518,9 @@
                                                                     <a href="{{ route('hrm.employees.documents.download', ['employee' => $employee->id, 'document' => $existingDoc->id]) }}" class="btn btn-sm btn-outline-primary" target="_blank" title="Download">
                                                                         <i class="bx bx-download"></i>
                                                                     </a>
-                                                                    <form action="{{ route('hrm.employees.documents.destroy', ['employee' => $employee->id, 'document' => $existingDoc->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this document?')">
-                                                                        @csrf
-                                                                        @method('DELETE')
-                                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bx bx-trash"></i></button>
-                                                                    </form>
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" onclick="confirmDeleteDocument('{{ route('hrm.employees.documents.destroy', ['employee' => $employee->id, 'document' => $existingDoc->id]) }}')">
+                                                                        <i class="bx bx-trash"></i>
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         @else
@@ -558,11 +545,9 @@
                                                 <a href="{{ route('hrm.employees.documents.download', ['employee' => $employee->id, 'document' => $doc->id]) }}" class="btn btn-sm btn-info" target="_blank">Download</a>
                                             </div>
                                             <div class="col-md-2">
-                                                 <form action="{{ route('hrm.employees.documents.destroy', ['employee' => $employee->id, 'document' => $doc->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this document?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm"><i class="bx bx-trash"></i></button>
-                                                </form>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeleteDocument('{{ route('hrm.employees.documents.destroy', ['employee' => $employee->id, 'document' => $doc->id]) }}')">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
                                         @endforeach
@@ -583,111 +568,7 @@
                                 </div>
                             </div>
                             
-                            <script>
-                                // Handle predefined document type uploads
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    const documentForm = document.querySelector('#documents form');
-                                    if (!documentForm) {
-                                        console.error('Document form not found!');
-                                        return;
-                                    }
-                                    
-                                    console.log('Document upload form found and initialized');
-                                    
-                                    documentForm.addEventListener('submit', function(e) {
-                                        console.log('Form submitted, processing documents...');
-                                        
-                                        // Find all doc_* file inputs
-                                        const docInputs = documentForm.querySelectorAll('input[type="file"][name^="doc_"]');
-                                        let docIndex = 0;
-                                        
-                                        console.log('Found ' + docInputs.length + ' document input fields');
-                                        
-                                        docInputs.forEach(function(input) {
-                                            if (input.files && input.files.length > 0) {
-                                                const docType = input.getAttribute('data-doc-type');
-                                                const docTitle = input.getAttribute('data-doc-title');
-                                                
-                                                console.log('Processing document:', {
-                                                    type: docType,
-                                                    title: docTitle,
-                                                    fileName: input.files[0].name
-                                                });
-                                                
-                                                // Create proper name format
-                                                input.setAttribute('name', `documents[${docIndex}][file]`);
-                                                
-                                                // Create hidden fields for title and type
-                                                const titleInput = document.createElement('input');
-                                                titleInput.type = 'hidden';
-                                                titleInput.name = `documents[${docIndex}][title]`;
-                                                titleInput.value = docTitle;
-                                                documentForm.appendChild(titleInput);
-                                                
-                                                const typeInput = document.createElement('input');
-                                                typeInput.type = 'hidden';
-                                                typeInput.name = `documents[${docIndex}][document_type_id]`;
-                                                typeInput.value = docType;
-                                                documentForm.appendChild(typeInput);
-                                                
-                                                console.log('Created hidden inputs for document index:', docIndex);
-                                                docIndex++;
-                                            } else {
-                                                // Remove empty file inputs
-                                                input.removeAttribute('name');
-                                            }
-                                        });
-                                        
-                                        console.log('Total documents to upload:', docIndex);
-                                    });
-                                });
-                                
-                                // Handle custom document uploads
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    let docIndex = 200; // Start high to avoid collision
-                                    const container = document.getElementById('document-list');
-                                    const template = document.querySelector('.document-row-template');
-                                    const addButton = document.getElementById('btn-add-doc');
-                                    
-                                    if (!addButton || !template || !container) {
-                                        console.error('Custom document elements not found:', {
-                                            addButton: !!addButton,
-                                            template: !!template,
-                                            container: !!container
-                                        });
-                                        return;
-                                    }
-                                    
-                                    console.log('Custom document upload initialized');
-                                    
-                                    addButton.addEventListener('click', function() {
-                                        console.log('Adding custom document row');
-                                        
-                                        const newRow = template.cloneNode(true);
-                                        newRow.style.display = 'flex'; // Make it visible
-                                        newRow.classList.remove('document-row-template');
-                                        newRow.classList.add('document-row');
-                                        
-                                        // Update names
-                                        const titleInput = newRow.querySelector('.doc-title');
-                                        titleInput.name = `documents[${docIndex}][title]`;
-                                        titleInput.required = true;
-                                        
-                                        const fileInput = newRow.querySelector('.doc-file');
-                                        fileInput.name = `documents[${docIndex}][file]`;
-                                        fileInput.required = true;
-                                        
-                                        container.appendChild(newRow);
-                                        console.log('Custom document row added with index:', docIndex);
-                                        docIndex++;
-                                        
-                                        newRow.querySelector('.btn-remove-doc').addEventListener('click', function() {
-                                            console.log('Removing custom document row');
-                                            newRow.remove();
-                                        });
-                                    });
-                                });
-                            </script>
+
 
                             <div class="row">
                                 <div class="col-md-12 mb-3">
@@ -713,5 +594,116 @@
         </div>
     </div>
 </div>
+</div>
 @endsection
+
+{{-- Hidden form for document deletion --}}
+<form id="delete-document-form" action="" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+@push('scripts')
+<script>
+    // Toggle MFS details visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentMethod = document.getElementById('payment_method');
+        if (paymentMethod) {
+            paymentMethod.addEventListener('change', function() {
+                const mfsDetails = document.getElementById('mfs_details');
+                if (this.value === 'mfs') {
+                    mfsDetails.style.display = 'flex';
+                } else {
+                    mfsDetails.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // Handle Document Deletion
+    function confirmDeleteDocument(url) {
+        if (confirm('Delete this document?')) {
+            const form = document.getElementById('delete-document-form');
+            form.action = url;
+            form.submit();
+        }
+    }
+
+    // Handle Custom and Predefined Documents
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Custom Document Handling ---
+        const wrapper = document.getElementById('document-list');
+        const addButton = document.getElementById('btn-add-doc');
+        const template = document.querySelector('.document-row-template');
+        let customDocIndex = 200; // Start at 200 to avoid collision with predefined
+
+        if(addButton && wrapper && template) {
+            addButton.addEventListener('click', function() {
+                const clone = template.cloneNode(true);
+                clone.classList.remove('document-row-template');
+                clone.style.display = 'flex'; // Ensure it's visible
+                
+                // Set names and required attributes
+                const titleInput = clone.querySelector('.doc-title');
+                const fileInput = clone.querySelector('.doc-file');
+                
+                titleInput.name = `documents[${customDocIndex}][title]`;
+                titleInput.required = true;
+                fileInput.name = `documents[${customDocIndex}][file]`;
+                fileInput.required = true;
+                
+                // Attach remove event listener
+                const removeBtn = clone.querySelector('.btn-remove-doc');
+                removeBtn.addEventListener('click', function() {
+                    clone.remove();
+                });
+                
+                wrapper.appendChild(clone);
+                customDocIndex++;
+            });
+        }
+
+        // --- Predefined Document Handling on Submit ---
+        // Find the specific form in the documents tab
+        const docForm = document.querySelector('#documents form');
+        
+        if(docForm) {
+            docForm.addEventListener('submit', function(e) {
+                // Find all predefined file inputs using data attribute
+                const fileInputs = docForm.querySelectorAll('input[type="file"][data-doc-type]');
+                let index = 0;
+                
+                fileInputs.forEach(input => {
+                    if(input.files.length > 0) {
+                        // Assign proper name for array handling
+                        input.name = `documents[${index}][file]`;
+                        
+                        // Create hidden inputs for title and type
+                        // We use data attributes from the input
+                        
+                        // Title
+                        const title = document.createElement('input');
+                        title.type = 'hidden';
+                        title.name = `documents[${index}][title]`;
+                        title.value = input.dataset.docTitle;
+                        docForm.appendChild(title);
+
+                        // Type ID
+                        const type = document.createElement('input');
+                        type.type = 'hidden';
+                        type.name = `documents[${index}][document_type_id]`;
+                        type.value = input.dataset.docType;
+                        docForm.appendChild(type);
+                        
+                        index++;
+                    } else {
+                         // Remove name attribute so empty files are not sent
+                         input.removeAttribute('name');
+                    }
+                });
+            });
+        }
+    });
+</script>
+@endpush
 

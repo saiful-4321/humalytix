@@ -13,7 +13,7 @@ class OvertimeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = EmployeeOvertime::with(['employee', 'otPolicy']);
+        $query = EmployeeOvertime::with(['employee', 'policy']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);

@@ -59,6 +59,7 @@ class UserController extends Controller
                         ->pluck('name', 'name')
                         ->toArray(), 
             'status' => UserStatusEnum::getAll(),
+            'employees' => \App\Modules\HRM\Models\Employee::whereNull('user_id')->active()->select('id', 'first_name', 'last_name', 'employee_code')->get(),
             'item'   => [],
         ]; 
 
@@ -74,6 +75,10 @@ class UserController extends Controller
             // save form progress
             EkycProgressbarService::save($user->id, 'basic_registration');
             EkycProgressbarService::save($user->id, 'otp_verification');
+
+            if ($request->filled('employee_id')) {
+                \App\Modules\HRM\Models\Employee::where('id', $request->employee_id)->update(['user_id' => $user->id]);
+            }
             
             if ($user) {
                 return JsonResponse::success('Save Successful!');
@@ -98,8 +103,14 @@ class UserController extends Controller
                         ->pluck('name', 'name')
                         ->toArray(), 
             'status' => UserStatusEnum::getAll(),
+            'employees' => \App\Modules\HRM\Models\Employee::where(function($q) use($id) {
+                                $q->whereNull('user_id')->orWhere('user_id', $id);
+                            })->active()->select('id', 'first_name', 'last_name', 'employee_code')->get(),
             'item'   => $this->userService->getById($id),
-        ]; 
+        ];
+        
+        // Attach current employee_id to item for form pre-selection
+        $data->item->employee_id = \App\Modules\HRM\Models\Employee::where('user_id', $id)->value('id'); 
          
         return view($this->view . 'form', compact('data'));
     }
@@ -111,6 +122,13 @@ class UserController extends Controller
             $update = $this->userService->createOrUpdate($request);
             
             if ($update) {
+                if ($request->has('employee_id')) {
+                   \App\Modules\HRM\Models\Employee::where('user_id', $id)->update(['user_id' => null]);
+                   if ($request->filled('employee_id')) {
+                        \App\Modules\HRM\Models\Employee::where('id', $request->employee_id)->update(['user_id' => $id]);
+                   }
+                }
+
                 return JsonResponse::success('Update Successful!');
             } else {
                 return JsonResponse::internalError('Please try again!');

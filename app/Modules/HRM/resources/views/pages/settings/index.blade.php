@@ -57,6 +57,16 @@
                             <i class="mdi mdi-chevron-right"></i>
                         </div>
                     </a>
+                    <a href="{{ route('hrm.skills.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.skills.*') ? 'active' : '' }}">
+                        <div class="d-flex align-items-center">
+                            <i class="mdi mdi-school me-2 font-size-18"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 font-size-13">Skills</h6>
+                                <small class="text-muted">Competencies & Qualifications</small>
+                            </div>
+                            <i class="mdi mdi-chevron-right"></i>
+                        </div>
+                    </a>
 
                     <!-- Leave Settings -->
                     <div class="list-group-item bg-light border-0 mt-2">

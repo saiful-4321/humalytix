@@ -28,6 +28,31 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::get('/salary-certificate', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'salaryCertificate'])->name('salary-certificate');
         Route::post('/salary-certificate', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'requestSalaryCertificate'])->name('salary-certificate.request');
         Route::get('/holidays', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'holidays'])->name('holidays');
+        Route::get('/expenses', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'expenses'])->name('expenses');
+        Route::post('/expenses', [\App\Modules\HRM\Http\Controllers\EmployeeServiceController::class, 'storeExpense'])->name('expenses.store');
+    });
+
+    // Manager Self-Service (MSS)
+    Route::prefix('mss')->name('mss.')->group(function () {
+        Route::get('/dashboard', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'dashboard'])->name('dashboard');
+        Route::get('/team', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'team'])->name('team');
+        Route::get('/approvals', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'approvals'])->name('approvals');
+        
+        // Leave Approvals
+        Route::post('/leaves/{leave}/approve', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'approveLeave'])->name('leaves.approve');
+        Route::post('/leaves/{leave}/reject', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'rejectLeave'])->name('leaves.reject');
+        
+        // Regularization
+        Route::post('/regularization/{regularization}/approve', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'approveRegularization'])->name('regularization.approve');
+        Route::post('/regularization/{regularization}/reject', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'rejectRegularization'])->name('regularization.reject');
+        
+        // Expenses
+        Route::post('/expenses/{expense}/approve', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'approveExpense'])->name('expenses.approve');
+        Route::post('/expenses/{expense}/reject', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'rejectExpense'])->name('expenses.reject');
+
+        // Roster
+        Route::get('/roster', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'roster'])->name('roster');
+        Route::post('/roster', [\App\Modules\HRM\Http\Controllers\ManagerServiceController::class, 'storeRoster'])->name('roster.store');
     });
 
     // Employee Management
@@ -39,6 +64,8 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::get('/{employee}/edit', [EmployeeController::class, 'edit'])->name('edit');
         Route::put('/{employee}', [EmployeeController::class, 'update'])->name('update');
         Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
+        Route::get('/{employee}/assign-user', [EmployeeController::class, 'assignUser'])->name('assign-user');
+        Route::post('/{employee}/assign-user', [EmployeeController::class, 'storeUserAssignment'])->name('store-user-assignment');
         
         // Import/Export
         Route::get('/export/sample', [EmployeeController::class, 'sample'])->name('sample');
@@ -219,6 +246,7 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::get('/', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'index'])->name('index');
         Route::get('/calculator', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'calculator'])->name('calculator');
         Route::post('/calculate', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'calculate'])->name('calculate');
+        Route::post('/config', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'storeConfig'])->name('config.store');
         Route::post('/{gratuity}/approve', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'approve'])->name('approve');
         Route::post('/{gratuity}/pay', [\App\Modules\HRM\Http\Controllers\GratuityController::class, 'pay'])->name('pay');
     });
@@ -309,7 +337,7 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
     // Route::resource('rosters', RosterController::class);
 
     // Skills
-    // Route::resource('skills', SkillController::class);
+    Route::resource('skills', \App\Modules\HRM\Http\Controllers\SkillController::class);
 
     // Documents
     // Route::resource('document-types', DocumentTypeController::class);

@@ -88,22 +88,18 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-link text-muted font-size-16 p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="mdi mdi-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="{{ route('hrm.business-units.edit', $bu->id) }}"><i class="bx bx-edit me-2"></i> Edit</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form action="{{ route('hrm.business-units.destroy', $bu->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure?')"><i class="bx bx-trash me-2"></i> Delete</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <form action="{{ route('hrm.business-units.destroy', $bu->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-sm btn-soft-info" data-bs-toggle="offcanvas" data-bs-target="#editBusinessUnitOffcanvas{{ $bu->id }}">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        <button type="submit" class="btn btn-sm btn-soft-danger" onclick="return confirm('Are you sure?')">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </div>
+                                </form>
                             </td>
                         </tr>
                         @empty
@@ -206,4 +202,58 @@
             </form>
         </div>
     </div>
+
+    {{-- Edit Offcanvases Loop --}}
+    @foreach($businessUnits as $bu)
+    <div class="offcanvas offcanvas-end w-50" tabindex="-1" id="editBusinessUnitOffcanvas{{ $bu->id }}" aria-labelledby="editBULabel{{ $bu->id }}">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="editBULabel{{ $bu->id }}">Edit Business Unit</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <form action="{{ route('hrm.business-units.update', $bu->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <div class="mb-3">
+                    <label class="form-label">Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="name" value="{{ $bu->name }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Code</label>
+                    <input type="text" class="form-control" name="code" value="{{ $bu->code }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Head of Unit</label>
+                    <select class="form-select select2" name="head_employee_id">
+                        <option value="">Select Head</option>
+                        @foreach($employees as $emp)
+                        <option value="{{ $emp->id }}" {{ $bu->head_employee_id == $emp->id ? 'selected' : '' }}>
+                            {{ $emp->full_name }} ({{ $emp->designation }})
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" name="description" rows="3">{{ $bu->description }}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" value="1" {{ $bu->is_active ? 'checked' : '' }}>
+                        <label class="form-check-label">Active Status</label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Update Business Unit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endforeach
 @endsection
