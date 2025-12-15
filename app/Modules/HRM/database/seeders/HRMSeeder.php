@@ -3,6 +3,8 @@
 namespace App\Modules\HRM\database\seeders;
 
 use Illuminate\Database\Seeder;
+use App\Modules\HRM\Database\Seeders\PerfectPayrollSeeder;
+use App\Modules\HRM\Database\Seeders\PMSSeeder;
 
 class HRMSeeder extends Seeder
 {
@@ -10,8 +12,9 @@ class HRMSeeder extends Seeder
     {
         $this->call([
             HRMPermissionSeeder::class,
-            PerfectPayrollSeeder::class, // Replaces HRMDemoDataSeeder and includes CompletePayrollSeeder
+            PerfectPayrollSeeder::class,
             SkillSeeder::class,
+            PMSSeeder::class,
         ]);
     }
 }

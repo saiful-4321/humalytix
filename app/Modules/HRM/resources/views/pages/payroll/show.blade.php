@@ -73,14 +73,19 @@
                             @endphp
                             
                             @for($i=0; $i<$maxRows; $i++)
+                                @php
+                                    $earning = $earnings->values()->get($i);
+                                    $deduction = $deductions->values()->get($i);
+                                @endphp
                                 <tr>
-                                    <td>{{ $earnings->values()->get($i)->component_name ?? '' }}</td>
-                                    <td class="text-end">{{ isset($earnings->values()->get($i)) ? '$'.number_format($earnings->values()->get($i)->amount, 2) : '' }}</td>
+                                    <td>{{ $earning->component_name ?? '' }}</td>
+                                    <td class="text-end">{{ $earning ? '$'.number_format($earning->amount, 2) : '' }}</td>
                                     
-                                    <td class="border-start">{{ $deductions->values()->get($i)->component_name ?? '' }}</td>
-                                    <td class="text-end">{{ isset($deductions->values()->get($i)) ? '$'.number_format($deductions->values()->get($i)->amount, 2) : '' }}</td>
+                                    <td class="border-start">{{ $deduction->component_name ?? '' }}</td>
+                                    <td class="text-end">{{ $deduction ? '$'.number_format($deduction->amount, 2) : '' }}</td>
                                 </tr>
                             @endfor
+
                             
                             <!-- Totals -->
                             <tr class="fw-bold bg-light">

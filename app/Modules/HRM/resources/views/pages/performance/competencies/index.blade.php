@@ -3,34 +3,42 @@
 @section('title', 'Competencies')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">Competencies</h4>
-            <p class="text-muted mb-0">Manage core, functional, and leadership competencies</p>
+<div class="block-header">
+    <div class="row">
+        <div class="col-lg-5 col-md-8 col-sm-12">
+            <h2>Competencies</h2>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-                <i class="bx bx-filter-alt me-1"></i> Filter
-            </button>
-            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createCompetencyOffcanvas">
-                <i class="bx bx-plus me-1"></i> Add Competency
-            </button>
+        <div class="col-lg-7 col-md-4 col-sm-12 text-right">
+            <ul class="breadcrumb justify-content-end">
+                <li class="breadcrumb-item"><a href="{{ route('hrm.dashboard') }}">HRM</a></li>
+                <li class="breadcrumb-item active">Performance</li>
+                <li class="breadcrumb-item active">Competencies</li>
+            </ul>
         </div>
     </div>
+</div>
 
-    <!-- Competencies List -->
-    <div class="card">
-        <div class="card-body">
-            @if($competencies->isEmpty())
-                <div class="text-center py-5">
-                    <i class="bx bx-medal display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No competencies found</p>
+<div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card bg-white">
+            <div class="card-header border-bottom">
+                 <div class="d-flex align-items-center justify-content-between py-1">
+                    <h6 class="font-weight-medium mb-0">Competencies List</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-soft-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                            <i class="mdi mdi-filter-variant me-1"></i> Filter
+                        </button>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#createCompetencyOffcanvas">
+                            <i class="mdi mdi-plus me-1"></i> Add Competency
+                        </button>
+                    </div>
                 </div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive rounded-10 border-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light sticky-top">
                             <tr>
                                 <th>Name</th>
                                 <th>Type</th>
@@ -39,10 +47,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($competencies as $competency)
+                            @forelse($competencies as $competency)
                             <tr>
                                 <td>
-                                    <div class="fw-bold">{{ $competency->name }}</div>
+                                    <h6 class="mb-0 font-size-14">{{ $competency->name }}</h6>
                                     @if($competency->description)
                                         <small class="text-muted">{{ Str::limit($competency->description, 60) }}</small>
                                     @endif
@@ -56,30 +64,46 @@
                                             default => 'secondary'
                                         };
                                     @endphp
-                                    <span class="badge bg-{{ $badgeColor }}">{{ ucfirst($competency->type) }}</span>
+                                    <span class="badge bg-soft-{{ $badgeColor }} text-{{ $badgeColor }}">{{ ucfirst($competency->type) }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ $competency->is_active ? 'success' : 'danger' }}">
+                                    <span class="badge bg-soft-{{ $competency->is_active ? 'success' : 'danger' }} text-{{ $competency->is_active ? 'success' : 'danger' }}">
                                         {{ $competency->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-icon edit-competency" 
-                                        data-id="{{ $competency->id }}"
-                                        data-bs-toggle="offcanvas" 
-                                        data-bs-target="#editCompetencyOffcanvas">
-                                        <i class="bx bx-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-icon text-danger delete-competency" data-id="{{ $competency->id }}">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button class="btn btn-sm btn-soft-primary edit-competency" 
+                                            data-id="{{ $competency->id }}"
+                                            data-bs-toggle="offcanvas" 
+                                            data-bs-target="#editCompetencyOffcanvas"
+                                            title="Edit">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger delete-competency" data-id="{{ $competency->id }}" title="Delete">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="mdi mdi-star-circle-outline font-size-24 d-block mb-2"></i>
+                                    No competencies found
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-3">{{ $competencies->links() }}</div>
+            </div>
+            @if($competencies->count())
+            <div class="card-footer bg-transparent border-top">
+                <div class="d-flex justify-content-end">
+                    {{ $competencies->links() }}
+                </div>
+            </div>
             @endif
         </div>
     </div>

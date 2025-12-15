@@ -24,9 +24,9 @@
                 <div class="d-flex align-items-center justify-content-between py-1">
                     <h6 class="font-weight-medium mb-0">Employee Bonuses</h6>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('hrm.bonuses.create') }}" class="btn btn-primary btn-sm">
+                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#createBonusOffcanvas">
                             <i class="mdi mdi-plus me-1"></i> New Bonus
-                        </a>
+                        </button>
                         <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#bonusFilter">
                             <i class="mdi mdi-filter-variant me-1"></i> Filter
                         </button>
@@ -71,36 +71,31 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
-                                            <i class="mdi mdi-dots-vertical font-size-18"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            @if($bonus->status == 'pending')
-                                            <li>
-                                                <form action="{{ route('hrm.bonuses.approve', $bonus->id) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item text-success"><i class="bx bx-check-circle me-2"></i> Approve</button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('hrm.bonuses.reject', $bonus->id) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item text-danger"><i class="bx bx-x-circle me-2"></i> Reject</button>
-                                                </form>
-                                            </li>
-                                            @endif
-                                            @if($bonus->status != 'paid')
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <form action="{{ route('hrm.bonuses.destroy', $bonus->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete?')"><i class="bx bx-trash me-2"></i> Delete</button>
-                                                </form>
-                                            </li>
-                                            @endif
-                                        </ul>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        @if($bonus->status == 'pending')
+                                        <form action="{{ route('hrm.bonuses.approve', $bonus->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-soft-success" title="Approve">
+                                                <i class="mdi mdi-check-circle-outline"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('hrm.bonuses.reject', $bonus->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-soft-danger" title="Reject">
+                                                <i class="mdi mdi-close-circle-outline"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                        
+                                        @if($bonus->status != 'paid')
+                                        <form action="{{ route('hrm.bonuses.destroy', $bonus->id) }}" method="POST" class="d-inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn btn-sm btn-soft-danger delete-btn" title="Delete">
+                                                <i class="mdi mdi-delete-outline"></i>
+                                            </button>
+                                        </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -152,4 +147,90 @@
         </form>
     </div>
 </div>
+{{-- Create Bonus Offcanvas --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="createBonusOffcanvas" style="width: 500px;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Add New Bonus</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form action="{{ route('hrm.bonuses.store') }}" method="POST">
+            @csrf
+            
+            <div class="mb-3">
+                <label class="form-label">Employee <span class="text-danger">*</span></label>
+                <select class="form-select" name="employee_id" required>
+                    <option value="">Select Employee</option>
+                    @foreach($employees as $employee)
+                    <option value="{{ $employee->id }}">{{ $employee->full_name }} ({{ $employee->employee_code }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Bonus Type</label>
+                <select class="form-select" name="bonus_type_id">
+                    <option value="">Select Type (Optional)</option>
+                    @foreach($bonusTypes as $type)
+                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Bonus Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="bonus_name" placeholder="e.g. Eid Bonus" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">Amount <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" class="form-control" name="amount" required>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="bonus_date" value="{{ date('Y-m-d') }}" required>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">For Year <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="bonus_year" value="{{ date('Y') }}" required>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary">Create Bonus</button>
+            </div>
+        </form>
+    </div>
+</div>
+@section('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+@endsection
 @endsection

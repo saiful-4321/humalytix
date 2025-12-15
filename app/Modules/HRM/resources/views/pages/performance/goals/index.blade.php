@@ -3,34 +3,42 @@
 @section('title', 'Performance Goals')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">Performance Goals</h4>
-            <p class="text-muted mb-0">Track employee goals and progress</p>
+<div class="block-header">
+    <div class="row">
+        <div class="col-lg-5 col-md-8 col-sm-12">
+            <h2>Performance Goals</h2>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-                <i class="bx bx-filter-alt me-1"></i> Filter
-            </button>
-            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createGoalOffcanvas">
-                <i class="bx bx-plus me-1"></i> Add Goal
-            </button>
+        <div class="col-lg-7 col-md-4 col-sm-12 text-right">
+            <ul class="breadcrumb justify-content-end">
+                <li class="breadcrumb-item"><a href="{{ route('hrm.dashboard') }}">HRM</a></li>
+                <li class="breadcrumb-item active">Performance</li>
+                <li class="breadcrumb-item active">Goals</li>
+            </ul>
         </div>
     </div>
+</div>
 
-    <!-- Goals List -->
-    <div class="card">
-        <div class="card-body">
-            @if($goals->isEmpty())
-                <div class="text-center py-5">
-                    <i class="bx bx-trophy display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No active goals found</p>
+<div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card bg-white">
+            <div class="card-header border-bottom">
+                 <div class="d-flex align-items-center justify-content-between py-1">
+                    <h6 class="font-weight-medium mb-0">Goals List</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-soft-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                            <i class="mdi mdi-filter-variant me-1"></i> Filter
+                        </button>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#createGoalOffcanvas">
+                            <i class="mdi mdi-plus me-1"></i> Add Goal
+                        </button>
+                    </div>
                 </div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive rounded-10 border-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light sticky-top">
                             <tr>
                                 <th>Goal</th>
                                 <th>Employee</th>
@@ -42,10 +50,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($goals as $goal)
+                            @forelse($goals as $goal)
                             <tr>
                                 <td>
-                                    <div class="fw-bold">{{ $goal->title }}</div>
+                                    <h6 class="mb-0 font-size-14">{{ $goal->title }}</h6>
                                     @if($goal->kpi)
                                         <small class="text-muted"><i class="bx bx-target-lock"></i> {{ $goal->kpi->name }}</small>
                                     @endif
@@ -60,12 +68,12 @@
                                     </small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ $goal->priority == 'high' || $goal->priority == 'critical' ? 'danger' : ($goal->priority == 'medium' ? 'warning' : 'info') }}">
+                                    <span class="badge bg-soft-{{ $goal->priority == 'high' || $goal->priority == 'critical' ? 'danger' : ($goal->priority == 'medium' ? 'warning' : 'info') }} text-{{ $goal->priority == 'high' || $goal->priority == 'critical' ? 'danger' : ($goal->priority == 'medium' ? 'warning' : 'info') }}">
                                         {{ ucfirst($goal->priority) }}
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ $goal->status == 'completed' ? 'success' : ($goal->status == 'in_progress' ? 'primary' : 'secondary') }}">
+                                    <span class="badge bg-soft-{{ $goal->status == 'completed' ? 'success' : ($goal->status == 'in_progress' ? 'primary' : 'secondary') }} text-{{ $goal->status == 'completed' ? 'success' : ($goal->status == 'in_progress' ? 'primary' : 'secondary') }}">
                                         {{ ucfirst(str_replace('_', ' ', $goal->status)) }}
                                     </span>
                                 </td>
@@ -76,25 +84,41 @@
                                     <small>{{ $goal->progress }}%</small>
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('hrm.performance-goals.show', $goal) }}" class="btn btn-sm btn-icon btn-outline-primary">
-                                        <i class="bx bx-show"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-icon edit-goal" 
-                                        data-id="{{ $goal->id }}"
-                                        data-bs-toggle="offcanvas" 
-                                        data-bs-target="#editGoalOffcanvas">
-                                        <i class="bx bx-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-icon text-danger delete-goal" data-id="{{ $goal->id }}">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{{ route('hrm.performance-goals.show', $goal) }}" class="btn btn-sm btn-soft-primary" title="Details">
+                                            <i class="mdi mdi-eye-outline"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-soft-primary edit-goal" 
+                                            data-id="{{ $goal->id }}"
+                                            data-bs-toggle="offcanvas" 
+                                            data-bs-target="#editGoalOffcanvas"
+                                            title="Edit">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger delete-goal" data-id="{{ $goal->id }}" title="Delete">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="mdi mdi-trophy-variant-outline font-size-24 d-block mb-2"></i>
+                                    No active goals found
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-3">{{ $goals->links() }}</div>
+            </div>
+            @if($goals->count())
+            <div class="card-footer bg-transparent border-top">
+                <div class="d-flex justify-content-end">
+                    {{ $goals->links() }}
+                </div>
+            </div>
             @endif
         </div>
     </div>

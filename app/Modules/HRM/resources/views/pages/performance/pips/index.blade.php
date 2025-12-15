@@ -3,34 +3,42 @@
 @section('title', 'Performance Improvement Plans')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">Performance Improvement Plans</h4>
-            <p class="text-muted mb-0">Manage employee improvement plans</p>
+<div class="block-header">
+    <div class="row">
+        <div class="col-lg-5 col-md-8 col-sm-12">
+            <h2>Performance Improvement Plans</h2>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-                <i class="bx bx-filter-alt me-1"></i> Filter
-            </button>
-            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createPipOffcanvas">
-                <i class="bx bx-plus me-1"></i> Initiate PIP
-            </button>
+        <div class="col-lg-7 col-md-4 col-sm-12 text-right">
+            <ul class="breadcrumb justify-content-end">
+                <li class="breadcrumb-item"><a href="{{ route('hrm.dashboard') }}">HRM</a></li>
+                <li class="breadcrumb-item active">Performance</li>
+                <li class="breadcrumb-item active">PIPs</li>
+            </ul>
         </div>
     </div>
+</div>
 
-    <!-- PIPs List -->
-    <div class="card">
-        <div class="card-body">
-            @if($pips->isEmpty())
-                <div class="text-center py-5">
-                    <i class="bx bx-trending-up display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No active PIPs found</p>
+<div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card bg-white">
+            <div class="card-header border-bottom">
+                 <div class="d-flex align-items-center justify-content-between py-1">
+                    <h6 class="font-weight-medium mb-0">PIPs List</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-soft-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                            <i class="mdi mdi-filter-variant me-1"></i> Filter
+                        </button>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#createPipOffcanvas">
+                            <i class="mdi mdi-plus me-1"></i> Initiate PIP
+                        </button>
+                    </div>
                 </div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive rounded-10 border-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light sticky-top">
                             <tr>
                                 <th>Reason</th>
                                 <th>Employee</th>
@@ -41,10 +49,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($pips as $pip)
+                            @forelse($pips as $pip)
                             <tr>
                                 <td>
-                                    <div class="fw-bold">{{ $pip->title ?? 'Improvement Plan' }}</div>
+                                    <h6 class="mb-0 font-size-14">{{ $pip->title ?? 'Improvement Plan' }}</h6>
                                     <small class="text-muted">{{ Str::limit($pip->reason, 40) }}</small>
                                 </td>
                                 <td>{{ $pip->employee->full_name }}</td>
@@ -56,30 +64,46 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ $pip->status == 'active' ? 'primary' : ($pip->status == 'successful' ? 'success' : 'danger') }}">
+                                    <span class="badge bg-soft-{{ $pip->status == 'active' ? 'primary' : ($pip->status == 'successful' ? 'success' : 'danger') }} text-{{ $pip->status == 'active' ? 'primary' : ($pip->status == 'successful' ? 'success' : 'danger') }}">
                                         {{ ucfirst($pip->status) }}
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('hrm.pips.show', $pip->id) }}" class="btn btn-sm btn-icon btn-outline-primary">
-                                        <i class="bx bx-show"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-icon edit-pip" 
-                                        data-id="{{ $pip->id }}"
-                                        data-bs-toggle="offcanvas" 
-                                        data-bs-target="#editPipOffcanvas">
-                                        <i class="bx bx-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-icon text-danger delete-pip" data-id="{{ $pip->id }}">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{{ route('hrm.pips.show', $pip->id) }}" class="btn btn-sm btn-soft-primary" title="Details">
+                                            <i class="mdi mdi-eye-outline"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-soft-primary edit-pip" 
+                                            data-id="{{ $pip->id }}"
+                                            data-bs-toggle="offcanvas" 
+                                            data-bs-target="#editPipOffcanvas"
+                                            title="Edit">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger delete-pip" data-id="{{ $pip->id }}" title="Delete">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="mdi mdi-trending-up font-size-24 d-block mb-2"></i>
+                                    No active PIPs found
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-3">{{ $pips->links() }}</div>
+            </div>
+            @if($pips->count())
+            <div class="card-footer bg-transparent border-top">
+                <div class="d-flex justify-content-end">
+                    {{ $pips->links() }}
+                </div>
+            </div>
             @endif
         </div>
     </div>

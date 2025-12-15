@@ -92,17 +92,17 @@
                                             <i class="mdi mdi-download"></i>
                                         </a>
                                         @if($payroll->status != 'paid')
-                                        <form action="{{ route('hrm.payroll.process', $payroll->id) }}" method="POST">
+                                        <form action="{{ route('hrm.payroll.process', $payroll->id) }}" method="POST" class="d-inline process-form">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-soft-success" title="Mark Paid" onclick="return confirm('Mark as Paid?')">
+                                            <button type="button" class="btn btn-sm btn-soft-success process-btn" title="Mark Paid">
                                                 <i class="mdi mdi-check-circle-outline"></i>
                                             </button>
                                         </form>
                                         
-                                        <form action="{{ route('hrm.payroll.destroy', $payroll->id) }}" method="POST">
+                                        <form action="{{ route('hrm.payroll.destroy', $payroll->id) }}" method="POST" class="d-inline delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-soft-danger" title="Delete" onclick="return confirm('Delete this payroll entry?')">
+                                            <button type="button" class="btn btn-sm btn-soft-danger delete-btn" title="Delete">
                                                 <i class="mdi mdi-delete-outline"></i>
                                             </button>
                                         </form>
@@ -160,6 +160,31 @@
                    @endfor
                </select>
             </div>
+            <div class="mb-3">
+                <label class="form-label">Search Employee</label>
+                <input type="text" name="employee_search" class="form-control" placeholder="Name or ID" value="{{ request('employee_search') }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Department</label>
+                <select name="department_id" class="form-select">
+                    <option value="">All Departments</option>
+                    @foreach(\App\Modules\HRM\Models\Department::all() as $dept)
+                    <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Branch</label>
+                <select name="branch_id" class="form-select">
+                    <option value="">All Branches</option>
+                    @foreach(\App\Modules\HRM\Models\Branch::all() as $branch)
+                    <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <div class="mb-3">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
@@ -248,4 +273,55 @@
         </form>
     </div>
 </div>
+@section('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delete Confirmation
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        // Process Confirmation
+        const processBtns = document.querySelectorAll('.process-btn');
+        processBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                
+                Swal.fire({
+                    title: 'Mark as Paid?',
+                    text: "This will finalize the payroll and cannot be undone easily.",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, mark as paid!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+@endsection
 @endsection

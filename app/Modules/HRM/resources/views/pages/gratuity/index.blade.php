@@ -24,12 +24,12 @@
                 <div class="d-flex align-items-center justify-content-between py-1">
                     <h6 class="font-weight-medium mb-0">Gratuity Records</h6>
                     <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#calculatorCanvas">
+                            <i class="mdi mdi-calculator me-1"></i> Calculate Gratuity
+                        </button>
                          <button class="btn btn-soft-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#settingsCanvas">
                             <i class="mdi mdi-cog-outline me-1"></i> Settings
                         </button>
-                        <a href="{{ route('hrm.gratuity.calculator') }}" class="btn btn-primary btn-sm">
-                            <i class="mdi mdi-calculator me-1"></i> Calculate Gratuity
-                        </a>
                     </div>
                 </div>
             </div>
@@ -143,6 +143,43 @@
             </div>
             @endif
         </div>
+    </div>
+</div>
+
+{{-- Calculator Offcanvas --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="calculatorCanvas">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title">Gratuity Calculator</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form action="{{ route('hrm.gratuity.calculate') }}" method="POST">
+            @csrf
+            
+            <div class="alert alert-soft-primary mb-3">
+                <i class="mdi mdi-information-outline me-1"></i>
+                Formula: {{ $config->formula_description }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Employee</label>
+                <select class="form-select" name="employee_id" required>
+                    <option value="">Select Employee</option>
+                    @foreach($employees as $employee)
+                    <option value="{{ $employee->id }}">{{ $employee->full_name }} (Joined: {{ $employee->joining_date?->format('d M, Y') }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Calculation Date</label>
+                <input type="date" class="form-control" name="calculation_date" value="{{ date('Y-m-d') }}" required>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary">Calculate and Save</button>
+            </div>
+        </form>
     </div>
 </div>
 

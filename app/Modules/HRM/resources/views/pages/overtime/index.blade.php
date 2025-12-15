@@ -77,42 +77,31 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
-                                            <i class="mdi mdi-dots-vertical font-size-18"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            @if($overtime->status == 'pending')
-                                            <li>
-                                                <form action="{{ route('hrm.overtime.approve', $overtime->id) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item text-success">
-                                                        <i class="bx bx-check-circle me-2"></i> Approve
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('hrm.overtime.reject', $overtime->id) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item text-danger">
-                                                        <i class="bx bx-x-circle me-2"></i> Reject
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            @endif
-                                            @if($overtime->status != 'paid')
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <form action="{{ route('hrm.overtime.destroy', $overtime->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete?')">
-                                                        <i class="bx bx-trash me-2"></i> Delete
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            @endif
-                                        </ul>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        @if($overtime->status == 'pending')
+                                        <form action="{{ route('hrm.overtime.approve', $overtime->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-soft-success" title="Approve">
+                                                <i class="mdi mdi-check-circle-outline"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('hrm.overtime.reject', $overtime->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-soft-danger" title="Reject">
+                                                <i class="mdi mdi-close-circle-outline"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                        
+                                        @if($overtime->status != 'paid')
+                                        <form action="{{ route('hrm.overtime.destroy', $overtime->id) }}" method="POST" class="d-inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn btn-sm btn-soft-danger delete-btn" title="Delete">
+                                                <i class="mdi mdi-delete-outline"></i>
+                                            </button>
+                                        </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -243,4 +232,30 @@
         </form>
     </div>
 </div>
+@section('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+@endsection
 @endsection

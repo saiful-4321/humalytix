@@ -77,44 +77,35 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
-                                            <i class="mdi mdi-dots-vertical font-size-18"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item" href="{{ route('hrm.loans.show', $loan->id) }}"><i class="bx bx-show me-2"></i> View Details</a></li>
-                                            @if($loan->status == 'pending')
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <form action="{{ route('hrm.loans.approve', $loan->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item text-success" onclick="return confirm('Approve this loan?')">
-                                                        <i class="bx bx-check-circle me-2"></i> Approve
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('hrm.loans.reject', $loan->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Reject this loan?')">
-                                                        <i class="bx bx-x-circle me-2"></i> Reject
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            @endif
-                                            @if($loan->status != 'active')
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <form action="{{ route('hrm.loans.destroy', $loan->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this loan?')">
-                                                        <i class="bx bx-trash me-2"></i> Delete
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            @endif
-                                        </ul>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{{ route('hrm.loans.show', $loan->id) }}" class="btn btn-sm btn-soft-primary" title="Details">
+                                            <i class="mdi mdi-eye-outline"></i>
+                                        </a>
+                                        
+                                        @if($loan->status == 'pending')
+                                        <form action="{{ route('hrm.loans.approve', $loan->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-soft-success" title="Approve">
+                                                <i class="mdi mdi-check-circle-outline"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('hrm.loans.reject', $loan->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-soft-danger" title="Reject">
+                                                <i class="mdi mdi-close-circle-outline"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                        
+                                        @if($loan->status != 'active' && $loan->status != 'completed')
+                                        <form action="{{ route('hrm.loans.destroy', $loan->id) }}" method="POST" class="d-inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn btn-sm btn-soft-danger delete-btn" title="Delete">
+                                                <i class="mdi mdi-delete-outline"></i>
+                                            </button>
+                                        </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -263,6 +254,28 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Delete Confirmation
+    const deleteBtns = document.querySelectorAll('.delete-btn');
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = this.closest('form');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
     const loanTypeSelect = document.getElementById('loanType');
     if (loanTypeSelect) {
         loanTypeSelect.addEventListener('change', function() {

@@ -36,6 +36,27 @@ class PayrollController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('employee_search')) {
+            $search = $request->employee_search;
+            $query->whereHas('employee', function($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('employee_code', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('department_id')) {
+            $query->whereHas('employee', function($q) use ($request) {
+                $q->where('department_id', $request->department_id);
+            });
+        }
+
+        if ($request->filled('branch_id')) {
+            $query->whereHas('employee', function($q) use ($request) {
+                $q->where('branch_id', $request->branch_id);
+            });
+        }
+
         $payrolls = $query->orderBy('year', 'desc')->orderBy('month', 'desc')->paginate(20);
 
         return view('HRM::pages.payroll.index', compact('payrolls'));

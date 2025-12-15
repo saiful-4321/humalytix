@@ -3,34 +3,42 @@
 @section('title', '360° Appraisals')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">360° Appraisals</h4>
-            <p class="text-muted mb-0">Manage performance review cycles</p>
+<div class="block-header">
+    <div class="row">
+        <div class="col-lg-5 col-md-8 col-sm-12">
+            <h2>360° Appraisals</h2>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-                <i class="bx bx-filter-alt me-1"></i> Filter
-            </button>
-            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createAppraisalOffcanvas">
-                <i class="bx bx-plus me-1"></i> New Appraisal
-            </button>
+        <div class="col-lg-7 col-md-4 col-sm-12 text-right">
+            <ul class="breadcrumb justify-content-end">
+                <li class="breadcrumb-item"><a href="{{ route('hrm.dashboard') }}">HRM</a></li>
+                <li class="breadcrumb-item active">Performance</li>
+                <li class="breadcrumb-item active">360° Appraisals</li>
+            </ul>
         </div>
     </div>
+</div>
 
-    <!-- Appraisals List -->
-    <div class="card">
-        <div class="card-body">
-            @if($appraisals->isEmpty())
-                <div class="text-center py-5">
-                    <i class="bx bx-revision display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No appraisal cycles found</p>
+<div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card bg-white">
+            <div class="card-header border-bottom">
+                 <div class="d-flex align-items-center justify-content-between py-1">
+                    <h6 class="font-weight-medium mb-0">Appraisals List</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-soft-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                            <i class="mdi mdi-filter-variant me-1"></i> Filter
+                        </button>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#createAppraisalOffcanvas">
+                            <i class="mdi mdi-plus me-1"></i> New Appraisal
+                        </button>
+                    </div>
                 </div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive rounded-10 border-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light sticky-top">
                             <tr>
                                 <th>Appraisal Name</th>
                                 <th>Employee</th>
@@ -42,21 +50,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($appraisals as $appraisal)
+                            @forelse($appraisals as $appraisal)
                             <tr>
                                 <td>
-                                    <div class="fw-bold">{{ $appraisal->appraisal_name }}</div>
+                                    <h6 class="mb-0 font-size-14">{{ $appraisal->appraisal_name }}</h6>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-xs me-2">
-                                            <span class="avatar-title rounded-circle bg-soft-primary text-primary">
+                                            <span class="avatar-title rounded-circle bg-soft-primary text-primary font-size-12">
                                                 {{ substr($appraisal->employee->first_name, 0, 1) }}
                                             </span>
                                         </div>
                                         <div>
-                                            <div class="fw-bold">{{ $appraisal->employee->full_name }}</div>
-                                            <div class="small text-muted">{{ $appraisal->employee->department->name ?? '' }}</div>
+                                            <h6 class="mb-0 font-size-14">{{ $appraisal->employee->full_name }}</h6>
+                                            <small class="text-muted">{{ $appraisal->employee->department->name ?? '' }}</small>
                                         </div>
                                     </div>
                                 </td>
@@ -65,7 +73,7 @@
                                     <small>{{ $appraisal->start_date->format('M d') }} - {{ $appraisal->end_date->format('M d, Y') }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ $appraisal->status == 'completed' ? 'success' : ($appraisal->status == 'in_progress' ? 'primary' : 'secondary') }}">
+                                    <span class="badge bg-soft-{{ $appraisal->status == 'completed' ? 'success' : ($appraisal->status == 'in_progress' ? 'primary' : 'secondary') }} text-{{ $appraisal->status == 'completed' ? 'success' : ($appraisal->status == 'in_progress' ? 'primary' : 'secondary') }}">
                                         {{ ucfirst(str_replace('_', ' ', $appraisal->status)) }}
                                     </span>
                                 </td>
@@ -77,25 +85,41 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('hrm.appraisals-360.show', $appraisal->id) }}" class="btn btn-sm btn-icon btn-outline-primary">
-                                        <i class="bx bx-show"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-icon edit-appraisal" 
-                                        data-id="{{ $appraisal->id }}"
-                                        data-bs-toggle="offcanvas" 
-                                        data-bs-target="#editAppraisalOffcanvas">
-                                        <i class="bx bx-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-icon text-danger delete-appraisal" data-id="{{ $appraisal->id }}">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{{ route('hrm.appraisals-360.show', $appraisal->id) }}" class="btn btn-sm btn-soft-primary" title="Details">
+                                            <i class="mdi mdi-eye-outline"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-soft-primary edit-appraisal" 
+                                            data-id="{{ $appraisal->id }}"
+                                            data-bs-toggle="offcanvas" 
+                                            data-bs-target="#editAppraisalOffcanvas"
+                                            title="Edit">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger delete-appraisal" data-id="{{ $appraisal->id }}" title="Delete">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="mdi mdi-briefcase-check-outline font-size-24 d-block mb-2"></i>
+                                    No appraisal cycles found
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-3">{{ $appraisals->links() }}</div>
+            </div>
+            @if($appraisals->count())
+            <div class="card-footer bg-transparent border-top">
+                <div class="d-flex justify-content-end">
+                    {{ $appraisals->links() }}
+                </div>
+            </div>
             @endif
         </div>
     </div>

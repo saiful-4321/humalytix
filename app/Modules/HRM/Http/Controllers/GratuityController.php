@@ -24,7 +24,8 @@ class GratuityController extends Controller
                 'formula_description' => 'Latest Basic Salary * Years of Service * Multiplier',
             ]
         );
-        return view('HRM::pages.gratuity.index', compact('gratuities', 'config'));
+        $employees = Employee::active()->orderBy('first_name')->get();
+        return view('HRM::pages.gratuity.index', compact('gratuities', 'config', 'employees'));
     }
     
     public function calculator()

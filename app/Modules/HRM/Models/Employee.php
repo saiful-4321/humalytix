@@ -218,7 +218,12 @@ class Employee extends Model
     // Scopes
     public function scopeActive($query)
     {
-        return $query->where('status', EmployeeStatusEnum::ACTIVE->value);
+        return $query->whereIn('status', [
+            EmployeeStatusEnum::ACTIVE->value,
+            EmployeeStatusEnum::CONFIRMED->value,
+            EmployeeStatusEnum::PROBATION->value,
+            EmployeeStatusEnum::NOTICE_PERIOD->value
+        ]);
     }
 
     public function scopeByDepartment($query, $departmentId)

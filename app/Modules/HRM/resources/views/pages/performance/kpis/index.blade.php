@@ -3,35 +3,42 @@
 @section('title', 'KPIs / KRAs')
 
 @section('content')
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">KPIs & KRAs</h4>
-            <p class="text-muted mb-0">Key Performance Indicators and Key Result Areas</p>
+<div class="block-header">
+    <div class="row">
+        <div class="col-lg-5 col-md-8 col-sm-12">
+            <h2>KPIs & KRAs</h2>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-                <i class="bx bx-filter-alt me-1"></i> Filter
-            </button>
-            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#createKpiOffcanvas">
-                <i class="bx bx-plus me-1"></i> Add KPI / KRA
-            </button>
+        <div class="col-lg-7 col-md-4 col-sm-12 text-right">
+            <ul class="breadcrumb justify-content-end">
+                <li class="breadcrumb-item"><a href="{{ route('hrm.dashboard') }}">HRM</a></li>
+                <li class="breadcrumb-item active">Performance</li>
+                <li class="breadcrumb-item active">KPIs & KRAs</li>
+            </ul>
         </div>
     </div>
+</div>
 
-    <!-- KPIs List -->
-    <div class="card">
-        <div class="card-body">
-            @if($kpis->isEmpty())
-                <div class="text-center py-5">
-                    <i class="bx bx-target-lock display-1 text-muted"></i>
-                    <p class="text-muted mt-3">No KPIs or KRAs found</p>
+<div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card bg-white">
+            <div class="card-header border-bottom">
+                 <div class="d-flex align-items-center justify-content-between py-1">
+                    <h6 class="font-weight-medium mb-0">KPIs & KRAs List</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-soft-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                            <i class="mdi mdi-filter-variant me-1"></i> Filter
+                        </button>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#createKpiOffcanvas">
+                            <i class="mdi mdi-plus me-1"></i> Add KPI / KRA
+                        </button>
+                    </div>
                 </div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive rounded-10 border-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light sticky-top">
                             <tr>
                                 <th>Name</th>
                                 <th>Type</th>
@@ -43,16 +50,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($kpis as $kpi)
+                            @forelse($kpis as $kpi)
                             <tr>
                                 <td>
-                                    <div class="fw-bold">{{ $kpi->name }}</div>
+                                    <h6 class="mb-0 font-size-14">{{ $kpi->name }}</h6>
                                     @if($kpi->description)
                                         <small class="text-muted">{{ Str::limit($kpi->description, 50) }}</small>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ $kpi->type == 'kpi' ? 'primary' : 'info' }}">
+                                    <span class="badge bg-soft-{{ $kpi->type == 'kpi' ? 'primary' : 'info' }} text-{{ $kpi->type == 'kpi' ? 'primary' : 'info' }}">
                                         {{ strtoupper($kpi->type) }}
                                     </span>
                                 </td>
@@ -64,22 +71,38 @@
                                 <td>{{ ucfirst($kpi->frequency) }}</td>
                                 <td>{{ $kpi->weightage }}%</td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-icon edit-kpi" 
-                                        data-id="{{ $kpi->id }}"
-                                        data-bs-toggle="offcanvas" 
-                                        data-bs-target="#editKpiOffcanvas">
-                                        <i class="bx bx-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-icon text-danger delete-kpi" data-id="{{ $kpi->id }}">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button class="btn btn-sm btn-soft-primary edit-kpi" 
+                                            data-id="{{ $kpi->id }}"
+                                            data-bs-toggle="offcanvas" 
+                                            data-bs-target="#editKpiOffcanvas"
+                                            title="Edit">
+                                            <i class="mdi mdi-pencil-outline"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger delete-kpi" data-id="{{ $kpi->id }}" title="Delete">
+                                            <i class="mdi mdi-delete-outline"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="mdi mdi-target-variant font-size-24 d-block mb-2"></i>
+                                    No KPIs or KRAs found
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-3">{{ $kpis->links() }}</div>
+            </div>
+            @if($kpis->count())
+            <div class="card-footer bg-transparent border-top">
+                <div class="d-flex justify-content-end">
+                    {{ $kpis->links() }}
+                </div>
+            </div>
             @endif
         </div>
     </div>

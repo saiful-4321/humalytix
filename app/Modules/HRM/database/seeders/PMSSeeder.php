@@ -3,270 +3,272 @@
 namespace App\Modules\HRM\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
-use App\Modules\HRM\Models\Competency;
-use App\Modules\HRM\Models\Kpi;
-use App\Modules\HRM\Models\PerformanceGoal;
-use App\Modules\HRM\Models\Okr;
-use App\Modules\HRM\Models\OkrKeyResult;
-use App\Modules\HRM\Models\Appraisal360;
-use App\Modules\HRM\Models\AppraisalReviewer;
-use App\Modules\HRM\Models\Pip;
 use App\Modules\HRM\Models\Employee;
 use App\Modules\HRM\Models\Department;
-use Log;
+use App\Modules\HRM\Models\Kpi;
+use App\Modules\HRM\Models\Okr;
+use App\Modules\HRM\Models\PerformanceGoal;
+use App\Modules\HRM\Models\Appraisal;
+use App\Modules\HRM\Models\Appraisal360;
+use App\Modules\HRM\Models\AppraisalReviewer;
+use App\Modules\HRM\Models\Competency;
+use App\Modules\HRM\Models\Pip;
+use App\Modules\HRM\Models\PipActionItem;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PMSSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
     public function run()
     {
-        $this->seedPermissions();
-        
-        // Ensure we have some employees to attach data to
-        $employees = Employee::limit(10)->get();
-        $departments = Department::limit(5)->get();
-        
+        // 1. Ensure Dependencies (Employees, Departments) exist
+        $this->ensureDependencies();
+
+        $employees = Employee::limit(20)->get();
         if ($employees->isEmpty()) {
-            $this->command->info('No employees found. Seed employees first.');
+            $this->command->info('No employees found to seed performance data.');
             return;
         }
 
-        $this->seedCompetencies();
-        $this->seedKpis($departments);
-        $this->seedOkrs($employees, $departments);
-        $this->seedGoals($employees);
-        $this->seedAppraisals($employees);
-        $this->seedPips($employees);
+        $departments = Department::all();
 
-        $this->command->info('PMS Seeding Completed Successfully!');
+        // 2. Seed Competencies
+        $this->seedCompetencies();
+
+        // 3. Seed KPIs (Generic & Departmental)
+        $this->seedKPIs($departments);
+
+        // 4. Seed OKRs (Company, Dept, Individual)
+        $this->seedOKRs($employees, $departments);
+
+        // 5. Seed Goals
+        $this->seedGoals($employees);
+
+        // 6. Seed Standard Appraisals
+        $this->seedStandardAppraisals($employees);
+
+        // 7. Seed 360 Appraisals
+        $this->seed360Appraisals($employees);
+
+        // 8. Seed PIPs
+        $this->seedPIPs($employees);
     }
 
-    private function seedPermissions()
+    private function ensureDependencies()
     {
-        // Get HRM Module
-        $hrmModule = \App\Modules\Main\Models\Module::firstOrCreate(
-            ['name' => 'HRM'],
-            ['status' => 1]
-        );
-
-        $permissions = [
-            'hrm.performance.view',
-            'hrm.performance.create',
-            'hrm.performance.edit',
-            'hrm.performance.delete',
-            'hrm.pips.view',
-            'hrm.pips.create',
-            'hrm.pips.edit',
-            'hrm.pips.delete',
-        ];
-
-        foreach ($permissions as $permissionName) {
-            \App\Modules\Main\Models\Permission::firstOrCreate(
-                ['name' => $permissionName],
-                [
-                    'module_id' => $hrmModule->id,
-                    'guard_name' => 'web',
-                ]
-            );
+        if (Department::count() == 0) {
+            Department::create(['name' => 'IT Department', 'code' => 'IT']);
+            Department::create(['name' => 'HR Department', 'code' => 'HR']);
+            Department::create(['name' => 'Sales Department', 'code' => 'SALES']);
         }
 
-        // Assign to Super Admin
-        $role = Role::where('name', 'Super Admin')->first();
-        if ($role) {
-            $role->givePermissionTo($permissions);
+        if (Employee::count() == 0) {
+            // Create a dummy employee if none exist
+            $dept = Department::first();
+            Employee::create([
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+                'email' => 'john.doe@example.com',
+                'phone' => '1234567890',
+                'employee_code' => 'DEMO001',
+                'department_id' => $dept->id,
+                'designation_id' => 1, // Assuming 1 exists or is nullable
+                'joining_date' => now(),
+                'salary' => 50000,
+                'status' => 'active', // Using string literal just in case
+            ]);
         }
-        
-        $this->command->info('Permissions seeded.');
     }
 
     private function seedCompetencies()
     {
         $competencies = [
-            [
-                'name' => 'Communication',
-                'description' => 'Effectively conveys information and ideas.',
-                'type' => 'core'
-            ],
-            [
-                'name' => 'Teamwork',
-                'description' => 'Works collaboratively with others to achieve group goals.',
-                'type' => 'core'
-            ],
-            [
-                'name' => 'Problem Solving',
-                'description' => 'Identifies problems and implements effective solutions.',
-                'type' => 'functional'
-            ],
-            [
-                'name' => 'Strategic Thinking',
-                'description' => 'Understands the big picture and aligns actions with long-term goals.',
-                'type' => 'leadership'
-            ],
-            [
-                'name' => 'Leadership',
-                'description' => 'Inspires and motivates others to perform their best.',
-                'type' => 'leadership'
-            ]
+            // Core
+            ['name' => 'Communication', 'type' => 'core', 'description' => 'Effectively conveys information and ideas.'],
+            ['name' => 'Teamwork', 'type' => 'core', 'description' => 'Works cooperatively with others to achieve group goals.'],
+            ['name' => 'Integrity', 'type' => 'core', 'description' => 'Upholds high ethical standards and honesty.'],
+            
+            // Leadership
+            ['name' => 'Strategic Thinking', 'type' => 'leadership', 'description' => 'Develops strategies to achieve organizational goals.'],
+            ['name' => 'Team Leadership', 'type' => 'leadership', 'description' => 'Motivates and guides team members.'],
+            ['name' => 'Decision Making', 'type' => 'leadership', 'description' => 'Makes timely and effective decisions.'],
+
+            // Functional
+            ['name' => 'Technical Proficiency', 'type' => 'functional', 'description' => 'Demonstrates necessary technical skills.'],
+            ['name' => 'Project Management', 'type' => 'functional', 'description' => 'Plans and executes projects effectively.'],
+            ['name' => 'Data Analysis', 'type' => 'functional', 'description' => 'Interprets data to drive business decisions.'],
         ];
 
-        foreach ($competencies as $data) {
-            Competency::firstOrCreate(['name' => $data['name']], $data);
+        foreach ($competencies as $comp) {
+            Competency::firstOrCreate(
+                ['name' => $comp['name']],
+                $comp
+            );
         }
-        $this->command->info('Competencies seeded.');
     }
 
-    private function seedKpis($departments)
+    private function seedKPIs($departments)
     {
+        // Generic KPIs
+        $kpis = [
+            ['name' => 'Attendance Score', 'type' => 'kpi', 'target_value' => 95, 'measurement_unit' => '%', 'weightage' => 10, 'frequency' => 'monthly'],
+            ['name' => 'Policy Compliance', 'type' => 'kpi', 'target_value' => 100, 'measurement_unit' => '%', 'weightage' => 10, 'frequency' => 'annually'],
+        ];
+
+        foreach ($kpis as $kpi) {
+            Kpi::updateOrCreate(['name' => $kpi['name']], $kpi);
+        }
+
+        // Department Specific KPIs
         foreach ($departments as $dept) {
-            Kpi::create([
-                'name' => 'Monthly Revenue Target - ' . $dept->name,
-                'description' => 'Achieve monthly revenue target for the department.',
-                'type' => 'kpi',
-                'measurement_unit' => 'USD',
-                'target_value' => rand(10000, 50000),
-                'weightage' => 30,
-                'frequency' => 'monthly',
-                'department_id' => $dept->id,
-                'is_active' => true,
-            ]);
+            $deptKpiName = "{$dept->name} Efficiency";
+            Kpi::updateOrCreate(
+                ['name' => $deptKpiName, 'department_id' => $dept->id],
+                [
+                    'type' => 'kpi',
+                    'target_value' => 90,
+                    'measurement_unit' => '%',
+                    'weightage' => 20,
+                    'frequency' => 'monthly',
+                    'description' => "Operational efficiency for {$dept->name}"
+                ]
+            );
         }
-
-        Kpi::create([
-            'name' => 'Customer Satisfaction Score',
-            'description' => 'Maintain high CSAT score.',
-            'type' => 'kra',
-            'measurement_unit' => 'Points',
-            'target_value' => 4.5,
-            'weightage' => 20,
-            'frequency' => 'quarterly',
-            'is_active' => true,
-        ]);
-        
-        $this->command->info('KPIs seeded.');
     }
 
-    private function seedOkrs($employees, $departments)
+    private function seedOKRs($employees, $departments)
     {
-        // Company Level OKR
-        $okr = Okr::create([
-            'title' => 'Expand Market Share in Asia',
-            'description' => 'Increase our footprint in the Asian market through strategic partnerships.',
-            'start_date' => now()->startOfQuarter(),
-            'end_date' => now()->endOfQuarter(),
-            'quarter' => 'Q' . ceil(now()->month / 3),
-            'year' => now()->year,
+        // Company Level
+        $companyOkr = Okr::create([
+            'title' => 'Expand Market Reach ' . date('Y'),
+            'description' => 'Increase global footprint and market share.',
             'level' => 'company',
+            'start_date' => Carbon::now()->startOfYear(),
+            'end_date' => Carbon::now()->endOfYear(),
+            'year' => date('Y'),
             'status' => 'active',
-        ]);
-        
-        OkrKeyResult::create([
-            'okr_id' => $okr->id,
-            'description' => 'Establish 5 new partnerships in Japan',
-            'measurement_unit' => 'Partnerships',
-            'target_value' => 5,
-            'current_value' => 2,
-            'weightage' => 40,
-        ]);
-        
-        OkrKeyResult::create([
-            'okr_id' => $okr->id,
-            'description' => 'Achieve $1M revenue from Asian region',
-            'measurement_unit' => 'USD',
-            'target_value' => 1000000,
-            'current_value' => 350000,
-            'weightage' => 60,
+            'progress' => 45,
         ]);
 
-        // Individual OKR
-        if ($employees->isNotEmpty()) {
-            $emp = $employees->first();
-            $empOkr = Okr::create([
-                'title' => 'Master New Tech Stack',
-                'description' => 'Become proficient in the new framework.',
-                'start_date' => now()->startOfQuarter(),
-                'end_date' => now()->endOfQuarter(),
-                'quarter' => 'Q' . ceil(now()->month / 3),
-                'year' => now()->year,
+        // Individual Level
+        foreach ($employees->take(5) as $emp) {
+            Okr::create([
+                'title' => 'Personal Development Q' . ceil(date('n')/3),
+                'description' => 'Improve key skills and certifications',
                 'level' => 'individual',
                 'employee_id' => $emp->id,
+                'start_date' => Carbon::now()->startOfQuarter(),
+                'end_date' => Carbon::now()->endOfQuarter(),
+                'year' => date('Y'),
+                'quarter' => 'Q' . ceil(date('n')/3),
                 'status' => 'active',
-            ]);
-
-            OkrKeyResult::create([
-                'okr_id' => $empOkr->id,
-                'description' => 'Complete Advanced Certification',
-                'measurement_unit' => '%',
-                'target_value' => 100,
-                'current_value' => 50,
-                'weightage' => 100,
+                'progress' => rand(10, 80),
             ]);
         }
-        
-        $this->command->info('OKRs seeded.');
     }
 
     private function seedGoals($employees)
     {
-        foreach ($employees->take(5) as $emp) {
+        foreach ($employees->take(10) as $emp) {
             PerformanceGoal::create([
                 'employee_id' => $emp->id,
-                'title' => 'Improve Code Quality',
-                'description' => 'Reduce bugs by 20% and improve test coverage.',
-                'start_date' => now(),
-                'due_date' => now()->addMonths(3),
-                'priority' => 'high',
-                'status' => 'in_progress',
-                'progress' => rand(10, 80),
+                'title' => 'Complete Advanced Training',
+                'description' => 'Finish the advanced certification course.',
+                'start_date' => Carbon::now()->subDays(15),
+                'due_date' => Carbon::now()->addDays(15),
+                'priority' => rand(0, 1) ? 'high' : 'medium',
+                'status' => rand(0, 1) ? 'in_progress' : 'not_started',
+                'progress' => rand(0, 60),
             ]);
         }
-        $this->command->info('Performance Goals seeded.');
     }
 
-    private function seedAppraisals($employees)
+    private function seedStandardAppraisals($employees)
     {
-        if ($employees->count() < 2) return;
+        foreach ($employees->take(3) as $emp) {
+            Appraisal::create([
+                'employee_id' => $emp->id,
+                'review_date' => Carbon::now()->subMonth(),
+                'review_period' => Carbon::now()->subYear()->format('Y') . ' - ' . Carbon::now()->format('Y'),
+                'reviewer_id' => $employees->last()->id,
+                'status' => 'completed',
+                'performance_score' => rand(3, 5),
+                'strengths' => 'Consistent performance, good team player.',
+                'weaknesses' => 'Need to improve on public speaking.',
+                'goals' => 'Achieve 100% target in next quarter.',
+                'comments' => 'Solid performance throughout the year.',
+            ]);
+        }
+    }
 
-        $targetEmp = $employees[0];
-        $reviewerEmp = $employees[1];
+    private function seed360Appraisals($employees)
+    {
+        if ($employees->count() < 3) return;
 
-        $appraisal = Appraisal360::create([
-            'employee_id' => $targetEmp->id,
-            'appraisal_name' => 'Annual Review ' . now()->year,
-            'review_period' => 'Annual ' . now()->year,
-            'start_date' => now()->subMonth(),
-            'end_date' => now()->addMonth(),
-            'status' => 'in_progress',
-        ]);
+        foreach ($employees->take(2) as $emp) {
+            $appraisal = Appraisal360::create([
+                'employee_id' => $emp->id,
+                'appraisal_name' => 'Annual 360 Review ' . date('Y'),
+                'review_period' => date('Y'),
+                'start_date' => Carbon::now()->subWeek(),
+                'end_date' => Carbon::now()->addWeek(),
+                'status' => 'in_progress',
+                'created_by' => 1, // Assuming admin ID 1
+            ]);
 
-        AppraisalReviewer::create([
-            'appraisal_id' => $appraisal->id,
-            'reviewer_id' => $reviewerEmp->id,
-            'reviewer_type' => 'peer',
-            'status' => 'pending',
-        ]);
+            // Add reviewers
+            // Self
+            AppraisalReviewer::create([
+                'appraisal_id' => $appraisal->id,
+                'reviewer_id' => $emp->id,
+                'reviewer_type' => 'self',
+                'status' => 'completed',
+                'rating' => 4,
+                'feedback' => 'I met most of my goals.'
+            ]);
+
+            // Peer
+            $peer = $employees->where('id', '!=', $emp->id)->first();
+            if ($peer) {
+                AppraisalReviewer::create([
+                    'appraisal_id' => $appraisal->id,
+                    'reviewer_id' => $peer->id,
+                    'reviewer_type' => 'peer',
+                    'status' => 'pending',
+                ]);
+            }
+        }
+    }
+
+    private function seedPIPs($employees)
+    {
+        if ($employees->isEmpty()) return;
         
-        $this->command->info('360 Appraisals seeded.');
-    }
+        $emp = $employees->first();
+        $manager = $employees->last();
 
-    private function seedPips($employees)
-    {
-        if ($employees->count() < 2) return;
-
-        $emp = $employees->last();
-        $manager = $employees->first();
-
-        \App\Modules\HRM\Models\Pip::create([
+        $pip = Pip::create([
             'employee_id' => $emp->id,
             'manager_id' => $manager->id,
-            'title' => 'Attendance Improvement Plan',
-            'reason' => 'Consistent missed deadlines',
-            'success_criteria' => 'Submit all weekly reports on time for 4 weeks.',
-            'start_date' => now(),
-            'end_date' => now()->addMonth(),
+            'title' => 'Performance Improvement Plan - Q3',
+            'reason' => 'Consistently missing deadlines.',
+            'start_date' => Carbon::now()->subDays(10),
+            'end_date' => Carbon::now()->addDays(20),
             'status' => 'active',
+            'success_criteria' => 'Zero late submissions for 4 weeks.',
         ]);
 
-        $this->command->info('PIPs seeded.');
+        PipActionItem::create([
+            'pip_id' => $pip->id,
+            'action_required' => 'Submit all weekly reports on time',
+            'expected_outcome' => 'No delays in reporting',
+            'due_date' => Carbon::now()->addDays(7),
+            'status' => 'pending',
+        ]);
     }
 }
