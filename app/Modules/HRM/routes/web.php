@@ -155,11 +155,21 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::get('/allocations', [\App\Modules\HRM\Http\Controllers\LeaveAllocationController::class, 'index'])->name('allocations.index');
         Route::post('/allocations/generate', [\App\Modules\HRM\Http\Controllers\LeaveAllocationController::class, 'generate'])->name('allocations.generate');
         Route::put('/allocations/{allocation}', [\App\Modules\HRM\Http\Controllers\LeaveAllocationController::class, 'update'])->name('allocations.update');
-
+        
+        Route::get('/dashboard', [\App\Modules\HRM\Http\Controllers\LeaveController::class, 'dashboard'])->name('dashboard');
+        Route::get('/my-leaves', [\App\Modules\HRM\Http\Controllers\LeaveController::class, 'myLeaves'])->name('my-leaves');
+        
         Route::get('/{leave}', [\App\Modules\HRM\Http\Controllers\LeaveController::class, 'show'])->name('show');
         Route::post('/{leave}/approve', [\App\Modules\HRM\Http\Controllers\LeaveController::class, 'approve'])->name('approve');
         Route::post('/{leave}/reject', [\App\Modules\HRM\Http\Controllers\LeaveController::class, 'reject'])->name('reject');
-        Route::get('/my-leaves', [\App\Modules\HRM\Http\Controllers\LeaveController::class, 'myLeaves'])->name('my-leaves');
+    });
+
+    // Expense Management
+    Route::group(['prefix' => 'expenses', 'as' => 'expenses.'], function () {
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\ExpenseController::class, 'index'])->name('index');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\ExpenseController::class, 'store'])->name('store');
+        Route::put('/{expense}/approve', [\App\Modules\HRM\Http\Controllers\ExpenseController::class, 'approve'])->name('approve');
+        Route::put('/{expense}/reject', [\App\Modules\HRM\Http\Controllers\ExpenseController::class, 'reject'])->name('reject');
     });
 
     // Recruitment
@@ -460,6 +470,9 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [\App\Modules\HRM\Http\Controllers\SettingsController::class, 'index'])->name('index');
+        Route::get('/general', [\App\Modules\HRM\Http\Controllers\SettingsController::class, 'general'])->name('general');
+        Route::post('/general', [\App\Modules\HRM\Http\Controllers\SettingsController::class, 'storeGeneral'])->name('general.store');
+        
         Route::resource('approval-chains', \App\Modules\HRM\Http\Controllers\ApprovalChainController::class);
         Route::resource('leave-types', \App\Modules\HRM\Http\Controllers\LeaveTypeController::class);
         Route::resource('letter-templates', \App\Modules\HRM\Http\Controllers\LetterTemplateController::class);
@@ -467,5 +480,13 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::resource('salary-structures', \App\Modules\HRM\Http\Controllers\SalaryStructureController::class);
         Route::resource('tax-slabs', \App\Modules\HRM\Http\Controllers\TaxSlabController::class);
         Route::resource('holidays', \App\Modules\HRM\Http\Controllers\HolidayController::class);
+
+        // Expense Settings
+        Route::group(['prefix' => 'expenses', 'as' => 'expenses.'], function () {
+            Route::get('/', [\App\Modules\HRM\Http\Controllers\ExpenseCategoryController::class, 'index'])->name('index');
+            Route::post('/', [\App\Modules\HRM\Http\Controllers\ExpenseCategoryController::class, 'store'])->name('store');
+            Route::put('/{expenseCategory}', [\App\Modules\HRM\Http\Controllers\ExpenseCategoryController::class, 'update'])->name('update');
+            Route::delete('/{expenseCategory}', [\App\Modules\HRM\Http\Controllers\ExpenseCategoryController::class, 'destroy'])->name('destroy');
+        });
     });
 });

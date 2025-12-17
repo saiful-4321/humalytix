@@ -242,7 +242,42 @@ class PerfectPayrollSeeder extends Seeder
              $this->command->info("  - Created Advance for {$advEmp->first_name}");
         }
 
-        $this->command->info('✅ Perfect Payroll Environment (Real Data) Ready! You can now Run Payroll.');
+        // 8. Generate Payroll Records for Last Month (For Bank Transfer Testing)
+        $this->command->info('💵 Generating Payroll Records for Last Month...');
+        $lastMonth = Carbon::now()->subMonth();
+        
+        foreach ($employees as $emp) {
+            // Check if payroll already exists
+            $exists = \App\Modules\HRM\Models\Payroll::where('employee_id', $emp->id)
+                ->where('month', $lastMonth->month)
+                ->where('year', $lastMonth->year)
+                ->exists();
+
+            if (!$exists) {
+                $gross = $emp->basic_salary + ($emp->basic_salary * 0.4); // +40% allowances
+                $deductions = $emp->basic_salary * 0.05; // 5% deduction
+                $tax = 0;
+                
+                \App\Modules\HRM\Models\Payroll::create([
+                    'employee_id' => $emp->id,
+                    'month' => $lastMonth->month,
+                    'year' => $lastMonth->year,
+                    'basic_salary' => $emp->basic_salary,
+                    'allowances' => $emp->basic_salary * 0.4,
+                    'bonuses' => 0,
+                    'deductions' => $deductions,
+                    'tax' => $tax,
+                    'gross_salary' => $gross,
+                    'net_salary' => $gross - $deductions - $tax,
+                    'status' => rand(0, 1) ? 'paid' : 'pending',
+                    'payment_date' => rand(0, 1) ? $lastMonth->copy()->endOfMonth() : null,
+                    'created_by' => $admin->id,
+                ]);
+                 $this->command->info("  - Generated Payroll for {$emp->first_name}");
+            }
+        }
+
+        $this->command->info('✅ Perfect Payroll Environment (Real Data) Ready! you can now Run Payroll.');
     }
 
     private function getRandomBankName()

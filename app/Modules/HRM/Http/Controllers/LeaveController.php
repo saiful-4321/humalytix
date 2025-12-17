@@ -18,6 +18,122 @@ class LeaveController extends Controller
         $this->middleware('permission:hrm.leaves.approve')->only(['approve', 'reject']);
     }
 
+    public function dashboard()
+    {
+        $today = \Carbon\Carbon::today();
+        $currentYear = $today->year;
+
+        // KPI: Employees on Leave Today
+        $onLeaveToday = Leave::where('status', 'approved')
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->count();
+
+        // KPI: Pending Requests
+        $pendingRequests = Leave::where('status', 'pending')->count();
+
+        // KPI: Monthly Leave Requests (for Chart)
+        $leaveTrends = Leave::selectRaw('MONTH(start_date) as month, COUNT(*) as count')
+            ->whereYear('start_date', $currentYear)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+        
+        // Fill missing months with 0
+        $monthlyTrendData = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $monthlyTrendData[] = $leaveTrends[$i] ?? 0;
+        }
+
+        // Leave Type Distribution (Approved)
+        $typeStats = Leave::selectRaw('leave_type_id, count(*) as count')
+            ->where('status', 'approved')
+            ->whereYear('start_date', $currentYear)
+            ->groupBy('leave_type_id')
+            ->with('leaveType')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'label' => $item->leaveType->name ?? 'Unknown',
+                    'value' => $item->count
+                ];
+            });
+
+        // Upcoming Holidays
+        $upcomingHolidays = \App\Modules\HRM\Models\Holiday::whereDate('start_date', '>=', $today)
+            ->orderBy('start_date')
+            ->take(5)
+            ->get();
+
+        // Recent Requests
+        $recentRequests = Leave::with(['employee', 'leaveType'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+            
+        // Employees on Leave Today List (for display)
+        $whoIsOut = Leave::with('employee')
+            ->where('status', 'approved')
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->get();
+
+        $calendarEvents = $this->getCalendarEvents($currentYear);
+        
+        // Settings for Weekly Holiday (e.g. ['Friday'])
+        $weeklyHolidays = \Illuminate\Support\Facades\DB::table('hrm_settings')->where('name', 'weekly_holidays')->value('payload');
+        $weeklyHolidays = $weeklyHolidays ? json_decode($weeklyHolidays, true) : ['Friday'];
+
+        return view('HRM::pages.leaves.dashboard', compact(
+            'onLeaveToday', 
+            'pendingRequests', 
+            'monthlyTrendData', 
+            'typeStats', 
+            'upcomingHolidays', 
+            'recentRequests',
+            'whoIsOut',
+            'calendarEvents',
+            'weeklyHolidays'
+        ));
+    }
+
+    private function getCalendarEvents($currentYear)
+    {
+        $events = [];
+
+        // 1. Holidays
+        $holidays = \App\Modules\HRM\Models\Holiday::whereYear('start_date', $currentYear)->get();
+        foreach ($holidays as $holiday) {
+            $events[] = [
+                'title' => $holiday->name,
+                'start' => $holiday->start_date->format('Y-m-d'),
+                'end' => $holiday->end_date ? $holiday->end_date->addDay()->format('Y-m-d') : $holiday->start_date->format('Y-m-d'), // FullCalendar end is exclusive
+                'className' => 'bg-danger text-white',
+                'allDay' => true
+            ];
+        }
+
+        // 2. Approved Leaves
+        $leaves = Leave::with('employee')
+            ->where('status', 'approved')
+            ->whereYear('start_date', $currentYear)
+            ->get();
+            
+        foreach ($leaves as $leave) {
+            $events[] = [
+                'title' => $leave->employee->full_name . ' (' . ($leave->leaveType->code ?? 'L') . ')',
+                'start' => $leave->start_date->format('Y-m-d'),
+                'end' => $leave->end_date->addDay()->format('Y-m-d'),
+                'className' => 'bg-info text-white',
+                'allDay' => true,
+                'url' => route('hrm.leaves.show', $leave->id)
+            ];
+        }
+        
+        return $events;
+    }
+
     public function index(Request $request)
     {
         $query = Leave::with(['employee', 'leaveType', 'approvedBy']);

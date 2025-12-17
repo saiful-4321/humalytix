@@ -13,6 +13,7 @@ use App\Modules\HRM\Models\EmployeeAdvance;
 use App\Modules\HRM\Models\AdvanceDeduction;
 use App\Modules\HRM\Models\EmployeeOvertime;
 use App\Modules\HRM\Models\EmployeeBonus;
+use App\Modules\HRM\Models\Expense; // Added Expense model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -152,6 +153,13 @@ class PayrollController extends Controller
                         $earnings[] = ['name' => 'Bonus', 'amount' => $bonusAmount];
                     }
 
+                    // 4.5 Add Approved Expenses (Reimbursements)
+                    $reimbursementAmount = $this->calculateReimbursementsForMonth($employee->id);
+                    if ($reimbursementAmount > 0) {
+                        $totalEarnings += $reimbursementAmount;
+                        $earnings[] = ['name' => 'Reimbursement', 'amount' => $reimbursementAmount];
+                    }
+
                     $gross = $totalEarnings;
 
                     // 5. Calculate Deductions
@@ -186,7 +194,7 @@ class PayrollController extends Controller
                         'month' => $month,
                         'year' => $year,
                         'basic_salary' => $basic,
-                        'allowances' => $totalEarnings - $basic - ($otAmount + $bonusAmount),
+                        'allowances' => $totalEarnings - $basic - ($otAmount + $bonusAmount + $reimbursementAmount),
                         'bonuses' => $bonusAmount,
                         'deductions' => $totalDeductions - $taxAmount,
                         'tax' => $taxAmount,
@@ -284,6 +292,17 @@ class PayrollController extends Controller
         return $bonus ?? 0;
     }
 
+    // Calculate pending approved expenses for reimbursement
+    protected function calculateReimbursementsForMonth($employeeId)
+    {
+        // Expenses are not strictly tied to the payroll month, but rather any *unpaid* approved expense
+        // up until the payroll generation time.
+        return Expense::where('employee_id', $employeeId)
+            ->where('status', 'approved')
+            ->whereNull('payroll_id')
+            ->sum('amount') ?? 0;
+    }
+
     // Deduct loan installments
     protected function deductLoanInstallments($employeeId, $month, $year)
     {
@@ -358,6 +377,16 @@ class PayrollController extends Controller
                 ->where('bonus_month', $payroll->month)
                 ->where('bonus_year', $payroll->year)
                 ->where('status', 'approved')
+                ->update(['payroll_id' => $payroll->id, 'status' => 'paid']);
+
+            // Mark expenses as paid
+            // We find expenses that were likely included. Since we don't track exact IDs in payroll items,
+            // we assume all currently approved & unpaid expenses for this employee are covered by this payroll.
+            // CAUTION: In a real system, we should lock these IDs at generation time. 
+            // For now, we update all approved/unpaid expenses.
+            Expense::where('employee_id', $payroll->employee_id)
+                ->where('status', 'approved')
+                ->whereNull('payroll_id')
                 ->update(['payroll_id' => $payroll->id, 'status' => 'paid']);
 
             // Mark loan installments as paid

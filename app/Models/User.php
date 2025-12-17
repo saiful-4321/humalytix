@@ -177,4 +177,9 @@ class User extends Authenticatable
             ->withDefault();
     }
 
+    public function employee()
+    {
+        return $this->hasOne(\App\Modules\HRM\Models\Employee::class, 'user_id', 'id')
+            ->withDefault();
+    }
 }

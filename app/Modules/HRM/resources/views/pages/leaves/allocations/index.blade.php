@@ -12,11 +12,11 @@
             </ul>
         </div>
         <div class="col-lg-6 col-md-4 col-sm-12 text-right">
-            <form action="{{ route('hrm.leaves.allocations.generate') }}" method="POST" class="d-inline" onsubmit="return confirm('This will generate allocations for all employees based on policies. Existing allocations will be skipped. Continue?')">
+            <form action="{{ route('hrm.leaves.allocations.generate') }}" method="POST" class="d-inline confirm-action" data-message="This will generate allocations for all employees based on policies. Existing allocations will be skipped.">
                 @csrf
                 <input type="hidden" name="year" value="{{ $year }}">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bx bx-cog"></i> Auto-Generate for {{ $year }}
+                    <i class="mdi mdi-cog-refresh me-1"></i> Auto-Generate for {{ $year }}
                 </button>
             </form>
         </div>
@@ -29,22 +29,12 @@
     <div class="col-lg-12">
         <div class="card">
             <div class="card-body">
-                <form action="" method="GET" class="row g-3 mb-4">
-                    <div class="col-md-3">
-                        <select name="employee_id" class="form-select" onchange="this.form.submit()">
-                            <option value="">All Employees</option>
-                            @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>{{ $emp->full_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" name="year" class="form-control" value="{{ $year }}" placeholder="Year">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-secondary">Filter</button>
-                    </div>
-                </form>
+                <div class="d-flex justify-content-between mb-3">
+                    <h6 class="card-title mb-0 pt-2">Allocation List</h6>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#allocationFilter">
+                        <i class="mdi mdi-filter-variant me-1"></i> Filter
+                    </button>
+                </div>
 
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
@@ -131,5 +121,59 @@
         var myModal = new bootstrap.Modal(document.getElementById('editAllocationModal'));
         myModal.show();
     }
+
+    // SweetAlert Confirmation
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.confirm-action').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const message = this.getAttribute('data-message') || 'Are you sure?';
+                const confirmBtnText = this.getAttribute('data-confirm-text') || 'Yes, proceed!';
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: confirmBtnText
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit();
+                    }
+                });
+            });
+        });
+    });
 </script>
+
+{{-- Filter Offcanvas --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="allocationFilter" aria-labelledby="allocationFilterLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="allocationFilterLabel">Filter Allocations</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form action="" method="GET">
+            <div class="mb-3">
+                <label class="form-label">Employee</label>
+                <select name="employee_id" class="form-select select2">
+                    <option value="">All Employees</option>
+                    @foreach($employees as $emp)
+                    <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>{{ $emp->full_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Year</label>
+                <input type="number" name="year" class="form-control" value="{{ $year }}" placeholder="Year">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{{ route('hrm.leaves.allocations.index') }}" class="btn btn-light">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection

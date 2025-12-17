@@ -274,14 +274,16 @@
     </div>
 </div>
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Delete Confirmation
-        const deleteBtns = document.querySelectorAll('.delete-btn');
-        deleteBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
+        // Use straightforward event delegation on the document
+        document.addEventListener('click', function(e) {
+            // Check for Delete Button (or its icon)
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
                 e.preventDefault();
-                const form = this.closest('form');
+                const form = deleteBtn.closest('form');
                 
                 Swal.fire({
                     title: 'Are you sure?',
@@ -296,30 +298,29 @@
                         form.submit();
                     }
                 });
-            });
-        });
+                return;
+            }
 
-        // Process Confirmation
-        const processBtns = document.querySelectorAll('.process-btn');
-        processBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            // Check for Process/Approve (Mark Paid) Button
+            const processBtn = e.target.closest('.process-btn');
+            if (processBtn) {
                 e.preventDefault();
-                const form = this.closest('form');
+                const form = processBtn.closest('form');
                 
                 Swal.fire({
                     title: 'Mark as Paid?',
-                    text: "This will finalize the payroll and cannot be undone easily.",
-                    icon: 'info',
+                    text: "This will finalize the payroll payment.",
+                    icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#28a745',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, mark as paid!'
+                    confirmButtonText: 'Yes, Mark Paid'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         form.submit();
                     }
                 });
-            });
+            }
         });
     });
 </script>

@@ -28,7 +28,7 @@
 
                         if (Str::startsWith($route, ['hrm.departments', 'hrm.branches', 'hrm.business-units', 'hrm.document-types', 'hrm.skills'])) {
                             $section = 'people';
-                        } elseif (Str::startsWith($route, ['hrm.settings.leave-types', 'hrm.settings.approval-chains'])) {
+                        } elseif (Str::startsWith($route, ['hrm.settings.leave-types', 'hrm.settings.approval-chains', 'hrm.settings.general'])) {
                             $section = 'leave';
                         } elseif (Str::startsWith($route, ['hrm.settings.salary-components', 'hrm.settings.salary-structures', 'hrm.settings.tax-slabs'])) {
                             $section = 'payroll';
@@ -36,6 +36,8 @@
                             $section = 'recruitment';
                         } elseif (Str::startsWith($route, ['hrm.shifts', 'hrm.settings.holidays'])) {
                             $section = 'attendance';
+                        } elseif (Str::startsWith($route, ['hrm.settings.expenses'])) {
+                            $section = 'expense';
                         }
                     @endphp
 
@@ -65,6 +67,9 @@
                         </div>
                         <a href="{{ route('hrm.settings.leave-types.index') }}" class="list-group-item list-group-item-action {{ Str::startsWith($route, 'hrm.settings.leave-types') ? 'active' : '' }}">
                             <i class="bx bx-list-ul me-2 align-middle font-size-16"></i> Leave Policies
+                        </a>
+                        <a href="{{ route('hrm.settings.general') }}" class="list-group-item list-group-item-action {{ Str::startsWith($route, 'hrm.settings.general') ? 'active' : '' }}">
+                            <i class="bx bx-calendar-x me-2 align-middle font-size-16"></i> Weekly Holidays
                         </a>
                         <a href="{{ route('hrm.settings.approval-chains.index') }}" class="list-group-item list-group-item-action {{ Str::startsWith($route, 'hrm.settings.approval-chains') ? 'active' : '' }}">
                             <i class="bx bx-git-pull-request me-2 align-middle font-size-16"></i> Approval Chains
@@ -101,6 +106,15 @@
                         </a>
                         <a href="{{ route('hrm.settings.holidays.index') }}" class="list-group-item list-group-item-action {{ Str::startsWith($route, 'hrm.settings.holidays') ? 'active' : '' }}">
                             <i class="bx bx-calendar-event me-2 align-middle font-size-16"></i> Holiday Calendar
+                        </a>
+                            <i class="bx bx-calendar-event me-2 align-middle font-size-16"></i> Holiday Calendar
+                        </a>
+                    @elseif($section === 'expense')
+                         <div class="p-3 border-bottom bg-light">
+                            <h6 class="font-size-13 text-uppercase text-muted mb-0">Expense Configuration</h6>
+                        </div>
+                        <a href="{{ route('hrm.settings.expenses.index') }}" class="list-group-item list-group-item-action {{ Str::startsWith($route, 'hrm.settings.expenses') ? 'active' : '' }}">
+                            <i class="bx bx-category me-2 align-middle font-size-16"></i> Expense Categories
                         </a>
                     @endif
                 </div>

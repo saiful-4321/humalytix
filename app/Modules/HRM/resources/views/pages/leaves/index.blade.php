@@ -26,9 +26,9 @@
                     
                     <div class="d-flex align-items-center gap-2">
                         @can('hrm.leaves.create')
-                        <a href="{{ route('hrm.leaves.create') }}" class="btn btn-info btn-sm d-flex align-items-center font-weight-medium">
+                        <button class="btn btn-info btn-sm d-flex align-items-center font-weight-medium" type="button" data-bs-toggle="offcanvas" data-bs-target="#applyLeaveCanvas">
                             <i class="mdi mdi-plus me-1"></i> Apply Leave
-                        </a>
+                        </button>
                         @endcan
                         
                         <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#leaveFilter" aria-controls="leaveFilter">
@@ -97,37 +97,32 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-link text-muted font-size-16 p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="mdi mdi-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item" href="{{ route('hrm.leaves.show', $leave) }}"><i class="bx bx-show me-2"></i> View Details</a></li>
-                                            
-                                            @if($leave->status == 'pending')
-                                                @can('hrm.leaves.approve')
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <form action="{{ route('hrm.leaves.approve', $leave) }}" method="POST" class="d-inline">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{{ route('hrm.leaves.show', $leave) }}" class="btn btn-sm btn-soft-primary" title="View">
+                                            <i class="mdi mdi-eye-outline"></i>
+                                        </a>
+
+                                        @if($leave->status == 'pending')
+                                            @can('hrm.leaves.approve')
+                                                    <form action="{{ route('hrm.leaves.approve', $leave) }}" method="POST" class="d-inline confirm-action" data-message="Approve this leave request?" data-confirm-text="Yes, Approve">
                                                         @csrf
-                                                        <button type="submit" class="dropdown-item text-success"><i class="bx bx-check me-2"></i> Approve</button>
+                                                        <button type="submit" class="btn btn-sm btn-soft-success" title="Approve">
+                                                            <i class="mdi mdi-check-circle-outline"></i>
+                                                        </button>
                                                     </form>
-                                                </li>
-                                                <li>
-                                                    <a href="javascript:void(0)" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $leave->id }}">
-                                                        <i class="bx bx-x me-2"></i> Reject
-                                                    </a>
-                                                </li>
-                                                @endcan
-                                            @endif
-                                        </ul>
+                                            
+                                            <button type="button" class="btn btn-sm btn-soft-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $leave->id }}" title="Reject">
+                                                <i class="mdi mdi-close-circle-outline"></i>
+                                            </button>
+                                            @endcan
+                                        @endif
                                     </div>
 
                                     <!-- Reject Modal (Nested to keep ID unique) -->
                                     <div class="modal fade" id="rejectModal{{ $leave->id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
-                                                <form action="{{ route('hrm.leaves.reject', $leave) }}" method="POST">
+                                                <form action="{{ route('hrm.leaves.reject', $leave) }}" method="POST" class="confirm-action" data-message="Reject this leave request? This cannot be undone." data-confirm-text="Yes, Reject">
                                                     @csrf
                                                     <div class="modal-header">
                                                         <h5 class="modal-title">Reject Leave Application</h5>
@@ -216,3 +211,86 @@
     </div>
 </div>
 @endsection
+
+@section('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.confirm-action').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const message = this.getAttribute('data-message') || 'Are you sure?';
+                const confirmBtnText = this.getAttribute('data-confirm-text') || 'Yes, proceed!';
+                
+                Swal.fire({
+                    title: 'Confirmation Required',
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: confirmBtnText
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+@endsection
+
+{{-- Apply Leave Offcanvas --}}
+<div class="offcanvas offcanvas-end w-50" tabindex="-1" id="applyLeaveCanvas" aria-labelledby="applyLeaveLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="applyLeaveLabel">Apply for Leave</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form action="{{ route('hrm.leaves.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Employee <span class="text-danger">*</span></label>
+                    <select class="form-select select2-offcanvas" name="employee_id" required>
+                        <option value="">Select Employee</option>
+                        @foreach($employees as $emp)
+                        <option value="{{ $emp->id }}" {{ old('employee_id') == $emp->id ? 'selected' : '' }}>{{ $emp->full_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Leave Type <span class="text-danger">*</span></label>
+                    <select class="form-select @error('leave_type_id') is-invalid @enderror" name="leave_type_id" required>
+                        <option value="">Select Leave Type</option>
+                        @foreach($leaveTypes as $type)
+                        <option value="{{ $type->id }}" {{ old('leave_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }} ({{ $type->days_per_year }} days/year)</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="start_date" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">End Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="end_date" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Reason <span class="text-danger">*</span></label>
+                <textarea class="form-control" name="reason" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Attachment (Optional)</label>
+                <input type="file" class="form-control" name="attachment" accept=".pdf,.jpg,.jpeg,.png">
+                <small class="text-muted">Max 5MB. Formats: PDF, JPG, PNG</small>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
+            </div>
+        </form>
+    </div>
+</div>

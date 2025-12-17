@@ -31,6 +31,9 @@ class LeaveType extends Model
         'encashment_limit',
         'require_approval',
         'requires_attachment',
+        'probation_restricted',
+        'apply_sandwich_rule',
+        'max_consecutive_days',
         'created_by',
         'updated_by',
     ];
@@ -44,6 +47,8 @@ class LeaveType extends Model
         'days_per_year' => 'integer',
         'is_paid' => 'boolean',
         'is_active' => 'boolean',
+        'probation_restricted' => 'boolean',
+        'apply_sandwich_rule' => 'boolean',
     ];
 
     // Relationships

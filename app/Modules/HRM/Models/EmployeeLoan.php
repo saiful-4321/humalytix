@@ -52,7 +52,18 @@ class EmployeeLoan extends Model
 
         static::creating(function ($loan) {
             if (empty($loan->loan_number)) {
-                $loan->loan_number = 'LOAN-' . date('Y') . '-' . str_pad(static::count() + 1, 5, '0', STR_PAD_LEFT);
+                $latestLoan = static::withTrashed()
+                    ->where('loan_number', 'like', 'LOAN-' . date('Y') . '-%')
+                    ->orderBy('id', 'desc')
+                    ->first();
+                
+                $sequence = 1;
+                if ($latestLoan) {
+                     $parts = explode('-', $latestLoan->loan_number);
+                     $sequence = intval(end($parts)) + 1;
+                }
+                
+                $loan->loan_number = 'LOAN-' . date('Y') . '-' . str_pad($sequence, 5, '0', STR_PAD_LEFT);
             }
         });
     }

@@ -75,13 +75,13 @@
                                         @if($bonus->status == 'pending')
                                         <form action="{{ route('hrm.bonuses.approve', $bonus->id) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-soft-success" title="Approve">
+                                            <button type="button" class="btn btn-sm btn-soft-success approve-btn" title="Approve">
                                                 <i class="mdi mdi-check-circle-outline"></i>
                                             </button>
                                         </form>
                                         <form action="{{ route('hrm.bonuses.reject', $bonus->id) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-soft-danger" title="Reject">
+                                            <button type="button" class="btn btn-sm btn-soft-danger reject-btn" title="Reject">
                                                 <i class="mdi mdi-close-circle-outline"></i>
                                             </button>
                                         </form>
@@ -208,13 +208,16 @@
     </div>
 </div>
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const deleteBtns = document.querySelectorAll('.delete-btn');
-        deleteBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
+        document.addEventListener('click', function(e) {
+            // Check for Delete Button
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
                 e.preventDefault();
-                const form = this.closest('form');
+                const form = deleteBtn.closest('form');
+                
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "You won't be able to revert this!",
@@ -228,7 +231,51 @@
                         form.submit();
                     }
                 });
-            });
+                return;
+            }
+
+            // Check for Approve Button
+            const approveBtn = e.target.closest('.approve-btn');
+            if (approveBtn) {
+                e.preventDefault();
+                const form = approveBtn.closest('form');
+                
+                Swal.fire({
+                    title: 'Approve Bonus?',
+                    text: "This will approve the bonus for payment.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Approve'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+                return;
+            }
+
+            // Check for Reject Button
+            const rejectBtn = e.target.closest('.reject-btn');
+            if (rejectBtn) {
+                e.preventDefault();
+                const form = rejectBtn.closest('form');
+                
+                Swal.fire({
+                    title: 'Reject Bonus?',
+                    text: "This will reject the bonus request.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, Reject'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            }
         });
     });
 </script>

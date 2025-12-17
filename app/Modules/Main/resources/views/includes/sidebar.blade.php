@@ -141,13 +141,26 @@
                         {{-- Leave Management --}}
                         @can('hrm.leaves.view')
                         <li>
-                            <a href="javascript: void(0);" class="has-arrow" data-key="t-leaves">Leave Management</a>
-                            <ul class="sub-menu" aria-expanded="true">
+                            <a href="javascript: void(0);" class="has-arrow waves-effect">
+                                <i class="bx bx-calendar-check"></i>
+                                <span key="t-leave">Leave Management</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('hrm.leaves.dashboard') }}" data-key="t-leave-dashboard">Dashboard</a></li>
                                 <li><a href="{{ route('hrm.leaves.my-leaves') }}" data-key="t-my-leaves">My Leaves</a></li>
                                 <li><a href="{{ route('hrm.leaves.index') }}" data-key="t-leave-requests">Leave Requests</a></li>
                                 <li><a href="{{ route('hrm.leaves.allocations.index') }}" data-key="t-allocations">Allocations</a></li>
                                 <li><a href="{{ route('hrm.settings.leave-types.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
+                        </li>
+                        @endcan
+
+                        @can('hrm.expenses.view')
+                        <li>
+                            <a href="{{ route('hrm.expenses.index') }}" class="waves-effect">
+                                <i class="bx bx-receipt"></i>
+                                <span key="t-expenses">Expense Management</span>
+                            </a>
                         </li>
                         @endcan
 

@@ -31,14 +31,17 @@ class Leave extends Model
         'is_completed',
         'created_by',
         'updated_by',
+        'half_day_session',
+        'is_half_day',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'approved_at' => 'datetime',
-        'days' => 'integer',
+        'days' => 'float',
         'is_completed' => 'boolean',
+        'is_half_day' => 'boolean',
     ];
 
     // Relationships
