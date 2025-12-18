@@ -109,6 +109,19 @@
                     <ul class="sub-menu" aria-expanded="false">
                         <li><a href="{{ route('hrm.dashboard') }}" data-key="t-hrm-dashboard">Dashboard</a></li>
 
+                        {{-- Recruitment --}}
+                        @can('hrm.jobs.view')
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-recruitment">Recruitment</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="{{ route('hrm.jobs.index') }}" data-key="t-jobs">Jobs</a></li>
+                                <li><a href="{{ route('hrm.candidates.index') }}" data-key="t-candidates">Candidates</a></li>
+                                <li><a href="{{ route('hrm.letters.index') }}" data-key="t-letters">Letters</a></li>
+                                <li><a href="{{ route('hrm.settings.letter-templates.index') }}" data-key="t-settings">Settings</a></li>
+                            </ul>
+                        </li>
+                        @endcan
+
                         {{-- People & Organization --}}
                         <li>
                             <a href="javascript: void(0);" class="has-arrow" data-key="t-organization">People & Org</a>
@@ -116,7 +129,6 @@
                                 @can('hrm.employees.view')
                                 <li><a href="{{ route('hrm.employees.index') }}" data-key="t-employees">Employees</a></li>
                                 @endcan
-                                <li><a href="{{ route('hrm.assets.index') }}" data-key="t-assets">Assets</a></li>
                                 @can('hrm.skills.view')
                                 <li><a href="{{ route('hrm.skills.index') }}" data-key="t-skills">Skills</a></li>
                                 @endcan
@@ -124,6 +136,25 @@
                                 <li><a href="{{ route('hrm.departments.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
                         </li>
+
+                        {{-- Assets --}}
+                        @can('hrm.assets.view')
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow" data-key="t-assets-main">Asset Management</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="{{ route('hrm.assets.index') }}" data-key="t-assets-list">Assets List</a></li>
+                                <li><a href="{{ route('hrm.assets.my-assets') }}" data-key="t-my-assets">My Assets</a></li>
+                            </ul>
+                        </li>
+                        @endcan
+                        @if(!auth()->user()->can('hrm.assets.view'))
+                             <li class="{{ Route::is('hrm.assets.my-assets') ? 'active' : '' }}">
+                                <a href="{{ route('hrm.assets.my-assets') }}">
+                                    <i class="bx bx-box"></i>
+                                    <span>My Assets</span>
+                                </a>
+                            </li>
+                        @endif
 
                         {{-- Time & Attendance --}}
                         <li>
@@ -142,7 +173,6 @@
                         @can('hrm.leaves.view')
                         <li>
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                <i class="bx bx-calendar-check"></i>
                                 <span key="t-leave">Leave Management</span>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
@@ -152,15 +182,6 @@
                                 <li><a href="{{ route('hrm.leaves.allocations.index') }}" data-key="t-allocations">Allocations</a></li>
                                 <li><a href="{{ route('hrm.settings.leave-types.index') }}" data-key="t-settings">Settings</a></li>
                             </ul>
-                        </li>
-                        @endcan
-
-                        @can('hrm.expenses.view')
-                        <li>
-                            <a href="{{ route('hrm.expenses.index') }}" class="waves-effect">
-                                <i class="bx bx-receipt"></i>
-                                <span key="t-expenses">Expense Management</span>
-                            </a>
                         </li>
                         @endcan
 
@@ -181,7 +202,16 @@
                         </li>
                         @endcan
 
-                        {{-- Performance --}}
+                        {{-- Expense Management --}}
+                        @can('hrm.expenses.view')
+                        <li>
+                             <a href="javascript: void(0);" class="has-arrow" data-key="t-expenses">Expense Management</a>
+                             <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="{{ route('hrm.expenses.index') }}">Expenses</a></li>
+                             </ul>
+                        </li>
+                        @endcan
+
                         {{-- Performance Management --}}
                         @can('hrm.performance.view')
                         <li>
@@ -197,18 +227,45 @@
                         </li>
                         @endcan
 
-                        {{-- Recruitment --}}
-                        @can('hrm.jobs.view')
+                        {{-- Training & L&D --}}
+                        @canany(['hrm.trainings.view', 'hrm.certifications.view'])
                         <li>
-                            <a href="javascript: void(0);" class="has-arrow" data-key="t-recruitment">Recruitment</a>
-                            <ul class="sub-menu" aria-expanded="true">
-                                <li><a href="{{ route('hrm.jobs.index') }}" data-key="t-jobs">Jobs</a></li>
-                                <li><a href="{{ route('hrm.candidates.index') }}" data-key="t-candidates">Candidates</a></li>
-                                <li><a href="{{ route('hrm.letters.index') }}" data-key="t-letters">Letters</a></li>
-                                <li><a href="{{ route('hrm.settings.letter-templates.index') }}" data-key="t-settings">Settings</a></li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <i data-feather="book-open"></i>
+                                <span data-key="t-training">Training & L&D</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('hrm.trainings.dashboard') }}" data-key="t-training-dashboard">Dashboard</a></li>
+                                @can('hrm.trainings.view')
+                                <li><a href="{{ route('hrm.trainings.index') }}" data-key="t-training-programs">Training Programs</a></li>
+                                <li><a href="{{ route('hrm.trainings.my-trainings') }}" data-key="t-my-trainings">My Trainings</a></li>
+                                @endcan
+                                @can('hrm.skills.view')
+                                <li><a href="{{ route('hrm.skills.matrix') }}" data-key="t-skill-matrix">Skill Matrix</a></li>
+                                <li><a href="{{ route('hrm.skills.index') }}" data-key="t-skills">Skills List</a></li>
+                                @endcan
+                                @can('hrm.certifications.view')
+                                <li><a href="{{ route('hrm.certifications.index') }}" data-key="t-certifications">Certifications</a></li>
+                                @endcan
                             </ul>
                         </li>
-                        @endcan
+                        @endcanany
+
+                        {{-- Compliance --}}
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow waves-effect">
+                                <i class="bx bx-file"></i>
+                                <span key="t-compliance">Compliance</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('hrm.policies.index') }}" key="t-policies">Policy Library</a></li>
+                                <li><a href="{{ route('hrm.contracts.index') }}" key="t-contracts">Contracts (Admin)</a></li>
+                                <li><a href="{{ route('hrm.contracts.my') }}" key="t-my-contracts">My Contracts</a></li>
+                                <li><a href="{{ route('hrm.documents.expiry') }}" key="t-doc-expiry">Expiry Tracker</a></li>
+                            </ul>
+                        </li>
+
+
 
                         {{-- Settings --}}
                         <li>

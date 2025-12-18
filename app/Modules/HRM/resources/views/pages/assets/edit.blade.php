@@ -32,14 +32,12 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Type <span class="text-danger">*</span></label>
-                            <select class="form-select" name="type" required>
-                                <option value="laptop" {{ $asset->type == 'laptop' ? 'selected' : '' }}>Laptop/Computer</option>
-                                <option value="mobile" {{ $asset->type == 'mobile' ? 'selected' : '' }}>Mobile Phone</option>
-                                <option value="furniture" {{ $asset->type == 'furniture' ? 'selected' : '' }}>Furniture</option>
-                                <option value="vehicle" {{ $asset->type == 'vehicle' ? 'selected' : '' }}>Vehicle</option>
-                                <option value="license" {{ $asset->type == 'license' ? 'selected' : '' }}>Software License</option>
-                                <option value="other" {{ $asset->type == 'other' ? 'selected' : '' }}>Other</option>
+                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                            <select class="form-select" name="asset_category_id" required>
+                                <option value="">Select Category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ $asset->asset_category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -48,17 +46,21 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Purchase Date</label>
                             <input type="date" class="form-control" name="purchase_date" value="{{ $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : '' }}">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Purchase Cost</label>
                             <input type="number" class="form-control" name="purchase_cost" value="{{ old('purchase_cost', $asset->purchase_cost) }}" step="0.01">
                         </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Salvage Value</label>
+                            <input type="number" class="form-control" name="salvage_value" value="{{ old('salvage_value', $asset->salvage_value) }}" step="0.01">
+                        </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Condition <span class="text-danger">*</span></label>
                             <select class="form-select" name="condition" required>
                                 <option value="new" {{ $asset->condition == 'new' ? 'selected' : '' }}>New</option>
@@ -67,14 +69,19 @@
                                 <option value="poor" {{ $asset->condition == 'poor' ? 'selected' : '' }}>Poor</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Status <span class="text-danger">*</span></label>
                             <select class="form-select" name="status" required>
                                 <option value="available" {{ $asset->status == 'available' ? 'selected' : '' }}>Available</option>
                                 <option value="assigned" {{ $asset->status == 'assigned' ? 'selected' : '' }}>Assigned</option>
                                 <option value="maintenance" {{ $asset->status == 'maintenance' ? 'selected' : '' }}>In Maintenance</option>
                                 <option value="lost" {{ $asset->status == 'lost' ? 'selected' : '' }}>Lost/Stolen</option>
+                                <option value="retired" {{ $asset->status == 'retired' ? 'selected' : '' }}>Retired</option>
                             </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" value="{{ old('location', $asset->location) }}">
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">

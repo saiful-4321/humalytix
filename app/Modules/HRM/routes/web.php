@@ -288,6 +288,7 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::get('/{asset}/edit', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'edit'])->name('edit');
         Route::put('/{asset}', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'update'])->name('update');
         Route::delete('/{asset}', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'destroy'])->name('destroy');
+        Route::get('/my-assets', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'myAssets'])->name('my-assets');
         Route::get('/{asset}/assign', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'assign'])->name('assign');
         Route::post('/{asset}/assign', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'storeAssignment'])->name('store-assignment');
         Route::post('/{asset}/return', [\App\Modules\HRM\Http\Controllers\AssetController::class, 'returnAsset'])->name('return');
@@ -347,7 +348,7 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
     // Route::resource('rosters', RosterController::class);
 
     // Skills
-    Route::resource('skills', \App\Modules\HRM\Http\Controllers\SkillController::class);
+
 
     // Documents
     // Route::resource('document-types', DocumentTypeController::class);
@@ -488,5 +489,43 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
             Route::put('/{expenseCategory}', [\App\Modules\HRM\Http\Controllers\ExpenseCategoryController::class, 'update'])->name('update');
             Route::delete('/{expenseCategory}', [\App\Modules\HRM\Http\Controllers\ExpenseCategoryController::class, 'destroy'])->name('destroy');
         });
+
+        // Asset Settings
+        Route::group(['prefix' => 'assets', 'as' => 'assets.'], function () {
+            Route::get('/', [\App\Modules\HRM\Http\Controllers\AssetCategoryController::class, 'index'])->name('index');
+            Route::post('/', [\App\Modules\HRM\Http\Controllers\AssetCategoryController::class, 'store'])->name('store');
+            Route::put('/{assetCategory}', [\App\Modules\HRM\Http\Controllers\AssetCategoryController::class, 'update'])->name('update');
+            Route::delete('/{assetCategory}', [\App\Modules\HRM\Http\Controllers\AssetCategoryController::class, 'destroy'])->name('destroy');
+            });
     });
+
+    // Training & Development
+    Route::prefix('trainings')->name('trainings.')->group(function () {
+        Route::get('/dashboard', [\App\Modules\HRM\Http\Controllers\TrainingDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/', [\App\Modules\HRM\Http\Controllers\TrainingController::class, 'index'])->name('index');
+        Route::post('/', [\App\Modules\HRM\Http\Controllers\TrainingController::class, 'store'])->name('store');
+        Route::put('/{training}', [\App\Modules\HRM\Http\Controllers\TrainingController::class, 'update'])->name('update');
+        Route::post('/sessions', [\App\Modules\HRM\Http\Controllers\TrainingController::class, 'storeSession'])->name('sessions.store');
+        Route::get('/my-trainings', [\App\Modules\HRM\Http\Controllers\TrainingController::class, 'myTrainings'])->name('my-trainings');
+        
+        // Certificate Actions
+        Route::get('/certificate/{participant}/download', [\App\Modules\HRM\Http\Controllers\CertificateController::class, 'download'])->name('certificate.download');
+        Route::get('/certificate/{participant}/preview', [\App\Modules\HRM\Http\Controllers\CertificateController::class, 'preview'])->name('certificate.preview');
+    });
+
+    Route::get('certifications/{certification}/download', [\App\Modules\HRM\Http\Controllers\CertificateController::class, 'downloadExternal'])->name('certifications.download');
+    Route::get('certifications/{certification}/preview', [\App\Modules\HRM\Http\Controllers\CertificateController::class, 'previewExternal'])->name('certifications.preview');
+    Route::resource('certifications', \App\Modules\HRM\Http\Controllers\CertificationController::class)->only(['index', 'store', 'destroy']);
+    
+    // Compliance & Documents
+    Route::resource('policies', \App\Modules\HRM\Http\Controllers\PolicyController::class)->only(['index', 'store', 'destroy']);
+    
+    Route::get('contracts/my-contracts', [\App\Modules\HRM\Http\Controllers\ContractController::class, 'myContracts'])->name('contracts.my');
+    Route::post('contracts/{contract}/sign', [\App\Modules\HRM\Http\Controllers\ContractController::class, 'sign'])->name('contracts.sign');
+    Route::resource('contracts', \App\Modules\HRM\Http\Controllers\ContractController::class)->only(['index', 'store', 'destroy']);
+    
+    Route::get('documents/expiry', [\App\Modules\HRM\Http\Controllers\EmployeeDocumentController::class, 'expiryReport'])->name('documents.expiry');
+
+    Route::get('skills/matrix', [\App\Modules\HRM\Http\Controllers\SkillController::class, 'matrix'])->name('skills.matrix');
+    Route::resource('skills', \App\Modules\HRM\Http\Controllers\SkillController::class)->only(['index', 'store', 'update', 'destroy']);
 });

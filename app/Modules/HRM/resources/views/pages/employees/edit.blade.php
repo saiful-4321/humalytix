@@ -454,7 +454,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($documentTypes->where('urgency', 'required') as $type)
+                                                @foreach($documentTypes->where('is_required', true) as $type)
                                                 @php
                                                     $existingDoc = $employee->documents->where('document_type_id', $type->id)->first();
                                                 @endphp
@@ -498,7 +498,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($documentTypes->where('urgency', 'nice_to_have') as $type)
+                                                @foreach($documentTypes->where('is_required', false) as $type)
                                                 @php
                                                     $existingDoc = $employee->documents->where('document_type_id', $type->id)->first();
                                                     $index = 100 + $loop->index; // Offset index to avoid collision

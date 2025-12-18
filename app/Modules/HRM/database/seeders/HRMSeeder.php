@@ -15,9 +15,15 @@ class HRMSeeder extends Seeder
     {
         $this->call([
             HRMSettingSeeder::class,
+            \App\Modules\HRM\Database\Seeders\HRMDemoDataSeeder::class, // Core data (Employees, Depts)
+            
+            // Core Modules
             CompleteLeaveSeeder::class,
             PMSSeeder::class,
             ExpenseSeeder::class,
+            AssetSeeder::class,
+            \App\Modules\HRM\Database\Seeders\TrainingSeeder::class, // L&D
+            \App\Modules\HRM\Database\Seeders\ComplianceSeeder::class, // Compliance
         ]);
     }
 }

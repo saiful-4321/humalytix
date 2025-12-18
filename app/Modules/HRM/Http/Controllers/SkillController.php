@@ -58,4 +58,22 @@ class SkillController extends Controller
         $skill->delete();
         return redirect()->route('hrm.skills.index')->with('success', 'Skill deleted successfully.');
     }
+
+    /**
+     * Display the Skill Matrix.
+     */
+    public function matrix()
+    {
+         if (!auth()->user()->can('hrm.skills.view')) {
+            abort(403);
+        }
+
+        // Fetch skills grouped by category
+        $skills = Skill::active()->orderBy('category')->get();
+        
+        // Fetch employees with their skills loaded
+        $employees = \App\Modules\HRM\Models\Employee::with('skills')->active()->get();
+
+        return view('HRM::pages.skills.matrix', compact('skills', 'employees'));
+    }
 }

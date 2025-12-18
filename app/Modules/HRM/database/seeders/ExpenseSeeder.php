@@ -80,5 +80,37 @@ class ExpenseSeeder extends Seeder
         ];
 
         DB::table('hrm_expense_categories')->insertOrIgnore($categories);
+
+        // 4. Create Real Expenses
+        $employees = \App\Modules\HRM\Models\Employee::inRandomOrder()->limit(5)->get();
+        $travelCat = \App\Modules\HRM\Models\ExpenseCategory::where('name', 'like', '%Travel%')->first();
+        $mealCat = \App\Modules\HRM\Models\ExpenseCategory::where('name', 'like', '%Meals%')->first();
+        $officeCat = \App\Modules\HRM\Models\ExpenseCategory::where('name', 'like', '%Office%')->first();
+
+        if ($employees->count() > 0 && $travelCat) {
+            foreach ($employees as $employee) {
+                // Trip Expense
+                \App\Modules\HRM\Models\Expense::create([
+                    'employee_id' => $employee->id,
+                    'expense_category_id' => $travelCat->id,
+                    'amount' => rand(5000, 20000),
+                    'expense_date' => now()->subDays(rand(1, 15)),
+                    'description' => 'Business trip to Chittagong',
+                    'status' => 'approved',
+                    'approved_by' => 1, // Admin
+                    'approved_at' => now(),
+                ]);
+
+                // Meal Expense
+                \App\Modules\HRM\Models\Expense::create([
+                    'employee_id' => $employee->id,
+                    'expense_category_id' => $mealCat->id,
+                    'amount' => rand(500, 2500),
+                    'expense_date' => now()->subDays(rand(1, 5)),
+                    'description' => 'Team Lunch',
+                    'status' => 'pending',
+                ]);
+            }
+        }
     }
 }

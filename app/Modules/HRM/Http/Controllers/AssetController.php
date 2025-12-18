@@ -4,6 +4,7 @@ namespace App\Modules\HRM\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\HRM\Models\Asset;
+use App\Modules\HRM\Models\AssetCategory;
 use App\Modules\HRM\Models\AssetAssignment;
 use App\Modules\HRM\Models\Employee;
 use Illuminate\Http\Request;
@@ -20,23 +21,27 @@ class AssetController extends Controller
 
     public function index(Request $request)
     {
-        $query = Asset::with('currentAssignment.employee');
+        $query = Asset::with(['currentAssignment.employee', 'category']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
+        if ($request->filled('category_id')) {
+            $query->where('asset_category_id', $request->category_id);
         }
 
         $assets = $query->orderBy('created_at', 'desc')->paginate(20);
-        return view('HRM::pages.assets.index', compact('assets'));
+        $categories = AssetCategory::where('is_active', true)->orderBy('name')->get();
+        $employees = Employee::active()->select('id', 'first_name', 'last_name', 'employee_code')->get();
+
+        return view('HRM::pages.assets.index', compact('assets', 'categories', 'employees'));
     }
 
     public function create()
     {
-        return view('HRM::pages.assets.create');
+        $categories = AssetCategory::where('is_active', true)->orderBy('name')->get();
+        return view('HRM::pages.assets.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -44,14 +49,19 @@ class AssetController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|unique:hrm_assets,code',
-            'type' => 'required|string',
+            'asset_category_id' => 'required|exists:hrm_asset_categories,id',
             'serial_number' => 'nullable|string',
             'purchase_date' => 'nullable|date',
-            'purchase_cost' => 'nullable|numeric',
+            'purchase_cost' => 'nullable|numeric|min:0',
+            'salvage_value' => 'nullable|numeric|min:0',
             'condition' => 'required|string',
             'status' => 'required|string',
+            'location' => 'nullable|string',
+            'description' => 'nullable|string',
         ]);
 
+        $validated['created_by'] = auth()->id();
+        
         Asset::create($validated);
         return redirect()->route('hrm.assets.index')->with('success', 'Asset created successfully!');
     }
@@ -117,7 +127,8 @@ class AssetController extends Controller
     }
     public function edit(Asset $asset)
     {
-        return view('HRM::pages.assets.edit', compact('asset'));
+        $categories = AssetCategory::where('is_active', true)->orderBy('name')->get();
+        return view('HRM::pages.assets.edit', compact('asset', 'categories'));
     }
 
     public function update(Request $request, Asset $asset)
@@ -125,13 +136,18 @@ class AssetController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|unique:hrm_assets,code,'.$asset->id,
-            'type' => 'required|string',
+            'asset_category_id' => 'required|exists:hrm_asset_categories,id',
             'serial_number' => 'nullable|string',
             'purchase_date' => 'nullable|date',
-            'purchase_cost' => 'nullable|numeric',
+            'purchase_cost' => 'nullable|numeric|min:0',
+            'salvage_value' => 'nullable|numeric|min:0',
             'condition' => 'required|string',
             'status' => 'required|string',
+            'location' => 'nullable|string',
+            'description' => 'nullable|string',
         ]);
+        
+        $validated['updated_by'] = auth()->id();
 
         $asset->update($validated);
         return redirect()->route('hrm.assets.index')->with('success', 'Asset updated successfully!');
@@ -143,4 +159,21 @@ class AssetController extends Controller
         return redirect()->route('hrm.assets.index')->with('success', 'Asset deleted successfully!');
     }
 
+    public function myAssets()
+    {
+        $employee = Employee::where('user_id', auth()->id())->first();
+
+        if (!$employee) {
+            $assets = collect(); // Empty collection if not an employee
+        } else {
+            $assets = AssetAssignment::with(['asset.category'])
+                ->where('employee_id', $employee->id)
+                ->whereNull('return_date')
+                ->latest()
+                ->get()
+                ->pluck('asset');
+        }
+
+        return view('HRM::pages.assets.my_assets', compact('assets'));
+    }
 }

@@ -92,4 +92,29 @@ class EmployeeDocumentController extends Controller
 
         return Storage::disk('public')->download($document->file_path);
     }
+    public function expiryReport(Request $request)
+    {
+        if (!auth()->user()->can('hrm.documents.view_all')) abort(403);
+
+        $days = $request->get('days', 90);
+        
+        $query = \App\Modules\HRM\Models\EmployeeDocument::with('employee', 'documentType')
+            ->expiringSoon($days);
+
+        if ($request->has('document_type_id') && $request->document_type_id != '') {
+            $query->where('document_type_id', $request->document_type_id);
+        }
+
+        if ($request->has('employee_id') && $request->employee_id != '') {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        $expiringDocs = $query->orderBy('expiry_date')->get();
+        
+        // Data for filters
+        $employees = Employee::active()->select('id', 'first_name', 'last_name', 'employee_code')->get();
+        $documentTypes = DocumentType::where('is_active', 1)->get();
+
+        return view('HRM::pages.compliance.documents.expiry', compact('expiringDocs', 'employees', 'documentTypes'));
+    }
 }

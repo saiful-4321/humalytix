@@ -30,14 +30,12 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Type <span class="text-danger">*</span></label>
-                            <select class="form-select" name="type" required>
-                                <option value="laptop">Laptop/Computer</option>
-                                <option value="mobile">Mobile Phone</option>
-                                <option value="furniture">Furniture</option>
-                                <option value="vehicle">Vehicle</option>
-                                <option value="license">Software License</option>
-                                <option value="other">Other</option>
+                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                            <select class="form-select" name="asset_category_id" required>
+                                <option value="">Select Category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -46,17 +44,21 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Purchase Date</label>
                             <input type="date" class="form-control" name="purchase_date">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Purchase Cost</label>
                             <input type="number" class="form-control" name="purchase_cost" step="0.01">
                         </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Salvage Value</label>
+                            <input type="number" class="form-control" name="salvage_value" step="0.01">
+                        </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Condition <span class="text-danger">*</span></label>
                             <select class="form-select" name="condition" required>
                                 <option value="new">New</option>
@@ -65,14 +67,19 @@
                                 <option value="poor">Poor</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Status <span class="text-danger">*</span></label>
                             <select class="form-select" name="status" required>
                                 <option value="available">Available</option>
                                 <option value="assigned">Assigned</option>
                                 <option value="maintenance">In Maintenance</option>
                                 <option value="lost">Lost/Stolen</option>
+                                <option value="retired">Retired</option>
                             </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" placeholder="e.g. Server Room">
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
