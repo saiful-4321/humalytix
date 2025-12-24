@@ -29,5 +29,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Super Admin') ? true : null;
         });
+
+        // Register Model Observers for Workflow Auto-Triggers
+        \App\Modules\HRM\Models\Leave::observe(\App\Observers\LeaveApplicationObserver::class);
+        \App\Modules\HRM\Models\Expense::observe(\App\Observers\ExpenseObserver::class);
     }
 }

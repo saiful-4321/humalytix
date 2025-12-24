@@ -192,7 +192,14 @@ class LeaveController extends Controller
             $validated['current_level'] = 1;
         }
 
-        Leave::create($validated);
+        $leave = Leave::create($validated);
+
+        // Trigger Workflow Engine
+        try {
+            (new \App\Modules\HRM\Services\WorkflowEngine)->process($leave, 'created');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Workflow Error: " . $e->getMessage());
+        }
 
         return redirect()->route('hrm.leaves.index')->with('success', 'Leave application submitted successfully!');
     }

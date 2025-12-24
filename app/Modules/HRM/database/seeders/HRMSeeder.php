@@ -24,6 +24,10 @@ class HRMSeeder extends Seeder
             AssetSeeder::class,
             \App\Modules\HRM\Database\Seeders\TrainingSeeder::class, // L&D
             \App\Modules\HRM\Database\Seeders\ComplianceSeeder::class, // Compliance
+            \App\Modules\HRM\Database\Seeders\RecruitmentSeeder::class, // Recruitment
+            \App\Modules\HRM\Database\Seeders\WorkflowSeeder::class, // Workflows
+            \App\Modules\HRM\Database\Seeders\ShiftRosterSeeder::class, // Shifts & Rosters
+            \App\Modules\HRM\Database\Seeders\NotificationSeeder::class, // Notifications
         ]);
     }
 }

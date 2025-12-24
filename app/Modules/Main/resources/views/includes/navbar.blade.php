@@ -76,94 +76,90 @@
             <!-- end dark light  -->
 
 
-            {{-- <div class="dropdown d-inline-block">
+            <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item noti-icon position-relative" id="page-header-notifications-dropdown"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="dripicons-bell"></i>
-                    <span class="badge bg-danger rounded-pill">5</span>
+                    @if(auth()->user()->unreadNotifications->count() > 0)
+                        <span class="badge bg-danger rounded-pill notification-badge">{{ auth()->user()->unreadNotifications->count() }}</span>
+                    @endif
                 </button>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                <div class="dropdown-menu dropdown-menu-xl dropdown-menu-end p-0 notification-dropdown"
                     aria-labelledby="page-header-notifications-dropdown">
-                    <div class="p-3">
+                    <div class="p-3 bg-primary bg-gradient text-white">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h6 class="m-0"> Notifications </h6>
+                                <h6 class="m-0 text-white fw-semibold">
+                                    <i class="bx bx-bell me-1"></i> Notifications
+                                </h6>
                             </div>
                             <div class="col-auto">
-                                <a href="#!" class="small text-reset text-decoration-underline"> Unread (3)</a>
+                                @if(auth()->user()->unreadNotifications->count() > 0)
+                                    <button type="button" class="btn btn-sm btn-light mark-all-read" title="Mark all as read">
+                                        <i class="mdi mdi-check-all"></i>
+                                    </button>
+                                @endif
+                                <a href="{{ route('hrm.notifications.index') }}" class="btn btn-sm btn-light ms-1">
+                                    <i class="mdi mdi-view-list"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <div data-simplebar style="max-height: 230px;">
-                        <a href="#!" class="text-reset notification-item">
-                            <div class="d-flex">
+                    <div data-simplebar style="max-height: 350px;">
+                        @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
+                        <a href="{{ route('hrm.notifications.show', $notification->id) }}" 
+                           class="text-reset notification-item d-block dropdown-item position-relative notification-clickable"
+                           data-notification-id="{{ $notification->id }}">
+                            <div class="d-flex align-items-start">
                                 <div class="flex-shrink-0 me-3">
-                                    <img src="assets/images/users/avatar-1.png" class="rounded-circle avatar-sm" alt="user-pic">
+                                    <div class="avatar-sm">
+                                        <span class="avatar-title rounded-circle font-size-16 notification-icon-{{ $loop->index % 5 }}">
+                                            @php
+                                                $type = $notification->data['type'] ?? 'default';
+                                                $icon = match($type) {
+                                                    'leave' => 'bx-calendar',
+                                                    'expense' => 'bx-wallet',
+                                                    'training' => 'bx-book-reader',
+                                                    'document' => 'bx-file',
+                                                    'approval' => 'bx-check-circle',
+                                                    default => 'bx-bell'
+                                                };
+                                            @endphp
+                                            <i class="bx {{ $icon }}"></i>
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="mb-1">James Lemire</h6>
+                                    <h6 class="mb-1 fw-semibold">{{ $notification->data['title'] ?? 'Notification' }}</h6>
                                     <div class="font-size-13 text-muted">
-                                        <p class="mb-1">It will seem like simplified English.</p>
-                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span>1 hour ago</span></p>
+                                        <p class="mb-1">{{ \Illuminate\Support\Str::limit($notification->data['message'] ?? '', 45) }}</p>
+                                        <p class="mb-0">
+                                            <i class="mdi mdi-clock-outline"></i>
+                                            <span class="ms-1">{{ $notification->created_at->diffForHumans() }}</span>
+                                        </p>
                                     </div>
+                                </div>
+                                <div class="flex-shrink-0 ms-2">
+                                    <span class="badge badge-soft-primary rounded-pill">New</span>
                                 </div>
                             </div>
                         </a>
-                        <a href="#!" class="text-reset notification-item">
-                            <div class="d-flex">
-                                <div class="flex-shrink-0 avatar-sm me-3">
-                                    <span class="avatar-title bg-primary rounded-circle font-size-16">
-                                        <i class="bx bx-cart"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Your order is placed</h6>
-                                    <div class="font-size-13 text-muted">
-                                        <p class="mb-1">If several languages coalesce the grammar</p>
-                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span>3 min ago</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <a href="#!" class="text-reset notification-item">
-                            <div class="d-flex">
-                                <div class="flex-shrink-0 avatar-sm me-3">
-                                    <span class="avatar-title bg-success rounded-circle font-size-16">
-                                        <i class="bx bx-badge-check"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Your item is shipped</h6>
-                                    <div class="font-size-13 text-muted">
-                                        <p class="mb-1">If several languages coalesce the grammar</p>
-                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span>3 min ago</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-
-                        <a href="#!" class="text-reset notification-item">
-                            <div class="d-flex">
-                                <div class="flex-shrink-0 me-3">
-                                    <img src="assets/images/users/avatar-1.png" class="rounded-circle avatar-sm" alt="user-pic">
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Salena Layfield</h6>
-                                    <div class="font-size-13 text-muted">
-                                        <p class="mb-1">As a skeptical Cambridge friend of mine occidental.</p>
-                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span>1 hour ago</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
+                        @empty
+                        <div class="p-4 text-center text-muted">
+                            <i class="bx bx-bell-off font-size-24 d-block mb-2"></i>
+                            <p class="mb-0">No new notifications</p>
+                        </div>
+                        @endforelse
                     </div>
+                    @if(auth()->user()->unreadNotifications->count() > 0)
                     <div class="p-2 border-top d-grid">
-                        <a class="btn btn-sm btn-link font-size-14 text-center" href="javascript:void(0)">
-                            <i class="mdi mdi-arrow-right-circle me-1"></i> <span>View More..</span> 
+                        <a class="btn btn-sm btn-link font-size-14 text-center" href="{{ route('hrm.notifications.index') }}">
+                            <i class="mdi mdi-arrow-right-circle me-1"></i> <span>View All ({{ auth()->user()->unreadNotifications->count() }})</span> 
                         </a>
                     </div>
+                    @endif
                 </div>
-            </div> --}}
+            </div>
             <!-- end notification  -->
 
 
@@ -200,5 +196,135 @@
         </div>
     </div>
 </header>
+
+<style>
+/* Modern Notification Styles */
+.notification-badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.notification-dropdown {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: none;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    width: 450px !important;
+}
+
+.notification-item {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-item:hover {
+    background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+    transform: translateX(5px);
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-clickable {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.notification-icon-0 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.notification-icon-1 {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.notification-icon-2 {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.notification-icon-3 {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.notification-icon-4 {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.mark-all-read {
+    transition: all 0.3s ease;
+}
+
+.mark-all-read:hover {
+    transform: scale(1.1);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark all as read functionality
+    const markAllBtn = document.querySelector('.mark-all-read');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            fetch('{{ route("hrm.notifications.mark-all-read") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge
+                    const badge = document.querySelector('.notification-badge');
+                    if (badge) {
+                        badge.remove();
+                    }
+                    
+                    // Reload to show updated notifications
+                    location.reload();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+    
+    // Auto-mark as read when clicking notification
+    document.querySelectorAll('.notification-clickable').forEach(item => {
+        item.addEventListener('click', function(e) {
+            const notificationId = this.dataset.notificationId;
+            
+            // Mark as read via AJAX
+            fetch(`/hrm/notifications/${notificationId}/read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge count
+                    const badge = document.querySelector('.notification-badge');
+                    if (badge && data.unread_count > 0) {
+                        badge.textContent = data.unread_count;
+                    } else if (badge && data.unread_count === 0) {
+                        badge.remove();
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
 
  

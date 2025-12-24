@@ -15,11 +15,10 @@ class Interview extends Model
 
     protected $fillable = [
         'candidate_id',
+        'job_id',
         'interview_type',
-        'scheduled_date',
-        'scheduled_time',
+        'scheduled_at',
         'duration',
-        'interviewer_ids',
         'location',
         'meeting_link',
         'status',
@@ -32,9 +31,8 @@ class Interview extends Model
     ];
 
     protected $casts = [
-        'scheduled_date' => 'date',
+        'scheduled_at' => 'datetime',
         'duration' => 'integer',
-        'interviewer_ids' => 'array',
         'rating' => 'integer',
         'completed_at' => 'datetime',
     ];

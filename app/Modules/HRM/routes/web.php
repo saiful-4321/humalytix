@@ -528,4 +528,23 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
 
     Route::get('skills/matrix', [\App\Modules\HRM\Http\Controllers\SkillController::class, 'matrix'])->name('skills.matrix');
     Route::resource('skills', \App\Modules\HRM\Http\Controllers\SkillController::class)->only(['index', 'store', 'update', 'destroy']);
+
+    // Workflows
+    Route::resource('workflows', \App\Modules\HRM\Http\Controllers\WorkflowController::class);
+
+    // Automation Settings
+    Route::get('settings/automation', [\App\Modules\HRM\Http\Controllers\AutomationSettingController::class, 'index'])->name('settings.automation');
+    Route::put('settings/automation', [\App\Modules\HRM\Http\Controllers\AutomationSettingController::class, 'update'])->name('settings.automation.update');
+    Route::post('settings/automation/run-accrual', [\App\Modules\HRM\Http\Controllers\AutomationSettingController::class, 'runLeaveAccrual'])->name('settings.automation.run-accrual');
+    Route::post('settings/automation/run-document-check', [\App\Modules\HRM\Http\Controllers\AutomationSettingController::class, 'runDocumentCheck'])->name('settings.automation.run-document-check');
+    Route::post('settings/automation/run-escalation', [\App\Modules\HRM\Http\Controllers\AutomationSettingController::class, 'runApprovalEscalation'])->name('settings.automation.run-escalation');
+
+    // Notifications
+    Route::get('notifications', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/create', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'create'])->name('notifications.create');
+    Route::post('notifications', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'store'])->name('notifications.store');
+    Route::get('notifications/{id}', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'show'])->name('notifications.show');
+    Route::post('notifications/{id}/read', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('notifications/mark-all-read', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::post('notifications/{id}/toggle-read', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'toggleRead'])->name('notifications.toggle-read');
 });

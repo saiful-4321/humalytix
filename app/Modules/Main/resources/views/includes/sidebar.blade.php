@@ -271,6 +271,14 @@
                         <li>
                             <a href="{{ route('hrm.settings.index') }}" data-key="t-hrm-settings">General Settings</a>
                         </li>
+                        <li>
+                            <a href="{{ route('hrm.workflows.index') }}" data-key="t-workflows">Workflows</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('hrm.settings.automation') }}" data-key="t-automation">
+                                <i class="bx bx-bot me-1"></i>Automation Settings
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 @endcanany

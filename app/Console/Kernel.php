@@ -100,6 +100,37 @@ class Kernel extends ConsoleKernel
         } catch (\Exception $e) {
             \Log::error('Schedule loading error: ' . $e->getMessage());
         }
+
+        // ===== HRM WORKFLOW AUTOMATION =====
+        // Monthly leave accrual (1st of every month at midnight)
+        $schedule->command('hrm:auto-accrue-leaves')
+            ->monthlyOn(1, '00:00')
+            ->onSuccess(function () {
+                \Log::info('HRM: Monthly leave accrual completed');
+            })
+            ->onFailure(function () {
+                \Log::error('HRM: Monthly leave accrual failed');
+            });
+
+        // Daily document expiry check (every day at 9 AM)
+        $schedule->command('hrm:check-expiring-documents')
+            ->dailyAt('09:00')
+            ->onSuccess(function () {
+                \Log::info('HRM: Document expiry check completed');
+            })
+            ->onFailure(function () {
+                \Log::error('HRM: Document expiry check failed');
+            });
+
+        // Daily approval escalation (every day at 10 AM)
+        $schedule->command('hrm:escalate-approvals')
+            ->dailyAt('10:00')
+            ->onSuccess(function () {
+                \Log::info('HRM: Approval escalation completed');
+            })
+            ->onFailure(function () {
+                \Log::error('HRM: Approval escalation failed');
+            });
     }
 
     /**
