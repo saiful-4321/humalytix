@@ -16,7 +16,13 @@ class ExpenseCategory extends Model
         'name',
         'description',
         'is_active',
+        'account_id',
     ];
+
+    public function account()
+    {
+        return $this->belongsTo(\App\Modules\Finance\Models\ChartOfAccount::class, 'account_id');
+    }
 
     protected $casts = [
         'is_active' => 'boolean',

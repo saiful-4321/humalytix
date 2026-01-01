@@ -547,4 +547,12 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
     Route::post('notifications/{id}/read', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('notifications/mark-all-read', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::post('notifications/{id}/toggle-read', [\App\Modules\HRM\Http\Controllers\NotificationController::class, 'toggleRead'])->name('notifications.toggle-read');
+
+    // Analytics & Reports
+    Route::prefix('analytics')->name('analytics.')->group(function () {
+        // HR Dashboard
+        Route::get('/hr', [\App\Modules\HRM\Http\Controllers\HRDashboardController::class, 'index'])->name('hr');
+        Route::get('/hr/export-pdf', [\App\Modules\HRM\Http\Controllers\HRDashboardController::class, 'exportPDF'])->name('hr.export-pdf');
+        Route::get('/hr/export-excel', [\App\Modules\HRM\Http\Controllers\HRDashboardController::class, 'exportExcel'])->name('hr.export-excel');
+    });
 });

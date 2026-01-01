@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
             
-            $table->index(['workflowable_type', 'workflowable_id']);
+            // morphs() already creates index for workflowable_type and workflowable_id
             $table->index('status');
         });
     }

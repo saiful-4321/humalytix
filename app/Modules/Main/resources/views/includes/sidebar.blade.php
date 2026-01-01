@@ -122,163 +122,252 @@
                         </li>
                         @endcan
 
-                        {{-- People & Organization --}}
-                        <li>
-                            <a href="javascript: void(0);" class="has-arrow" data-key="t-organization">People & Org</a>
-                            <ul class="sub-menu" aria-expanded="true">
-                                @can('hrm.employees.view')
-                                <li><a href="{{ route('hrm.employees.index') }}" data-key="t-employees">Employees</a></li>
-                                @endcan
-                                @can('hrm.skills.view')
-                                <li><a href="{{ route('hrm.skills.index') }}" data-key="t-skills">Skills</a></li>
-                                @endcan
-                                <li><a href="{{ route('hrm.resignations.index') }}" data-key="t-resignations">Resignations</a></li>
-                                <li><a href="{{ route('hrm.departments.index') }}" data-key="t-settings">Settings</a></li>
-                            </ul>
-                        </li>
+                    </ul>
+                </li>
+                @endcanany
 
-                        {{-- Assets --}}
-                        @can('hrm.assets.view')
+                {{-- HRM Module --}}
+                @canany(['hrm.employees.view', 'hrm.attendance.view', 'hrm.leaves.view', 'hrm.payroll.view'])
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow">
+                        <i class="bx bx-user-circle"></i>
+                        <span data-key="t-hrm">Human Resources</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        
+                        {{-- Core HR --}}
                         <li>
-                            <a href="javascript: void(0);" class="has-arrow" data-key="t-assets-main">Asset Management</a>
-                            <ul class="sub-menu" aria-expanded="true">
-                                <li><a href="{{ route('hrm.assets.index') }}" data-key="t-assets-list">Assets List</a></li>
-                                <li><a href="{{ route('hrm.assets.my-assets') }}" data-key="t-my-assets">My Assets</a></li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-core-hr">Core HR</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                @can('hrm.employees.view')
+                                <li><a href="{{ route('hrm.employees.index') }}">Employees</a></li>
+                                @endcan
+                                <li><a href="{{ route('hrm.departments.index') }}">Departments</a></li>
+                                <li><a href="{{ route('hrm.branches.index') }}">Branches</a></li>
+                                <li><a href="{{ route('hrm.business-units.index') }}">Business Units</a></li>
+                                <li><a href="{{ route('hrm.document-types.index') }}">Document Types</a></li>
                             </ul>
                         </li>
-                        @endcan
-                        @if(!auth()->user()->can('hrm.assets.view'))
-                             <li class="{{ Route::is('hrm.assets.my-assets') ? 'active' : '' }}">
-                                <a href="{{ route('hrm.assets.my-assets') }}">
-                                    <i class="bx bx-box"></i>
-                                    <span>My Assets</span>
-                                </a>
-                            </li>
-                        @endif
 
                         {{-- Time & Attendance --}}
                         <li>
-                            <a href="javascript: void(0);" class="has-arrow" data-key="t-attendance">Time & Attendance</a>
-                            <ul class="sub-menu" aria-expanded="true">
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-attendance">Time & Attendance</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
                                 @can('hrm.attendance.view')
-                                <li><a href="{{ route('hrm.attendance.my-attendance') }}" data-key="t-my-attendance">My Attendance</a></li>
-                                <li><a href="{{ route('hrm.attendance.index') }}" data-key="t-daily-log">Daily Logs</a></li>
+                                <li><a href="{{ route('hrm.attendance.my-attendance') }}">My Attendance</a></li>
+                                <li><a href="{{ route('hrm.attendance.index') }}">Daily Logs</a></li>
                                 @endcan
-                                <li><a href="{{ route('hrm.rosters.index') }}" data-key="t-rosters">Weekly Roster</a></li>
-                                <li><a href="{{ route('hrm.shifts.index') }}" data-key="t-settings">Settings</a></li>
+                                <li><a href="{{ route('hrm.rosters.index') }}">Weekly Roster</a></li>
+                                <li><a href="{{ route('hrm.shifts.index') }}">Shift Settings</a></li>
                             </ul>
                         </li>
 
                         {{-- Leave Management --}}
                         @can('hrm.leaves.view')
                         <li>
-                            <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                <span key="t-leave">Leave Management</span>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-leave">Leave Management</span>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
-                                <li><a href="{{ route('hrm.leaves.dashboard') }}" data-key="t-leave-dashboard">Dashboard</a></li>
-                                <li><a href="{{ route('hrm.leaves.my-leaves') }}" data-key="t-my-leaves">My Leaves</a></li>
-                                <li><a href="{{ route('hrm.leaves.index') }}" data-key="t-leave-requests">Leave Requests</a></li>
-                                <li><a href="{{ route('hrm.leaves.allocations.index') }}" data-key="t-allocations">Allocations</a></li>
-                                <li><a href="{{ route('hrm.settings.leave-types.index') }}" data-key="t-settings">Settings</a></li>
+                                <li><a href="{{ route('hrm.leaves.dashboard') }}">Dashboard</a></li>
+                                <li><a href="{{ route('hrm.leaves.my-leaves') }}">My Leaves</a></li>
+                                <li><a href="{{ route('hrm.leaves.index') }}">Leave Requests</a></li>
+                                <li><a href="{{ route('hrm.leaves.allocations.index') }}">Allocations</a></li>
+                                <li><a href="{{ route('hrm.settings.leave-types.index') }}">Settings</a></li>
                             </ul>
                         </li>
                         @endcan
 
-                        {{-- Payroll --}}
+                        {{-- Compensation & Benefits --}}
                         @can('hrm.payroll.view')
                         <li>
-                            <a href="javascript: void(0);" class="has-arrow" data-key="t-payroll">Payroll</a>
-                            <ul class="sub-menu" aria-expanded="true">
-                                <li><a href="{{ route('hrm.payroll.index') }}" data-key="t-payroll-process">Process Payroll</a></li>
-                                <li><a href="{{ route('hrm.reports.salary-register') }}" data-key="t-salary-sheet">Salary Sheet</a></li>
-                                <li><a href="{{ route('hrm.bank-transfers.index') }}" data-key="t-bank-transfer">Bank Transfer</a></li>
-                                <li><a href="{{ route('hrm.bonuses.index') }}" data-key="t-bonuses">Bonuses</a></li>
-                                <li><a href="{{ route('hrm.overtime.index') }}" data-key="t-overtime">Overtime</a></li>
-                                <li><a href="{{ route('hrm.loans.index') }}" data-key="t-loans">Loans & Advances</a></li>
-                                <li><a href="{{ route('hrm.gratuity.index') }}" data-key="t-gratuity">Gratuity</a></li>
-                                <li><a href="{{ route('hrm.settings.salary-components.index') }}" data-key="t-settings">Settings</a></li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-compensation">Compensation</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('hrm.payroll.index') }}">Process Payroll</a></li>
+                                <li><a href="{{ route('hrm.reports.salary-register') }}">Salary Sheet</a></li>
+                                <li><a href="{{ route('hrm.bank-transfers.index') }}">Bank Transfer</a></li>
+                                <li><a href="{{ route('hrm.bonuses.index') }}">Bonuses</a></li>
+                                <li><a href="{{ route('hrm.overtime.index') }}">Overtime</a></li>
+                                <li><a href="{{ route('hrm.loans.index') }}">Loans & Advances</a></li>
+                                <li><a href="{{ route('hrm.gratuity.index') }}">Gratuity</a></li>
+                                <li><a href="{{ route('hrm.settings.salary-components.index') }}">Settings</a></li>
                             </ul>
                         </li>
                         @endcan
 
                         {{-- Expense Management --}}
                         @can('hrm.expenses.view')
-                        <li>
-                             <a href="javascript: void(0);" class="has-arrow" data-key="t-expenses">Expense Management</a>
-                             <ul class="sub-menu" aria-expanded="true">
-                                <li><a href="{{ route('hrm.expenses.index') }}">Expenses</a></li>
-                             </ul>
-                        </li>
+                        <li><a href="{{ route('hrm.expenses.index') }}">Expenses</a></li>
                         @endcan
 
-                        {{-- Performance Management --}}
-                        @can('hrm.performance.view')
-                        <li>
-                            <a href="javascript: void(0);" class="has-arrow" data-key="t-performance">Performance</a>
-                            <ul class="sub-menu" aria-expanded="true">
-                                <li><a href="{{ route('hrm.kpis.index') }}" data-key="t-kpis">KPIs / KRAs</a></li>
-                                <li><a href="{{ route('hrm.okrs.index') }}" data-key="t-okrs">OKRs</a></li>
-                                <li><a href="{{ route('hrm.performance-goals.index') }}" data-key="t-goals">Goals</a></li>
-                                <li><a href="{{ route('hrm.appraisals-360.index') }}" data-key="t-appraisals-360">360° Appraisals</a></li>
-                                <li><a href="{{ route('hrm.competencies.index') }}" data-key="t-competencies">Competencies</a></li>
-                                <li><a href="{{ route('hrm.pips.index') }}" data-key="t-pips">PIPs</a></li>
-                            </ul>
-                        </li>
+                        {{-- Asset Management --}}
+                        @can('hrm.assets.view')
+                        <li><a href="{{ route('hrm.assets.index') }}">Assets</a></li>
                         @endcan
+                        
+                        @cannot('hrm.assets.view')
+                        <li><a href="{{ route('hrm.assets.my-assets') }}">My Assets</a></li>
+                        @endcannot
 
-                        {{-- Training & L&D --}}
-                        @canany(['hrm.trainings.view', 'hrm.certifications.view'])
+                        {{-- Talent Management --}}
                         <li>
                             <a href="javascript: void(0);" class="has-arrow">
-                                <i data-feather="book-open"></i>
-                                <span data-key="t-training">Training & L&D</span>
+                                <span data-key="t-talent">Talent Management</span>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
-                                <li><a href="{{ route('hrm.trainings.dashboard') }}" data-key="t-training-dashboard">Dashboard</a></li>
-                                @can('hrm.trainings.view')
-                                <li><a href="{{ route('hrm.trainings.index') }}" data-key="t-training-programs">Training Programs</a></li>
-                                <li><a href="{{ route('hrm.trainings.my-trainings') }}" data-key="t-my-trainings">My Trainings</a></li>
+                                {{-- Performance --}}
+                                @can('hrm.performance.view')
+                                <li>
+                                    <a href="javascript: void(0);" class="has-arrow">
+                                        <span>Performance</span>
+                                    </a>
+                                    <ul class="sub-menu" aria-expanded="false">
+                                        <li><a href="{{ route('hrm.kpis.index') }}">KPIs / KRAs</a></li>
+                                        <li><a href="{{ route('hrm.okrs.index') }}">OKRs</a></li>
+                                        <li><a href="{{ route('hrm.performance-goals.index') }}">Goals</a></li>
+                                        <li><a href="{{ route('hrm.appraisals-360.index') }}">360° Appraisals</a></li>
+                                        <li><a href="{{ route('hrm.competencies.index') }}">Competencies</a></li>
+                                        <li><a href="{{ route('hrm.pips.index') }}">PIPs</a></li>
+                                    </ul>
+                                </li>
                                 @endcan
-                                @can('hrm.skills.view')
-                                <li><a href="{{ route('hrm.skills.matrix') }}" data-key="t-skill-matrix">Skill Matrix</a></li>
-                                <li><a href="{{ route('hrm.skills.index') }}" data-key="t-skills">Skills List</a></li>
-                                @endcan
-                                @can('hrm.certifications.view')
-                                <li><a href="{{ route('hrm.certifications.index') }}" data-key="t-certifications">Certifications</a></li>
-                                @endcan
+
+                                {{-- Training & L&D --}}
+                                @canany(['hrm.trainings.view', 'hrm.certifications.view'])
+                                <li>
+                                    <a href="javascript: void(0);" class="has-arrow">
+                                        <span>Training & L&D</span>
+                                    </a>
+                                    <ul class="sub-menu" aria-expanded="false">
+                                        <li><a href="{{ route('hrm.trainings.dashboard') }}">Dashboard</a></li>
+                                        @can('hrm.trainings.view')
+                                        <li><a href="{{ route('hrm.trainings.index') }}">Training Programs</a></li>
+                                        <li><a href="{{ route('hrm.trainings.my-trainings') }}">My Trainings</a></li>
+                                        @endcan
+                                        @can('hrm.skills.view')
+                                        <li><a href="{{ route('hrm.skills.matrix') }}">Skill Matrix</a></li>
+                                        <li><a href="{{ route('hrm.skills.index') }}">Skills List</a></li>
+                                        @endcan
+                                        @can('hrm.certifications.view')
+                                        <li><a href="{{ route('hrm.certifications.index') }}">Certifications</a></li>
+                                        @endcan
+                                    </ul>
+                                </li>
+                                @endcanany
                             </ul>
                         </li>
-                        @endcanany
 
-                        {{-- Compliance --}}
+                        {{-- Compliance & Documents --}}
                         <li>
-                            <a href="javascript: void(0);" class="has-arrow waves-effect">
-                                <i class="bx bx-file"></i>
-                                <span key="t-compliance">Compliance</span>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-compliance">Compliance</span>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
-                                <li><a href="{{ route('hrm.policies.index') }}" key="t-policies">Policy Library</a></li>
-                                <li><a href="{{ route('hrm.contracts.index') }}" key="t-contracts">Contracts (Admin)</a></li>
-                                <li><a href="{{ route('hrm.contracts.my') }}" key="t-my-contracts">My Contracts</a></li>
-                                <li><a href="{{ route('hrm.documents.expiry') }}" key="t-doc-expiry">Expiry Tracker</a></li>
+                                <li><a href="{{ route('hrm.policies.index') }}">Policy Library</a></li>
+                                <li><a href="{{ route('hrm.contracts.index') }}">Contracts (Admin)</a></li>
+                                <li><a href="{{ route('hrm.contracts.my') }}">My Contracts</a></li>
+                                <li><a href="{{ route('hrm.documents.expiry') }}">Expiry Tracker</a></li>
                             </ul>
                         </li>
 
+                        {{-- Analytics & Reports --}}
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-analytics">Analytics & Reports</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('hrm.analytics.hr') }}">HR Dashboard</a></li>
+                            </ul>
+                        </li>
 
+                        {{-- Automation & Workflows --}}
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-automation-workflows">Automation</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('hrm.workflows.index') }}">Workflows</a></li>
+                                <li><a href="{{ route('hrm.settings.automation') }}">Settings</a></li>
+                            </ul>
+                        </li>
 
                         {{-- Settings --}}
+                        <li><a href="{{ route('hrm.settings.index') }}">Settings</a></li>
+
+                    </ul>
+                </li>
+                @endcanany
+
+                {{-- Finance Module --}}
+                @canany(['finance-module'])
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow">
+                        <i class="bx bx-money"></i>
+                        <span data-key="t-finance">Finance</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('finance.dashboard') }}" data-key="t-finance-dashboard">Dashboard</a></li>
+                        
+                        @can('finance-coa-list')
+                        <li><a href="{{ route('finance.accounts.index') }}" data-key="t-finance-accounts">Chart of Accounts</a></li>
+                        @endcan
+                        
+                        @can('finance-journal-list')
+                        <li><a href="{{ route('finance.journals.index') }}" data-key="t-finance-journals">Journals</a></li>
+                        @endcan
+                        
+                        {{-- Reports --}}
                         <li>
-                            <a href="{{ route('hrm.settings.index') }}" data-key="t-hrm-settings">General Settings</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('hrm.workflows.index') }}" data-key="t-workflows">Workflows</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('hrm.settings.automation') }}" data-key="t-automation">
-                                <i class="bx bx-bot me-1"></i>Automation Settings
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-finance-reports">Reports</span>
                             </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                @can('finance-report-trial-balance')
+                                <li><a href="{{ route('finance.reports.trial-balance') }}" data-key="t-finance-tb">Trial Balance</a></li>
+                                @endcan
+                                @can('finance-report-balance-sheet')
+                                <li><a href="{{ route('finance.reports.balance-sheet') }}" data-key="t-finance-bs">Balance Sheet</a></li>
+                                @endcan
+                                @can('finance-report-pl')
+                                <li><a href="{{ route('finance.reports.profit-loss') }}" data-key="t-finance-pl">Profit & Loss</a></li>
+                                @endcan
+                                @can('finance-report-ledger')
+                                <li><a href="{{ route('finance.reports.ledger') }}" data-key="t-finance-ledger">General Ledger</a></li>
+                                @endcan
+                                @can('finance-report-cashbook')
+                                <li><a href="{{ route('finance.reports.cashbook') }}" data-key="t-finance-cashbook">Cashbook</a></li>
+                                @endcan
+                                @can('finance-report-bankbook')
+                                <li><a href="{{ route('finance.reports.bankbook') }}" data-key="t-finance-bankbook">Bankbook</a></li>
+                                @endcan
+                                @can('finance-report-summary')
+                                <li><a href="{{ route('finance.reports.summary') }}" data-key="t-finance-summary">Payment/Receipt Summary</a></li>
+                                @endcan
+                                @can('finance-report-dishonoured')
+                                <li><a href="{{ route('finance.reports.dishonoured') }}" data-key="t-finance-dishonoured">Cheque Dishonour</a></li>
+                                @endcan
+                                <li><a href="{{ route('finance.reports.retained-earnings') }}" data-key="t-finance-re">Retained Earnings</a></li>
+                                <li><a href="{{ route('finance.reports.bank-transfer') }}" data-key="t-finance-transfer">Bank Transfer</a></li>
+                                <li><a href="{{ route('finance.reports.voucher-wise') }}" data-key="t-finance-voucher">Voucher-wise Transactions</a></li>
+                            </ul>
                         </li>
+
+                        @can('finance-settings-manage')
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">
+                                <span data-key="t-finance-settings">Settings</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('finance.settings.mapping') }}" data-key="t-finance-mapping">Mappings</a></li>
+                            </ul>
+                        </li>
+                        @endcan
                     </ul>
                 </li>
                 @endcanany

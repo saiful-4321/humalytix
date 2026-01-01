@@ -13,10 +13,20 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            // Core System Seeders
             UserSeeder::class,
             PermissionsSeeder::class,
             SettingsSeeder::class,
-            \App\Modules\HRM\database\seeders\HRMSeeder::class,
+            
+            // HRM Module Seeders
+            \App\Modules\HRM\database\seeders\HRMPermissionSeeder::class, // HRM Permissions first
+            \App\Modules\HRM\database\seeders\HRMSeeder::class, // Then all HRM data
+
+            // Finance Module Seeders
+            \App\Modules\Finance\database\seeders\FinancePermissionSeeder::class,
+            \App\Modules\Finance\database\seeders\FinanceSeeder::class,
         ]);
+        
+        $this->command->info('✅ All seeders completed successfully!');
     }
 }

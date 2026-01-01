@@ -40,6 +40,7 @@ class PermissionsSeeder extends Seeder
                 ['id' => 4, 'name' => 'System', 'status' => 1, 'created_at' => now()],
                 ['id' => 5, 'name' => 'Settings', 'status' => 1, 'created_at' => now()],
                 ['id' => 6, 'name' => 'Documentation', 'status' => 1, 'created_at' => now()],
+                ['id' => 7, 'name' => 'Finance', 'status' => 1, 'created_at' => now()],
             ]);
 
             // Define permissions for different modules
@@ -83,6 +84,18 @@ class PermissionsSeeder extends Seeder
                 [
                     'module_id' => 6,
                     'permissions' => ['api-documentation']
+                ],
+                // Permissions for module_id 7 (Finance)
+                [
+                    'module_id' => 7,
+                    'permissions' => [
+                        'finance-module', 'finance-dashboard',
+                        'finance-coa-list', 'finance-coa-create', 'finance-coa-update', 'finance-coa-delete',
+                        'finance-journal-list', 'finance-journal-create', 'finance-journal-update', 'finance-journal-delete', 'finance-journal-view',
+                        'finance-report-trial-balance', 'finance-report-balance-sheet', 'finance-report-pl',
+                        'finance-report-cashbook', 'finance-report-bankbook', 'finance-report-ledger', 'finance-report-summary', 'finance-report-dishonoured',
+                        'finance-settings-manage'
+                    ]
                 ],
             ];
 

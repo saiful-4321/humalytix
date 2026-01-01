@@ -19,6 +19,8 @@ class AssetCategory extends Model
         'is_active',
         'depreciation_rate',
         'useful_life_years',
+        'depreciation_expense_account_id',
+        'accumulated_depreciation_account_id',
     ];
 
     protected $casts = [
@@ -29,5 +31,15 @@ class AssetCategory extends Model
     public function assets(): HasMany
     {
         return $this->hasMany(Asset::class, 'asset_category_id');
+    }
+
+    public function depreciationAccount()
+    {
+        return $this->belongsTo(\App\Modules\Finance\Models\ChartOfAccount::class, 'depreciation_expense_account_id');
+    }
+
+    public function accumulatedAccount()
+    {
+        return $this->belongsTo(\App\Modules\Finance\Models\ChartOfAccount::class, 'accumulated_depreciation_account_id');
     }
 }

@@ -14,33 +14,13 @@ class ComplianceSeeder extends Seeder
 {
     public function run()
     {
-        // 1. Create/Get Compliance Module
-        $module = \App\Modules\Main\Models\Module::firstOrCreate(['name' => 'Compliance', 'status' => 1]);
+        // Permissions are now seeded in HRMPermissionSeeder
+        // This seeder only creates sample data
+        
+        // Get employees for assigning contracts
+        $employees = Employee::limit(10)->get();
 
-        // 2. Seed Permissions
-        $permissions = [
-            'hrm.policies.view', 'hrm.policies.create', 'hrm.policies.edit', 'hrm.policies.delete',
-            'hrm.contracts.view_all', 'hrm.contracts.create', 'hrm.contracts.delete',
-            'hrm.documents.view_all',
-        ];
-
-        foreach ($permissions as $p) {
-            Permission::firstOrCreate([
-                'name' => $p, 
-                'guard_name' => 'web',
-                'module_id' => $module->id // Fixed: Included module_id
-            ]);
-        }
-
-        // Assign to Admin Role
-        $adminRole = Role::where('name', 'Admin')->first();
-        if ($adminRole) {
-             // Spatie uses name to sync, but we inserted with module_id. 
-             // Ideally we pass objects or names. Spatie handles connection via model.
-             $adminRole->givePermissionTo($permissions);
-        }
-
-        // 2. Seed Policies
+        // Seed Policies
         if (Policy::count() == 0) {
             Policy::create([
                 'title' => 'Employee Handbook 2024',
