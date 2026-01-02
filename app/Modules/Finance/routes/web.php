@@ -13,6 +13,7 @@ Route::middleware(['web', 'auth'])->prefix('dashboard/finance')->name('finance.'
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Chart of Accounts
+    Route::get('accounts/export', [ChartOfAccountController::class, 'export'])->name('accounts.export');
     Route::resource('accounts', ChartOfAccountController::class);
 
     // Journals

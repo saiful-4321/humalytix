@@ -10,17 +10,63 @@ use Illuminate\Support\Facades\DB;
 
 class ChartOfAccountController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Fetch hierarchical data
-        $accounts = ChartOfAccount::with('type', 'children')
-            ->whereNull('parent_id')
-            ->orderBy('code')
-            ->get();
-            
-        $accountTypes = AccountType::all();
+        $sort = $request->get('sort', 'default');
+        
+        // Fetch Account Types with Root Accounts eager loaded
+        $accountTypes = AccountType::with(['accounts' => function($query) use ($sort) {
+            $query->whereNull('parent_id')->with(['children' => function($q) use ($sort) {
+                // Apply sort to children too if needed, or just roots? usually tree sort is by code.
+                // But user asked for "created date, desc wise".
+                if ($sort == 'date_desc') {
+                    $q->orderBy('created_at', 'desc');
+                } else {
+                    $q->orderBy('code', 'asc');
+                }
+            }]);
 
-        return view('Finance::pages.accounts.index', compact('accounts', 'accountTypes'));
+            if ($sort == 'date_desc') {
+                $query->orderBy('created_at', 'desc');
+            } else {
+                $query->orderBy('code', 'asc');
+            }
+        }])->get();
+
+        return view('Finance::pages.accounts.index', compact('accountTypes', 'sort'));
+    }
+
+    public function export(Request $request)
+    {
+        $type = $request->get('type', 'excel');
+        $accounts = ChartOfAccount::with('type')->orderBy('code')->get();
+
+        // Flatten for Excel/CSV
+        if ($type == 'excel' || $type == 'csv') {
+            $list = $accounts->map(function ($account) {
+                return [
+                    'Code' => $account->code,
+                    'Name' => $account->name,
+                    'Type' => $account->type->name ?? '',
+                    'Group' => $account->is_group ? 'Yes' : 'No',
+                    'Parent Code' => $account->parent ? $account->parent->code : '-',
+                    'Description' => $account->description,
+                ];
+            });
+
+            if ($type == 'csv') {
+                return (new \Rap2hpoutre\FastExcel\FastExcel($list))->download('chart_of_accounts.csv');
+            }
+            return (new \Rap2hpoutre\FastExcel\FastExcel($list))->download('chart_of_accounts.xlsx');
+        }
+
+        // PDF Export
+        if ($type == 'pdf') {
+            $pdf = \PDF::loadView('Finance::pages.accounts.pdf_export', compact('accounts'));
+            return $pdf->download('chart_of_accounts.pdf');
+        }
+
+        return redirect()->back();
     }
 
     public function store(Request $request)
