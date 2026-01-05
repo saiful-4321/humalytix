@@ -17,8 +17,10 @@ Route::middleware(['web', 'auth'])->prefix('dashboard/finance')->name('finance.'
     Route::resource('accounts', ChartOfAccountController::class);
 
     // Journals
+    Route::get('journals/export', [JournalController::class, 'export'])->name('journals.export');
     Route::resource('journals', JournalController::class);
     Route::post('journals/{id}/post', [JournalController::class, 'post'])->name('journals.post');
+    Route::get('journals/{id}/print', [JournalController::class, 'print'])->name('journals.print');
 
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {

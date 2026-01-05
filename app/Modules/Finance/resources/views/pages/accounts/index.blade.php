@@ -57,39 +57,39 @@
                 </div>
             </div>
             
-            <div class="card-body p-3 bg-light-subtle mt-3">
+            <div class="card-body p-3 bg-transparent mt-3">
                 <div class="row g-3 flex-nowrap overflow-auto pb-3" style="scroll-behavior: smooth;">
                     @foreach($accountTypes as $type)
-                    <div class="col-xl-4 col-lg-4 col-md-6 " style="min-width: 320px;">
-                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden bg-white">
-                            <div class="card-header border-bottom border-light py-3 d-flex align-items-center justify-content-between">
-                                <h5 class="card-title mb-0 text-uppercase fs-14 fw-bold text-primary d-flex align-items-center flex-grow-1">
-                                    <span class="bg-primary-subtle text-primary rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                        <i class="fas fa-layer-group fs-14"></i>
-                                    </span>
-                                    {{ $type->name }}
-                                </h5>
-                                <button class="btn btn-sm btn-soft-primary add-sub-account" 
-                                        data-bs-toggle="offcanvas" data-bs-target="#addAccountOffcanvas" 
-                                        data-type-id="{{ $type->id }}" data-parent-id="" title="Add Top-Level {{ $type->name }}">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                            <div class="card-body p-2" style="max-height: 75vh; overflow-y: auto;">
-                                <ul class="list-unstyled account-tree m-0" id="tree-type-{{ $type->id }}">
-                                    @foreach($type->accounts as $account)
-                                        @include('Finance::pages.accounts.tree-node', ['account' => $account])
-                                    @endforeach
-                                    @if($type->accounts->isEmpty())
-                                        <div class="text-center bg-white py-5">
-                                            <i class="fas fa-folder-open text-muted opacity-25" style="font-size: 3rem;"></i>
-                                            <p class="text-muted fs-13 mt-2">No accounts in this group</p>
-                                        </div>
-                                    @endif
-                                </ul>
+                        <div class="col-xl-4 col-lg-4 col-md-6 " style="min-width: 320px;">
+                            <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden bg-white">
+                                <div class="card-header border-bottom border-light py-3 d-flex align-items-center justify-content-between">
+                                    <h5 class="card-title mb-0 text-uppercase fs-14 fw-bold text-primary d-flex align-items-center flex-grow-1">
+                                        <span class="bg-primary-subtle text-primary rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                            <i class="fas fa-layer-group fs-14"></i>
+                                        </span>
+                                        {{ $type->name }}
+                                    </h5>
+                                    <button class="btn btn-sm btn-soft-primary add-sub-account" 
+                                            data-bs-toggle="offcanvas" data-bs-target="#addAccountOffcanvas" 
+                                            data-type-id="{{ $type->id }}" data-parent-id="" title="Add Top-Level {{ $type->name }}">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <div class="card-body p-2" style="max-height: 75vh; overflow-y: auto;">
+                                    <ul class="list-unstyled account-tree m-0" id="tree-type-{{ $type->id }}">
+                                        @foreach($type->accounts as $account)
+                                            @include('Finance::pages.accounts.tree-node', ['account' => $account])
+                                        @endforeach
+                                        @if($type->accounts->isEmpty())
+                                            <div class="text-center bg-white py-5">
+                                                <i class="fas fa-folder-open text-muted opacity-25" style="font-size: 3rem;"></i>
+                                                <p class="text-muted fs-13 mt-2">No accounts in this group</p>
+                                            </div>
+                                        @endif
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     @endforeach
                 </div>
                 
@@ -106,45 +106,41 @@
 </div>
 
 {{-- Filter Offcanvas --}}
-<div class="offcanvas offcanvas-end border-0" tabindex="-1" id="filterOffcanvas">
-    <div class="offcanvas-header bg-light">
-        <h5 class="offcanvas-title" id="filterOffcanvasLabel"><i class="fas fa-filter me-2 text-muted"></i> Filter Accounts</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+<x-offcanvas id="filterOffcanvas" title="<i class='fas fa-filter me-2 text-muted'></i> Filter Accounts">
+    <div class="mb-4">
+        <label class="form-label text-muted fs-12 text-uppercase fw-bold">Name</label>
+        <div class="input-group">
+            <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+            <input type="text" id="filter-name" class="form-control" placeholder="Search by name...">
+        </div>
     </div>
-    <div class="offcanvas-body">
-        <div class="mb-4">
-            <label class="form-label text-muted fs-12 text-uppercase fw-bold">Name</label>
-            <div class="input-group">
-                <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-                <input type="text" id="filter-name" class="form-control" placeholder="Search by name...">
-            </div>
+    <div class="mb-4">
+        <label class="form-label text-muted fs-12 text-uppercase fw-bold">Code</label>
+        <div class="input-group">
+            <span class="input-group-text bg-white"><i class="fas fa-hashtag text-muted"></i></span>
+            <input type="text" id="filter-code" class="form-control" placeholder="Search by code...">
         </div>
-        <div class="mb-4">
-            <label class="form-label text-muted fs-12 text-uppercase fw-bold">Code</label>
-            <div class="input-group">
-                <span class="input-group-text bg-white"><i class="fas fa-hashtag text-muted"></i></span>
-                <input type="text" id="filter-code" class="form-control" placeholder="Search by code...">
-            </div>
-        </div>
-        {{-- Sort Options --}}
-        <div class="mb-4">
-           <label class="form-label text-muted fs-12 text-uppercase fw-bold">Sort By</label>
-           <div class="input-group">
-               <span class="input-group-text bg-white"><i class="fas fa-sort text-muted"></i></span>
-               <select id="filter-sort" class="form-select">
-                   <option value="default">Default (Code)</option>
-                   <option value="date_desc">Created Date (Newest First)</option>
-                   <option value="date_asc">Created Date (Oldest First)</option>
-               </select>
-           </div>
-        </div>
+    </div>
+    {{-- Sort Options --}}
+    <div class="mb-4">
+       <label class="form-label text-muted fs-12 text-uppercase fw-bold">Sort By</label>
+       <div class="input-group">
+           <span class="input-group-text bg-white"><i class="fas fa-sort text-muted"></i></span>
+           <select id="filter-sort" class="form-select">
+               <option value="default">Default (Code)</option>
+               <option value="date_desc">Created Date (Newest First)</option>
+               <option value="date_asc">Created Date (Oldest First)</option>
+           </select>
+       </div>
+    </div>
 
+    <x-slot:footer>
         <div class="d-grid gap-2">
             <button class="btn btn-primary" id="btn-filter" data-bs-dismiss="offcanvas"><i class="fas fa-check me-1"></i> Apply Filter</button>
             <button class="btn btn-light" id="btn-reset"><i class="fas fa-undo me-1"></i> Reset</button>
         </div>
-    </div>
-</div>
+    </x-slot:footer>
+</x-offcanvas>
 
 <style>
     .tree-item {
@@ -443,68 +439,64 @@
 </script>
 
 <!-- Add Account Offcanvas -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="addAccountOffcanvas" aria-labelledby="addAccountLabel">
-    <div class="offcanvas-header bg-light">
-        <h5 class="offcanvas-title" id="addAccountLabel"><i class="fas fa-plus-circle me-2 text-primary"></i> Add Account</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <form action="{{ route('finance.accounts.store') }}" method="POST">
-            @csrf
-            <div class="mb-3">
-                <label for="code" class="form-label text-muted fs-12 fw-bold text-uppercase">Account Code <span class="text-danger">*</span></label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-hashtag text-muted"></i></span>
-                    <input type="text" class="form-control" id="code" name="code" required placeholder="e.g. 1001">
-                </div>
+<x-offcanvas id="addAccountOffcanvas" title="<i class='fas fa-plus-circle me-2 text-primary'></i> Add Account">
+    <form id="addAccountForm" action="{{ route('finance.accounts.store') }}" method="POST">
+        @csrf
+        <div class="mb-3">
+            <label for="code" class="form-label text-muted fs-12 fw-bold text-uppercase">Account Code <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fas fa-hashtag text-muted"></i></span>
+                <input type="text" class="form-control" id="code" name="code" required placeholder="e.g. 1001">
             </div>
-            <div class="mb-3">
-                <label for="name" class="form-label text-muted fs-12 fw-bold text-uppercase">Account Name <span class="text-danger">*</span></label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-font text-muted"></i></span>
-                    <input type="text" class="form-control" id="name" name="name" required placeholder="e.g. Petty Cash">
-                </div>
+        </div>
+        <div class="mb-3">
+            <label for="name" class="form-label text-muted fs-12 fw-bold text-uppercase">Account Name <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fas fa-font text-muted"></i></span>
+                <input type="text" class="form-control" id="name" name="name" required placeholder="e.g. Petty Cash">
             </div>
-            <div class="mb-3">
-                <label for="type_id" class="form-label text-muted fs-12 fw-bold text-uppercase">Account Type <span class="text-danger">*</span></label>
-                <select class="form-select" id="type_id" name="type_id" required>
-                    <option value="">Select Type</option>
-                    @foreach($accountTypes as $type)
-                        <option value="{{ $type->id }}">{{ $type->name }} ({{ $type->normal_balance }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="parent_id" class="form-label text-muted fs-12 fw-bold text-uppercase">Parent Account</label>
-                <select class="form-select" id="parent_id" name="parent_id">
-                    <option value="">None (Top Level)</option>
-                    @foreach($accountTypes as $type)
-                        <optgroup label="{{ $type->name }}" data-type-id="{{ $type->id }}">
-                            @foreach($type->accounts as $acc)
-                                <option value="{{ $acc->id }}">{{ $acc->code }} - {{ $acc->name }}</option>
-                                @foreach($acc->children as $child)
-                                     <option value="{{ $child->id }}">&nbsp;&nbsp; {{ $child->code }} - {{ $child->name }}</option>
-                                @endforeach
+        </div>
+        <div class="mb-3">
+            <label for="type_id" class="form-label text-muted fs-12 fw-bold text-uppercase">Account Type <span class="text-danger">*</span></label>
+            <select class="form-select" id="type_id" name="type_id" required>
+                <option value="">Select Type</option>
+                @foreach($accountTypes as $type)
+                    <option value="{{ $type->id }}">{{ $type->name }} ({{ $type->normal_balance }})</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="parent_id" class="form-label text-muted fs-12 fw-bold text-uppercase">Parent Account</label>
+            <select class="form-select" id="parent_id" name="parent_id">
+                <option value="">None (Top Level)</option>
+                @foreach($accountTypes as $type)
+                    <optgroup label="{{ $type->name }}" data-type-id="{{ $type->id }}">
+                        @foreach($type->accounts as $acc)
+                            <option value="{{ $acc->id }}">{{ $acc->code }} - {{ $acc->name }}</option>
+                            @foreach($acc->children as $child)
+                                 <option value="{{ $child->id }}">&nbsp;&nbsp; {{ $child->code }} - {{ $child->name }}</option>
                             @endforeach
-                        </optgroup>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-3 form-check bg-light p-3 rounded border">
-                <input type="checkbox" class="form-check-input" id="is_group" name="is_group" value="1">
-                <label class="form-check-label fw-bold" for="is_group">Is this a Group Account?</label>
-                <small class="d-block text-muted mt-1">Group accounts can have sub-accounts but cannot record transactions directly.</small>
-            </div>
-            <div class="mb-3">
-                <label for="description" class="form-label text-muted fs-12 fw-bold text-uppercase">Description</label>
-                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary btn-lg shadow-sm"><i class="fas fa-save me-1"></i> Save Account</button>
-            </div>
-        </form>
-    </div>
-</div>
+                        @endforeach
+                    </optgroup>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3 form-check bg-light p-3 rounded border">
+            <input type="checkbox" class="form-check-input" id="is_group" name="is_group" value="1">
+            <label class="form-check-label fw-bold" for="is_group">Is this a Group Account?</label>
+            <small class="d-block text-muted mt-1">Group accounts can have sub-accounts but cannot record transactions directly.</small>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label text-muted fs-12 fw-bold text-uppercase">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+    </form>
+    <x-slot:footer>
+        <div class="d-grid w-100">
+            <button type="submit" form="addAccountForm" class="btn btn-primary btn-lg shadow-sm"><i class="fas fa-save me-1"></i> Save Account</button>
+        </div>
+    </x-slot:footer>
+</x-offcanvas>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

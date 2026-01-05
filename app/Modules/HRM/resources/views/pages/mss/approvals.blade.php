@@ -1,31 +1,29 @@
-@extends('HRM::layouts.master')
+@extends('Main::layouts.app')
 
 @section('title', 'Pending Approvals | MSS')
 
 @section('content')
-<div class="main-content">
-    <div class="page-content">
-        <div class="container-fluid">
+<div class="container-fluid">
 
-            <!-- Page Title -->
-             <div class="row">
-                <div class="col-12">
-                    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0 font-size-18">Pending Approvals</h4>
-                        <div class="page-title-right">
-                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="{{ route('hrm.mss.dashboard') }}">MSS</a></li>
-                                <li class="breadcrumb-item active">Approvals</li>
-                            </ol>
-                        </div>
-                    </div>
+    <!-- Page Title -->
+     <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">Pending Approvals</h4>
+                <div class="page-title-right">
+                     <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{{ route('hrm.mss.dashboard') }}">MSS</a></li>
+                        <li class="breadcrumb-item active">Approvals</li>
+                    </ol>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
 
                             <!-- Nav tabs -->
                             <ul class="nav nav-tabs nav-tabs-custom nav-justified" role="tablist">
@@ -185,8 +183,6 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
 <!-- Reject Modal -->
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">

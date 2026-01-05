@@ -28,6 +28,23 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm mb-0" style="font-family: 'Courier New', monospace; font-size: 13px;">
+                        @php
+                            $liabilityTotal = 0;
+                            $equityTotal = 0;
+                            $assetTotal = 0;
+                            
+                            // Calculate totals
+                            foreach(($data['2'] ?? []) as $item) $liabilityTotal += $item['balance'];
+                            foreach(($data['3'] ?? []) as $item) $equityTotal += $item['balance'];
+                            foreach(($data['1'] ?? []) as $item) $assetTotal += $item['balance'];
+                            
+                            $liabilities = array_values($data['2'] ?? []);
+                            $equity = array_values($data['3'] ?? []);
+                            $assets = array_values($data['1'] ?? []);
+                            
+                            $assetIndex = 0;
+                            $assetCount = count($assets);
+                        @endphp
                         <thead class="table-light">
                             <tr>
                                 <th colspan="4" class="text-center py-3">
@@ -36,100 +53,138 @@
                                 </th>
                             </tr>
                             <tr class="fw-bold">
-                                <th width="40%">LIABILITIES</th>
-                                <th width="10%" class="text-end">Amount</th>
+                                <th width="40%">LIABILITIES & EQUITY</th>
+                                <th width="10%" class="text-end">{{ number_format($liabilityTotal + $equityTotal + $retainedEarnings, 2) }}</th>
                                 <th width="40%">ASSETS</th>
-                                <th width="10%" class="text-end">Amount</th>
+                                <th width="10%" class="text-end">{{ number_format($assetTotal, 2) }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @php
-                                $liabilityTotal = 0;
-                                $equityTotal = 0;
-                                $assetTotal = 0;
-                                
-                                // Calculate totals
-                                foreach(($data['2'] ?? []) as $item) $liabilityTotal += $item['balance'];
-                                foreach(($data['3'] ?? []) as $item) $equityTotal += $item['balance'];
-                                foreach(($data['1'] ?? []) as $item) $assetTotal += $item['balance'];
-                                
-                                $liabilities = array_values($data['2'] ?? []);
-                                $equity = array_values($data['3'] ?? []);
-                                $assets = array_values($data['1'] ?? []);
-                            @endphp
                             
-                            <!-- LIABILITIES HEADER -->
+                            <!-- LIABILITIES SECTION HEADER -->
                             <tr class="table-secondary">
-                                <td class="fw-bold ps-2">LIABILITIES</td>
-                                <td></td>
-                                <td class="fw-bold ps-2">ASSETS</td>
-                                <td></td>
+                                <td colspan="2" class="fw-bold ps-2">Liabilities</td>
+                                <!-- PRINT ASSET IF AVAILABLE -->
+                                @if($assetIndex < $assetCount)
+                                    <td class="ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                    <td class="text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                    @php $assetIndex++; @endphp
+                                @else
+                                    <td></td><td></td>
+                                @endif
                             </tr>
                             
-                            <!-- LIABILITIES ITEMS vs ASSETS ITEMS -->
-                            @for($i = 0; $i < max(count($liabilities), count($assets)); $i++)
+                            <!-- LIABILITIES ITEMS -->
+                            @foreach($liabilities as $liab)
                                 <tr>
-                                    <!-- Left: Liabilities -->
-                                    @if($i < count($liabilities))
-                                        <td class="ps-4">{{ $liabilities[$i]['account']->name ?? 'N/A' }}</td>
-                                        <td class="text-end">{{ number_format($liabilities[$i]['balance'] ?? 0, 2) }}</td>
-                                    @else
-                                        <td></td>
-                                        <td></td>
-                                    @endif
+                                    <td class="ps-4">{{ $liab['account']->name ?? 'N/A' }}</td>
+                                    <td class="text-end">{{ number_format($liab['balance'] ?? 0, 2) }}</td>
                                     
-                                    <!-- Right: Assets -->
-                                    @if($i < count($assets))
-                                        <td class="ps-4">{{ $assets[$i]['account']->name ?? 'N/A' }}</td>
-                                        <td class="text-end">{{ number_format($assets[$i]['balance'] ?? 0, 2) }}</td>
+                                    @if($assetIndex < $assetCount)
+                                        <td class="ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                        <td class="text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                        @php $assetIndex++; @endphp
                                     @else
-                                        <td></td>
-                                        <td></td>
+                                        <td></td><td></td>
                                     @endif
                                 </tr>
-                            @endfor
+                            @endforeach
                             
-                            <!-- LIABILITIES SUBTOTAL -->
+                            <!-- TOTAL LIABILITIES -->
                             <tr class="fw-bold">
                                 <td class="ps-3">Total Liabilities</td>
                                 <td class="text-end">{{ number_format($liabilityTotal, 2) }}</td>
-                                <td colspan="2"></td>
+                                
+                                @if($assetIndex < $assetCount)
+                                    <td class="fw-normal ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                    <td class="fw-normal text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                    @php $assetIndex++; @endphp
+                                @else
+                                    <td></td><td></td>
+                                @endif
+                            </tr>
+
+                            <!-- SPACER -->
+                            <tr>
+                                <td colspan="2" class="p-1"></td>
+                                @if($assetIndex < $assetCount)
+                                    <td class="ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                    <td class="text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                    @php $assetIndex++; @endphp
+                                @else
+                                    <td></td><td></td>
+                                @endif
                             </tr>
                             
-                            <tr><td colspan="4" class="p-1"></td></tr>
-                            
-                            <!-- EQUITY HEADER -->
+                            <!-- EQUITY SECTION HEADER -->
                             <tr class="table-secondary">
-                                <td class="fw-bold ps-2">EQUITY</td>
-                                <td></td>
-                                <td colspan="2"></td>
+                                <td colspan="2" class="fw-bold ps-2">Equity</td>
+                                @if($assetIndex < $assetCount)
+                                    <td class="ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                    <td class="text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                    @php $assetIndex++; @endphp
+                                @else
+                                    <td></td><td></td>
+                                @endif
                             </tr>
                             
+                            <!-- EQUITY ITEMS -->
                             @foreach($equity as $item)
                                 <tr>
                                     <td class="ps-4">{{ $item['account']->name ?? 'N/A' }}</td>
                                     <td class="text-end">{{ number_format($item['balance'] ?? 0, 2) }}</td>
-                                    <td colspan="2"></td>
+                                    
+                                    @if($assetIndex < $assetCount)
+                                        <td class="ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                        <td class="text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                        @php $assetIndex++; @endphp
+                                    @else
+                                        <td></td><td></td>
+                                    @endif
                                 </tr>
                             @endforeach
                             
+                            <!-- RETAINED EARNINGS -->
                             <tr>
                                 <td class="ps-4">Retained Earnings</td>
                                 <td class="text-end {{ $retainedEarnings >= 0 ? 'text-success' : 'text-danger' }}">{{ number_format(abs($retainedEarnings), 2) }}</td>
-                                <td colspan="2"></td>
+                                @if($assetIndex < $assetCount)
+                                    <td class="ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                    <td class="text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                    @php $assetIndex++; @endphp
+                                @else
+                                    <td></td><td></td>
+                                @endif
                             </tr>
                             
+                            <!-- TOTAL EQUITY -->
                             <tr class="fw-bold">
                                 <td class="ps-3">Total Equity</td>
                                 <td class="text-end">{{ number_format($equityTotal + $retainedEarnings, 2) }}</td>
-                                <td colspan="2"></td>
+                                @if($assetIndex < $assetCount)
+                                    <td class="fw-normal ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                    <td class="fw-normal text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                    @php $assetIndex++; @endphp
+                                @else
+                                    <td></td><td></td>
+                                @endif
                             </tr>
+                            
+                            <!-- REMAINING ASSETS -->
+                            @while($assetIndex < $assetCount)
+                                <tr>
+                                    <td></td><td></td>
+                                    <td class="ps-4">{{ $assets[$assetIndex]['account']->name ?? 'N/A' }}</td>
+                                    <td class="text-end">{{ number_format($assets[$assetIndex]['balance'] ?? 0, 2) }}</td>
+                                    @php $assetIndex++; @endphp
+                                </tr>
+                            @endwhile
                             
                             <!-- GRAND TOTALS -->
                             <tr class="table-active fw-bold border-top border-dark border-2">
-                                <td class="ps-2">TOTAL</td>
+                                <td class="ps-2">TOTAL LIABILITIES & EQUITY</td>
                                 <td class="text-end">{{ number_format($liabilityTotal + $equityTotal + $retainedEarnings, 2) }}</td>
-                                <td class="ps-2">TOTAL</td>
+                                <td class="ps-2">TOTAL ASSETS</td>
                                 <td class="text-end">{{ number_format($assetTotal, 2) }}</td>
                             </tr>
                             
@@ -160,24 +215,20 @@
 </div>
 
 <!-- Filter Offcanvas -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title"><i class="fas fa-filter me-2"></i> Report Filters</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-        <form action="{{ route('finance.reports.balance-sheet') }}" method="GET">
-            <div class="mb-3">
-                <label class="form-label fw-semibold">As of Date</label>
-                <input type="date" name="as_of_date" class="form-control" value="{{ $asOfDate }}">
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i> Apply Filters</button>
-                <button type="button" class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
-            </div>
-        </form>
-    </div>
-</div>
+<x-offcanvas id="filterOffcanvas" title="<i class='fas fa-filter me-2'></i> Report Filters">
+    <form id="balanceSheetFilterForm" action="{{ route('finance.reports.balance-sheet') }}" method="GET">
+        <div class="mb-3">
+            <label class="form-label fw-semibold">As of Date</label>
+            <input type="date" name="as_of_date" class="form-control" value="{{ $asOfDate }}">
+        </div>
+    </form>
+    <x-slot:footer>
+        <div class="d-grid gap-2">
+            <button type="submit" form="balanceSheetFilterForm" class="btn btn-primary"><i class="fas fa-search me-1"></i> Apply Filters</button>
+            <button type="button" class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
+        </div>
+    </x-slot:footer>
+</x-offcanvas>
 
 <style>
 @media print {

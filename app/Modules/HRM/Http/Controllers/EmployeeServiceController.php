@@ -119,7 +119,7 @@ class EmployeeServiceController extends Controller
     {
         $employee = $this->getEmployee();
         
-        $assets = Asset::where('assigned_to', $employee->id)
+        $assets = Asset::where('employee_id', $employee->id)
             ->orderBy('assigned_date', 'desc')
             ->get();
 
@@ -157,12 +157,120 @@ class EmployeeServiceController extends Controller
 
     public function holidays()
     {
-        // Fetch upcoming holidays
-        $holidays = Holiday::whereDate('date', '>=', today())
-            ->orderBy('date', 'asc')
+        $employee = $this->getEmployee();
+        $year = now()->year;
+
+        // 1. Fetch Holidays
+        $holidays = Holiday::active()
+            // ->whereYear('start_date', $year) // Optional: restrict to current year? functionality wise better to show all.
             ->get();
+
+        $events = [];
+
+        $processedRecurring = [];
+
+        foreach ($holidays as $holiday) {
+            // If recurring, project to current year
+            if ($holiday->is_recurring) {
+                // Prevent duplicates if multiple past years' records exist for the same recurring holiday
+                if (in_array($holiday->name, $processedRecurring)) {
+                    continue;
+                }
+                $processedRecurring[] = $holiday->name;
+
+                // Create a date for the current year with the same month and day
+                $startDate = $holiday->start_date->copy()->year($year);
+                
+                // Calculate duration to adjust end date
+                $duration = $holiday->start_date->diffInDays($holiday->end_date ?? $holiday->start_date);
+                $endDate = $startDate->copy()->addDays($duration);
+
+                $events[] = [
+                    'title' => $holiday->name,
+                    'start' => $startDate->format('Y-m-d'),
+                    'end' => $endDate->addDay()->format('Y-m-d'), // Exclusive end date
+                    'className' => 'bg-danger text-white',
+                    'allDay' => true,
+                ];
+            } else {
+                // If not recurring, only show if it falls in the current year
+                if ($holiday->start_date->year == $year) {
+                    $events[] = [
+                        'title' => $holiday->name,
+                        'start' => $holiday->start_date->format('Y-m-d'),
+                        'end' => $holiday->end_date ? $holiday->end_date->addDay()->format('Y-m-d') : $holiday->start_date->format('Y-m-d'),
+                        'className' => 'bg-danger text-white', 
+                        'allDay' => true,
+                    ];
+                }
+            }
+        }
+
+        // 2. Fetch Employee's Approved Leaves
+        $leaves = Leave::where('employee_id', $employee->id)
+            ->where('status', 'approved')
+            ->with('leaveType')
+            ->get();
+
+        foreach ($leaves as $leave) {
+            $events[] = [
+                'title' => 'Leave: ' . ($leave->leaveType->name ?? 'Leave'),
+                'start' => $leave->start_date->format('Y-m-d'),
+                'end' => $leave->end_date ? $leave->end_date->addDay()->format('Y-m-d') : $leave->start_date->format('Y-m-d'),
+                'className' => 'bg-warning text-dark', // Orange/Yellow for leaves
+                'allDay' => true,
+            ];
+        }
+
+        // 3. Fetch Birthdays of Active Employees
+        $birthdays = Employee::active()
+            ->whereNotNull('date_of_birth')
+            ->select('first_name', 'last_name', 'date_of_birth')
+            ->get();
+
+        foreach ($birthdays as $bday) {
+            // Repeat birthday for current year and next year to cover crossover
+            $currentYearBday = $bday->date_of_birth->copy()->year($year);
+            $events[] = [
+                'title' => '🎂 ' . $bday->full_name,
+                'start' => $currentYearBday->format('Y-m-d'),
+                'className' => 'bg-info text-white', // Blue for birthdays
+                'allDay' => true,
+            ];
             
-        return view('HRM::pages.ess.holidays', compact('holidays'));
+            // Add next year too
+             $nextYearBday = $bday->date_of_birth->copy()->year($year + 1);
+             $events[] = [
+                'title' => '🎂 ' . $bday->full_name,
+                'start' => $nextYearBday->format('Y-m-d'),
+                'className' => 'bg-info text-white',
+                'allDay' => true,
+            ];
+        }
+
+        // 4. Generate Weekly Holidays (Weekends)
+        // Assuming Friday (5) and Saturday (6) are weekends for now. 
+        // Ideally this should come from a setting.
+        $startOfYear = \Carbon\Carbon::createFromDate($year, 1, 1);
+        $endOfYear = \Carbon\Carbon::createFromDate($year, 12, 31);
+        
+        $weekendDays = [ \Carbon\Carbon::FRIDAY, \Carbon\Carbon::SATURDAY ]; // Adjust based on region
+
+        $currentDate = $startOfYear->copy();
+        while ($currentDate->lte($endOfYear)) {
+            if (in_array($currentDate->dayOfWeek, $weekendDays)) {
+                $events[] = [
+                    'title' => 'Weekly Holiday',
+                    'start' => $currentDate->format('Y-m-d'),
+                    'className' => 'bg-secondary text-white', // Grey for weekends
+                    'allDay' => true,
+                    // 'rendering' => 'background', // Optional: make it a background event
+                ];
+            }
+            $currentDate->addDay();
+        }
+
+        return view('HRM::pages.ess.holidays', compact('holidays', 'events'));
     }
     public function expenses()
     {

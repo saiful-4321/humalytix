@@ -16,8 +16,20 @@ class JournalController extends Controller
     {
         $query = Journal::with('fiscalYear')->orderBy('date', 'desc');
 
-        if ($request->has('status')) {
+        if ($request->has('status') && $request->status != 'all') {
             $query->where('status', $request->status);
+        }
+        if ($request->filled('start_date')) {
+            $query->whereDate('date', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('date', '<=', $request->end_date);
+        }
+        if ($request->filled('reference')) {
+            $query->where('reference', 'like', '%' . $request->reference . '%');
+        }
+        if ($request->filled('type') && $request->type != 'all') {
+            $query->where('type', $request->type);
         }
 
         $journals = $query->paginate(15);
@@ -252,5 +264,67 @@ class JournalController extends Controller
                 // For this implementation, we will stick to calculating leaf nodes and summing parents in reports.
             }
         });
+    }
+    public function destroy($id)
+    {
+        $journal = Journal::findOrFail($id);
+        if ($journal->status != 'draft') {
+            return back()->with('error', 'Only draft journals can be deleted.');
+        }
+
+        $journal->entries()->delete();
+        $journal->delete();
+
+        return back()->with('success', 'Journal deleted successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $query = Journal::with(['entries.account', 'fiscalYear'])->orderBy('date', 'desc');
+
+        if ($request->has('status') && $request->status != 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('start_date')) {
+            $query->whereDate('date', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('date', '<=', $request->end_date);
+        }
+        if ($request->filled('reference')) {
+            $query->where('reference', 'like', '%' . $request->reference . '%');
+        }
+        if ($request->filled('type') && $request->type != 'all') {
+            $query->where('type', $request->type);
+        }
+
+        $journals = $query->get();
+        $type = $request->get('export_type', 'excel');
+
+        if ($type == 'pdf') {
+            $company = \App\Modules\Settings\Models\CompanySetting::first();
+            $pdf = \PDF::loadView('Finance::pages.journals.pdf_export', compact('journals', 'company'));
+            return $pdf->download('journals.pdf');
+        }
+
+        return (new \Rap2hpoutre\FastExcel\FastExcel($journals))->download("journals.{$type}", function ($journal) {
+            return [
+                'Date' => $journal->date->format('Y-m-d'),
+                'Number' => $journal->journal_number,
+                'Reference' => $journal->reference,
+                'Type' => ucfirst($journal->type),
+                'Description' => $journal->description,
+                'Status' => ucfirst($journal->status),
+                'Amount' => $journal->total_amount, // Accessor assuming exists or sum entries
+            ];
+        });
+    }
+
+    public function print($id)
+    {
+        $journal = Journal::with('entries.account')->findOrFail($id);
+        $company = \App\Modules\Settings\Models\CompanySetting::first();
+        $pdf = \PDF::loadView('Finance::pages.journals.pdf_single', compact('journal', 'company'));
+        return $pdf->stream("journal-{$journal->journal_number}.pdf");
     }
 }

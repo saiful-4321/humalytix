@@ -68,7 +68,7 @@ class PerformanceGoalController extends Controller
     {
         $employee = auth()->user()->employee;
         
-        if (!$employee) {
+        if (!$employee || !$employee->id) {
             return redirect()->route('hrm.dashboard')->with('error', 'No employee profile linked to your account.');
         }
 
@@ -89,7 +89,7 @@ class PerformanceGoalController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'start_date' => 'required|date',
-            'due_date' => 'required|date|after:start_date',
+            'due_date' => 'required|date|after_or_equal:start_date',
             'priority' => 'required|in:low,medium,high,critical',
             'status' => 'required|in:not_started,in_progress,completed,cancelled',
             'progress' => 'nullable|integer|min:0|max:100',
@@ -108,7 +108,7 @@ class PerformanceGoalController extends Controller
             ]);
         }
 
-        return redirect()->route('hrm.performance-goals.index')->with('success', 'Performance goal created successfully!');
+        return redirect()->back()->with('success', 'Performance goal created successfully!');
     }
 
     public function update(Request $request, PerformanceGoal $performanceGoal)

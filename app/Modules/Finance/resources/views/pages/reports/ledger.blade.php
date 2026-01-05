@@ -106,42 +106,38 @@
 </div>
 
 <!-- Filter Offcanvas -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title"><i class="fas fa-filter me-2"></i> Ledger Filters</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-        <form action="{{ route('finance.reports.ledger') }}" method="GET">
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Account <span class="text-danger">*</span></label>
-                <select name="account_id" class="form-select select2" required>
-                    <option value="">Select Account</option>
-                    @foreach($accounts as $acc)
-                        <option value="{{ $acc->id }}" {{ (isset($selectedAccount) && $selectedAccount->id == $acc->id) ? 'selected' : '' }}>
-                            {{ $acc->code }} - {{ $acc->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-semibold">From Date</label>
-                <input type="date" name="start_date" class="form-control" value="{{ $startDate }}">
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-semibold">To Date</label>
-                <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i> Show Ledger</button>
-                @if(isset($selectedAccount))
-                <button type="button" class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
-                @endif
-                <a href="{{ route('finance.reports.ledger') }}" class="btn btn-outline-secondary"><i class="fas fa-redo me-1"></i> Reset</a>
-            </div>
-        </form>
-    </div>
-</div>
+<x-offcanvas id="filterOffcanvas" title="<i class='fas fa-filter me-2'></i> Ledger Filters">
+    <form id="ledgerFilterForm" action="{{ route('finance.reports.ledger') }}" method="GET">
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Account <span class="text-danger">*</span></label>
+            <select name="account_id" class="form-select select2" required>
+                <option value="">Select Account</option>
+                @foreach($accounts as $acc)
+                    <option value="{{ $acc->id }}" {{ (isset($selectedAccount) && $selectedAccount->id == $acc->id) ? 'selected' : '' }}>
+                        {{ $acc->code }} - {{ $acc->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-semibold">From Date</label>
+            <input type="date" name="start_date" class="form-control" value="{{ $startDate }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-semibold">To Date</label>
+            <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
+        </div>
+    </form>
+    <x-slot:footer>
+        <div class="d-grid gap-2">
+            <button type="submit" form="ledgerFilterForm" class="btn btn-primary"><i class="fas fa-search me-1"></i> Show Ledger</button>
+            @if(isset($selectedAccount))
+            <button type="button" class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
+            @endif
+            <a href="{{ route('finance.reports.ledger') }}" class="btn btn-outline-secondary"><i class="fas fa-redo me-1"></i> Reset</a>
+        </div>
+    </x-slot:footer>
+</x-offcanvas>
 
 <style>
 @media print {

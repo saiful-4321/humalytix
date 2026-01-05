@@ -1,69 +1,73 @@
-@extends('HRM::layouts.master')
+@extends('Main::layouts.app')
 
 @section('title', 'Expense Claims | ESS')
 
 @section('content')
-<div class="main-content">
-    <div class="page-content">
-        <div class="container-fluid">
+<div class="container-fluid">
 
-            <!-- Page Title -->
-            <div class="row">
-                <div class="col-12">
-                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0 font-size-18">Expense Claims</h4>
-                        <div class="page-title-right">
-                             <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#expenseOffcanvas">
-                                <i class="bx bx-plus"></i> New Claim
-                            </button>
-                        </div>
-                    </div>
+    <!-- Page Title -->
+    <div class="row">
+        <div class="col-12">
+             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">Expense Claims</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">ESS</a></li>
+                        <li class="breadcrumb-item active">Expenses</li>
+                    </ol>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="row">
-                <div class="col-12">
-                     <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title mb-4">Your Claims</h4>
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Title</th>
-                                            <th>Category</th>
-                                            <th>Amount</th>
-                                            <th>Status</th>
-                                            <th>Remarks</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($expenses as $expense)
-                                        <tr>
-                                            <td>{{ $expense->date->format('d M, Y') }}</td>
-                                            <td class="fw-bold">{{ $expense->title }}</td>
-                                            <td>{{ $expense->category ?? '-' }}</td>
-                                            <td>{{ number_format($expense->amount, 2) }}</td>
-                                            <td>
-                                                <span class="badge bg-{{ $expense->status == 'pending' ? 'warning' : ($expense->status == 'approved' ? 'success' : 'danger') }}">
-                                                    {{ ucfirst($expense->status) }}
-                                                </span>
-                                            </td>
-                                            <td>{{ $expense->remarks ?? '-' }}</td>
-                                        </tr>
-                                        @empty
-                                        <tr>
-                                            <td colspan="6" class="text-center">No expense claims found.</td>
-                                        </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="mt-3">
-                                {{ $expenses->links() }}
-                            </div>
-                        </div>
+    <div class="row">
+        <div class="col-12">
+             <div class="card">
+                <div class="card-header align-items-center d-flex border-bottom-0">
+                    <h4 class="card-title mb-0 flex-grow-1">Your Claims</h4>
+                    <div class="flex-shrink-0">
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#expenseOffcanvas">
+                            <i class="bx bx-plus"></i> New Claim
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($expenses as $expense)
+                                <tr>
+                                    <td>{{ $expense->date->format('d M, Y') }}</td>
+                                    <td class="fw-bold">{{ $expense->title }}</td>
+                                    <td>{{ $expense->category ?? '-' }}</td>
+                                    <td>{{ number_format($expense->amount, 2) }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $expense->status == 'pending' ? 'warning' : ($expense->status == 'approved' ? 'success' : 'danger') }}">
+                                            {{ ucfirst($expense->status) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $expense->remarks ?? '-' }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="text-center">No expense claims found.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        {{ $expenses->links() }}
                     </div>
                 </div>
             </div>

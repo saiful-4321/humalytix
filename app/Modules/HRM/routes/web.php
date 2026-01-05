@@ -429,7 +429,7 @@ Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function 
         Route::get('/{performanceGoal}', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'show'])->name('show');
         Route::post('/', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'store'])->name('store');
         Route::put('/{performanceGoal}', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'update'])->name('update');
-        Route::post('/{performanceGoal}/progress', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'updateProgress'])->name('update-progress');
+        Route::put('/{performanceGoal}/progress', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'updateProgress'])->name('update-progress');
         Route::delete('/{performanceGoal}', [\App\Modules\HRM\Http\Controllers\PerformanceGoalController::class, 'destroy'])->name('destroy');
     });
 

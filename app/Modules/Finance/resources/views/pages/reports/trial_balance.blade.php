@@ -87,29 +87,25 @@
 </div>
 
 <!-- Filter Offcanvas -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title"><i class="fas fa-filter me-2"></i> Report Filters</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-        <form action="{{ route('finance.reports.trial-balance') }}" method="GET">
-            <div class="mb-3">
-                <label class="form-label fw-semibold">From Date</label>
-                <input type="date" name="start_date" class="form-control" value="{{ $startDate }}">
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-semibold">To Date</label>
-                <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i> Apply Filters</button>
-                <button type="button" class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
-                <a href="{{ route('finance.reports.trial-balance') }}" class="btn btn-outline-secondary"><i class="fas fa-redo me-1"></i> Reset</a>
-            </div>
-        </form>
-    </div>
-</div>
+<x-offcanvas id="filterOffcanvas" title="<i class='fas fa-filter me-2'></i> Report Filters">
+    <form id="tbFilterForm" action="{{ route('finance.reports.trial-balance') }}" method="GET">
+        <div class="mb-3">
+            <label class="form-label fw-semibold">From Date</label>
+            <input type="date" name="start_date" class="form-control" value="{{ $startDate }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-semibold">To Date</label>
+            <input type="date" name="end_date" class="form-control" value="{{ $endDate }}">
+        </div>
+    </form>
+    <x-slot:footer>
+        <div class="d-grid gap-2">
+            <button type="submit" form="tbFilterForm" class="btn btn-primary"><i class="fas fa-search me-1"></i> Apply Filters</button>
+            <button type="button" class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
+            <a href="{{ route('finance.reports.trial-balance') }}" class="btn btn-outline-secondary"><i class="fas fa-redo me-1"></i> Reset</a>
+        </div>
+    </x-slot:footer>
+</x-offcanvas>
 
 <style>
 @media print {

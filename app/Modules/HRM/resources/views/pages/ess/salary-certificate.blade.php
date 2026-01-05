@@ -1,74 +1,78 @@
-@extends('HRM::layouts.master')
+@extends('Main::layouts.app')
 
 @section('title', 'Salary Certificate | ESS')
 
 @section('content')
-<div class="main-content">
-    <div class="page-content">
-        <div class="container-fluid">
+<div class="container-fluid">
 
-            <!-- Page Title -->
-            <div class="row">
-                <div class="col-12">
-                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0 font-size-18">Salary Certificate Requests</h4>
-                        <div class="page-title-right">
-                             <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#requestCertificateOffcanvas">
-                                <i class="bx bx-plus"></i> New Request
-                            </button>
-                        </div>
-                    </div>
+    <!-- Page Title -->
+    <div class="row">
+        <div class="col-12">
+             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">Salary Certificate Requests</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">ESS</a></li>
+                        <li class="breadcrumb-item active">Salary Certificate</li>
+                    </ol>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="row">
-                <div class="col-12">
-                     <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title mb-4">Request History</h4>
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Date Requested</th>
-                                            <th>Type</th>
-                                            <th>Reason</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($requests as $request)
-                                        <tr>
-                                            <td>{{ $request->created_at->format('d M, Y') }}</td>
-                                            <td class="fw-bold">{{ ucfirst(str_replace('_', ' ', $request->type)) }}</td>
-                                            <td>{{ $request->reason }}</td>
-                                            <td>
-                                                <span class="badge bg-{{ $request->status == 'pending' ? 'warning' : ($request->status == 'approved' ? 'success' : 'danger') }}">
-                                                    {{ ucfirst($request->status) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @if($request->status == 'approved' && $request->letter_id)
-                                                    <a href="{{ route('hrm.letters.download', $request->letter_id) }}" class="btn btn-sm btn-primary" target="_blank">
-                                                        <i class="bx bx-download"></i> Download
-                                                    </a>
-                                                @elseif($request->status == 'rejected')
-                                                     <i class="mdi mdi-information-outline" title="{{ $request->remarks }}"></i> {{ $request->remarks }}
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        @empty
-                                        <tr>
-                                            <td colspan="5" class="text-center">No requests found.</td>
-                                        </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+    <div class="row">
+        <div class="col-12">
+             <div class="card">
+                <div class="card-header align-items-center d-flex border-bottom-0">
+                    <h4 class="card-title mb-0 flex-grow-1">Request History</h4>
+                    <div class="flex-shrink-0">
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#requestCertificateOffcanvas">
+                            <i class="bx bx-plus"></i> New Request
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date Requested</th>
+                                    <th>Type</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($requests as $request)
+                                <tr>
+                                    <td>{{ $request->created_at->format('d M, Y') }}</td>
+                                    <td class="fw-bold">{{ ucfirst(str_replace('_', ' ', $request->type)) }}</td>
+                                    <td>{{ $request->reason }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $request->status == 'pending' ? 'warning' : ($request->status == 'approved' ? 'success' : 'danger') }}">
+                                            {{ ucfirst($request->status) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($request->status == 'approved' && $request->letter_id)
+                                            <a href="{{ route('hrm.letters.download', $request->letter_id) }}" class="btn btn-sm btn-primary" target="_blank">
+                                                <i class="bx bx-download"></i> Download
+                                            </a>
+                                        @elseif($request->status == 'rejected')
+                                             <i class="mdi mdi-information-outline" title="{{ $request->remarks }}"></i> {{ $request->remarks }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center">No requests found.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
