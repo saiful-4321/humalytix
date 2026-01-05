@@ -15,6 +15,8 @@ use App\Modules\HRM\Models\Leave;
 use App\Modules\HRM\Models\ExpenseClaim;
 use Illuminate\Support\Facades\DB;
 use App\Modules\HRM\Enums\AttendanceStatusEnum;
+use App\Modules\HRM\Models\PerformanceGoal;
+use App\Modules\HRM\Models\LeaveAllocation;
 
 class EmployeeServiceController extends Controller
 {
@@ -31,14 +33,128 @@ class EmployeeServiceController extends Controller
     {
         $employee = $this->getEmployee();
         
-        // Stats
+        // Basic Stats
         $pendingLeaves = Leave::where('employee_id', $employee->id)->where('status', 'pending')->count();
         $attendanceToday = Attendance::where('employee_id', $employee->id)->whereDate('date', today())->first();
         $lastPayroll = Payroll::where('employee_id', $employee->id)->orderBy('month', 'desc')->first();
-        
-        // Recent Activities or similar could go here
 
-        return view('HRM::pages.ess.dashboard', compact('employee', 'pendingLeaves', 'attendanceToday', 'lastPayroll'));
+        // 1. Leave Balances (Personal)
+        $leaveAllocations = \App\Modules\HRM\Models\LeaveAllocation::where('employee_id', $employee->id)
+            ->where('year', now()->year)
+            ->with('leaveType')
+            ->get();
+
+        $sickLeave = $leaveAllocations->where('leave_type_id', 2)->first();
+        $casualLeave = $leaveAllocations->where('leave_type_id', 1)->first();
+        $totalLeaveBalance = $leaveAllocations->sum(function($alloc) {
+            return $alloc->balance;
+        });
+
+        $leaveStats = [
+            'sick' => $sickLeave ? $sickLeave->balance : 0,
+            'casual' => $casualLeave ? $casualLeave->balance : 0,
+            'total' => $totalLeaveBalance
+        ];
+
+        // 2. Office Presence Stats (Today)
+        $totalActiveEmployees = Employee::active()->count();
+        $presentCount = Attendance::whereDate('date', today())->distinct('employee_id')->count();
+        $leaveTodayCount = Leave::where('status', 'approved')
+            ->whereDate('start_date', '<=', today())
+            ->whereDate('end_date', '>=', today())
+            ->count();
+        $lateInCount = Attendance::whereDate('date', today())
+            ->where('status', AttendanceStatusEnum::LATE)
+            ->count();
+        $absentCount = max(0, $totalActiveEmployees - ($presentCount + $leaveTodayCount));
+
+        $officePresence = [
+            'present' => $presentCount,
+            'absent' => $absentCount,
+            'on_leave' => $leaveTodayCount,
+            'late' => $lateInCount
+        ];
+
+        // 3. Attendance Trend (Last 7 Days)
+        $attendanceTrend = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $att = Attendance::where('employee_id', $employee->id)
+                ->whereDate('date', $date)
+                ->first();
+            
+            $hours = 0;
+            if ($att && $att->check_in && $att->check_out) {
+                $hours = \Carbon\Carbon::parse($att->check_in)->diffInHours(\Carbon\Carbon::parse($att->check_out));
+            }
+            $attendanceTrend[] = [
+                'day' => now()->subDays($i)->format('D'),
+                'hours' => $hours
+            ];
+        }
+
+        // 4. Happiness Index (Goal Progress Proxy)
+        $avgProgress = PerformanceGoal::where('employee_id', $employee->id)
+            ->whereIn('status', ['not_started', 'in_progress', 'completed'])
+            ->avg('progress') ?? 0;
+        
+        $happinessRate = round($avgProgress);
+
+        // Upcoming Events
+        $upcomingHolidays = Holiday::active()
+            ->whereDate('start_date', '>=', today())
+            ->orderBy('start_date', 'asc')
+            ->limit(3)
+            ->get();
+
+        $upcomingBirthdays = Employee::active()
+            ->whereNotNull('date_of_birth')
+            ->get()
+            ->filter(function($emp) {
+                $bday = $emp->date_of_birth->copy()->year(now()->year);
+                if ($bday->isPast()) $bday->addYear();
+                return $bday->diffInDays(now()) <= 30;
+            })
+            ->take(3);
+
+        // 5. Notice Board (Actual Notifications)
+        $notices = auth()->user()->notifications()->latest()->limit(5)->get()->map(function($notif) {
+            $data = is_array($notif->data) ? $notif->data : json_decode($notif->data, true);
+            return [
+                'title' => $data['title'] ?? ($data['subject'] ?? 'Notification'),
+                'date' => $notif->created_at->format('d M Y'),
+                'description' => \Illuminate\Support\Str::limit($data['message'] ?? ($data['body'] ?? ''), 100),
+                'image' => $this->getNotificationIcon($data['type'] ?? 'info')
+            ];
+        });
+
+        return view('HRM::pages.ess.dashboard', compact(
+            'employee', 
+            'pendingLeaves', 
+            'attendanceToday', 
+            'lastPayroll',
+            'leaveStats',
+            'officePresence',
+            'attendanceTrend',
+            'happinessRate',
+            'upcomingHolidays',
+            'upcomingBirthdays',
+            'notices'
+        ));
+    }
+
+    private function getNotificationIcon($type)
+    {
+        $icons = [
+            'leave' => 'https://img.icons8.com/color/96/leave.png',
+            'payroll' => 'https://img.icons8.com/color/96/payroll.png',
+            'event' => 'https://img.icons8.com/color/96/event-accepted.png',
+            'holiday' => 'https://img.icons8.com/color/96/beach-umbrella.png',
+            'announcement' => 'https://img.icons8.com/color/96/megaphone.png',
+            'info' => 'https://img.icons8.com/color/96/info.png',
+        ];
+
+        return $icons[$type] ?? $icons['info'];
     }
 
     public function profile()
