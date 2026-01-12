@@ -5,7 +5,12 @@ namespace App\Modules\HRM\Http\Controllers;
 use App\Modules\HRM\Models\Employee;
 use App\Modules\HRM\Models\Department;
 use App\Modules\HRM\Models\Leave;
+use App\Modules\HRM\Models\LeaveType;
 use App\Modules\HRM\Models\Attendance;
+use App\Modules\HRM\Models\Job;
+use App\Modules\HRM\Models\Candidate;
+use App\Modules\HRM\Models\Payroll;
+use App\Modules\HRM\Models\PerformanceGoal;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Carbon\Carbon;
@@ -32,6 +37,11 @@ class HRDashboardController extends Controller
             'growth' => $this->getGrowthTrend($startDate, $endDate, $departmentId),
             'departments' => $this->getDepartmentDistribution(),
             'tenure' => $this->getTenureData($departmentId),
+            'recruitment' => $this->getRecruitmentData($departmentId),
+            'leaves' => $this->getLeaveAnalytics($startDate, $endDate, $departmentId),
+            'attendance' => $this->getAttendanceAnalytics($startDate, $endDate, $departmentId),
+            'payroll' => $this->getPayrollAnalytics($startDate, $endDate, $departmentId),
+            'performance' => $this->getPerformanceOverview($departmentId),
         ];
 
         // Get departments for filter
@@ -241,6 +251,111 @@ class HRDashboardController extends Controller
     }
 
     /**
+     * Get recruitment data
+     */
+    private function getRecruitmentData($departmentId = null)
+    {
+        return [
+            'active_jobs' => Job::where('status', 'active')->when($departmentId, function($q) use ($departmentId) {
+                $q->where('department_id', $departmentId);
+            })->count(),
+            'total_candidates' => Candidate::count(),
+            'hired_this_month' => Employee::whereMonth('joining_date', now()->month)
+                ->whereYear('joining_date', now()->year)
+                ->when($departmentId, function($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                })->count(),
+            'funnel' => Candidate::selectRaw('stage, COUNT(*) as count')->groupBy('stage')->pluck('count', 'stage')->toArray(),
+        ];
+    }
+
+    /**
+     * Get leave analytics
+     */
+    private function getLeaveAnalytics($startDate, $endDate, $departmentId = null)
+    {
+        $leaves = Leave::with('leaveType')
+            ->whereBetween('start_date', [$startDate, $endDate])
+            ->where('status', 'approved')
+            ->when($departmentId, function($q) use ($departmentId) {
+                $q->whereHas('employee', function($eq) use ($departmentId) {
+                    $eq->where('department_id', $departmentId);
+                });
+            })->get();
+
+        $distribution = [];
+        foreach ($leaves as $leave) {
+            $typeName = $leave->leaveType->name ?? 'Other';
+            $distribution[$typeName] = ($distribution[$typeName] ?? 0) + $leave->days;
+        }
+
+        return [
+            'total_days' => $leaves->sum('days'),
+            'type_distribution' => $distribution,
+        ];
+    }
+
+    /**
+     * Get attendance analytics
+     */
+    private function getAttendanceAnalytics($startDate, $endDate, $departmentId = null)
+    {
+        $attendance = Attendance::whereBetween('date', [$startDate, $endDate])
+            ->when($departmentId, function($q) use ($departmentId) {
+                $q->whereHas('employee', function($eq) use ($departmentId) {
+                    $eq->where('department_id', $departmentId);
+                });
+            })->get();
+
+        return [
+            'present_count' => $attendance->where('status', 'present')->count(),
+            'late_count' => $attendance->where('status', 'late_in')->count(),
+            'absent_count' => $attendance->where('status', 'absent')->count(),
+            'avg_working_hours' => round($attendance->avg('working_hours') ?? 0, 2),
+        ];
+    }
+
+    /**
+     * Get payroll analytics
+     */
+    private function getPayrollAnalytics($startDate, $endDate, $departmentId = null)
+    {
+        $payrolls = Payroll::whereBetween('created_at', [$startDate, $endDate])
+            ->when($departmentId, function($q) use ($departmentId) {
+                $q->whereHas('employee', function($eq) use ($departmentId) {
+                    $eq->where('department_id', $departmentId);
+                });
+            })->get();
+
+        return [
+            'total_cost' => $payrolls->sum('net_salary'),
+            'avg_salary' => round($payrolls->avg('net_salary') ?? 0, 2),
+            'last_month_total' => Payroll::where('month', now()->subMonth()->month)
+                ->where('year', now()->subMonth()->year)
+                ->sum('net_salary'),
+        ];
+    }
+
+    /**
+     * Get performance overview
+     */
+    private function getPerformanceOverview($departmentId = null)
+    {
+        $goals = PerformanceGoal::when($departmentId, function($q) use ($departmentId) {
+            $q->whereHas('employee', function($eq) use ($departmentId) {
+                $eq->where('department_id', $departmentId);
+            });
+        })->get();
+
+        return [
+            'avg_progress' => round($goals->avg('progress') ?? 0, 1),
+            'completed_count' => $goals->where('status', 'completed')->count(),
+            'total_goals' => $goals->count(),
+            'status_distribution' => $goals->countBy('status')->toArray(),
+        ];
+    }
+
+    /**
      * Export dashboard to PDF
      */
     public function exportPDF(Request $request)
@@ -256,6 +371,9 @@ class HRDashboardController extends Controller
             'growth' => $this->getGrowthTrend($startDate, $endDate, $departmentId),
             'departments' => $this->getDepartmentDistribution(),
             'tenure' => $this->getTenureData($departmentId),
+            'recruitment' => $this->getRecruitmentData($departmentId),
+            'leaves' => $this->getLeaveAnalytics($startDate, $endDate, $departmentId),
+            'attendance' => $this->getAttendanceAnalytics($startDate, $endDate, $departmentId),
         ];
 
         $pdf = PDF::loadView('HRM::pages.analytics.hr-dashboard-pdf', compact('data', 'startDate', 'endDate'));

@@ -58,6 +58,14 @@
                 </button>
             @endif
             <!-- end toggle  -->
+
+            @if(auth()->user()->employee)
+                <a href="{{ route('hrm.ess.holidays') }}">
+                    <button class="btn header-item noti-icon">
+                        <i class="bx bx-calendar"></i>
+                    </button>
+                </a>
+            @endif
         </div>
 
         <div class="d-flex">

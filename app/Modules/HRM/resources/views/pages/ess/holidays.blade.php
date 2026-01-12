@@ -33,7 +33,7 @@
 </div>
 
 <div class="row">
-    <div class="col-xl-12">
+    <div class="col-xl-12 mb-5">
          <div class="card bg-white">
             <div class="card-header align-items-center d-flex border-bottom-0 rounded-top p-3 shadow-sm">
                 <h4 class="card-title mb-0 flex-grow-1 font-weight-bold text-dark">
@@ -41,32 +41,34 @@
                 </h4>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-3">Date</th>
-                                <th>Day</th>
-                                <th>Occasion</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($holidays as $holiday)
-                            <tr>
-                                <td class="fw-bold ps-3">{{ \Carbon\Carbon::parse($holiday->start_date)->format('d M, Y') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($holiday->start_date)->format('l') }}</td>
-                                <td>{{ $holiday->name }}</td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="text-center py-5">
-                                    <i class="mdi mdi-calendar-remove display-4 text-muted d-block mb-3"></i>
-                                    No upcoming holidays found.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="row pt-3 px-2">
+                    @forelse($groupedHolidays as $month => $monthHolidays)
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="border rounded h-100">
+                                <div class="bg-light p-2 rounded-top border-bottom">
+                                    <h5 class="font-size-14 mb-0 fw-bold text-center text-primary">{{ $month }}</h5>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-nowrap align-middle mb-0 table-borderless">
+                                        <tbody>
+                                            @foreach($monthHolidays as $holiday)
+                                            <tr>
+                                                <td style="width: 50px;" class="fw-bold ps-3 text-muted">{{ $holiday['date']->format('d') }}</td>
+                                                <td style="width: 100px;">{{ $holiday['day'] }}</td>
+                                                <td class="text-wrap">{{ $holiday['name'] }}</td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12 text-center py-5">
+                            <i class="mdi mdi-calendar-remove display-4 text-muted d-block mb-3"></i>
+                            <p class="text-muted">No upcoming holidays found.</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>

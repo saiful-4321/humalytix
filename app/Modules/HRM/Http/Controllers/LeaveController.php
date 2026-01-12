@@ -18,38 +18,90 @@ class LeaveController extends Controller
         $this->middleware('permission:hrm.leaves.approve')->only(['approve', 'reject']);
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $today = \Carbon\Carbon::today();
-        $currentYear = $today->year;
+        
+        // --- 1. Filter Logic (Presets & Intervals) ---
+        $preset = $request->input('preset', 'this_year');
+        $interval = $request->input('interval', 'month');
+        
+        switch ($preset) {
+            case 'today':
+                $startDate = $today->copy()->startOfDay();
+                $endDate = $today->copy()->endOfDay();
+                $interval = 'day';
+                break;
+            case 'this_week':
+                $startDate = $today->copy()->startOfWeek();
+                $endDate = $today->copy()->endOfWeek();
+                if ($request->missing('interval')) $interval = 'day';
+                break;
+            case 'this_month':
+                $startDate = $today->copy()->startOfMonth();
+                $endDate = $today->copy()->endOfMonth();
+                if ($request->missing('interval')) $interval = 'week';
+                break;
+            case 'last_month':
+                $startDate = $today->copy()->subMonth()->startOfMonth();
+                $endDate = $today->copy()->subMonth()->endOfMonth();
+                if ($request->missing('interval')) $interval = 'week';
+                break;
+            case 'this_quarter':
+                $startDate = $today->copy()->startOfQuarter();
+                $endDate = $today->copy()->endOfQuarter();
+                if ($request->missing('interval')) $interval = 'month';
+                break;
+            case 'this_year':
+                $startDate = $today->copy()->startOfYear();
+                $endDate = $today->copy()->endOfYear();
+                if ($request->missing('interval')) $interval = 'month';
+                break;
+            case 'custom':
+                $startDate = \Carbon\Carbon::parse($request->input('start_date', $today->copy()->startOfYear()));
+                $endDate = \Carbon\Carbon::parse($request->input('end_date', $today->copy()->endOfYear()));
+                break;
+            default:
+                $startDate = $today->copy()->startOfYear();
+                $endDate = $today->copy()->endOfYear();
+                break;
+        }
 
-        // KPI: Employees on Leave Today
+        // --- 2. KPI Totals (Aggregate in Range) ---
+        // Employees on Leave Today (always today-centric for this KPI)
         $onLeaveToday = Leave::where('status', 'approved')
             ->whereDate('start_date', '<=', $today)
             ->whereDate('end_date', '>=', $today)
             ->count();
 
-        // KPI: Pending Requests
+        // Pending Requests (Total outstanding)
         $pendingRequests = Leave::where('status', 'pending')->count();
 
-        // KPI: Monthly Leave Requests (for Chart)
-        $leaveTrends = Leave::selectRaw('MONTH(start_date) as month, COUNT(*) as count')
-            ->whereYear('start_date', $currentYear)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('count', 'month')
-            ->toArray();
+        // Total Requests in Selected Period
+        $periodRequests = Leave::whereBetween('created_at', [$startDate, $endDate])->count();
         
-        // Fill missing months with 0
-        $monthlyTrendData = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $monthlyTrendData[] = $leaveTrends[$i] ?? 0;
-        }
+        // Approved Requests in Selected Period
+        $periodApproved = Leave::where('status', 'approved')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
 
-        // Leave Type Distribution (Approved)
+        // Total Active Employees
+        $totalEmployees = Employee::where('status', 'confirmed')->count();
+
+        // --- 3. Trend & Sparkline Data ---
+        $trendData = $this->getTrendData($startDate, $endDate, $interval);
+        
+        // Sparklines are based on trend data points
+        $sparklineRequests = $trendData['requests'];
+        $sparklineApproved = $trendData['approved'];
+        $sparklinePending = $trendData['pending'];
+        $sparklineRejected = $trendData['rejected'];
+
+        // --- 4. Extra Stats ---
+        // Leave Type Distribution (Approved in period)
         $typeStats = Leave::selectRaw('leave_type_id, count(*) as count')
             ->where('status', 'approved')
-            ->whereYear('start_date', $currentYear)
+            ->whereBetween('start_date', [$startDate, $endDate])
             ->groupBy('leave_type_id')
             ->with('leaveType')
             ->get()
@@ -72,30 +124,83 @@ class LeaveController extends Controller
             ->take(5)
             ->get();
             
-        // Employees on Leave Today List (for display)
+        // Who is Out Today
         $whoIsOut = Leave::with('employee')
             ->where('status', 'approved')
             ->whereDate('start_date', '<=', $today)
             ->whereDate('end_date', '>=', $today)
             ->get();
 
-        $calendarEvents = $this->getCalendarEvents($currentYear);
+        $calendarEvents = $this->getCalendarEvents($today->year);
         
-        // Settings for Weekly Holiday (e.g. ['Friday'])
         $weeklyHolidays = \Illuminate\Support\Facades\DB::table('hrm_settings')->where('name', 'weekly_holidays')->value('payload');
         $weeklyHolidays = $weeklyHolidays ? json_decode($weeklyHolidays, true) : ['Friday'];
 
+        // Gauge Data Calculations
+        $approvalRate = $periodRequests > 0 ? ($periodApproved / $periodRequests) * 100 : 0;
+        $utilizationRate = $totalEmployees > 0 ? ($onLeaveToday / $totalEmployees) * 100 : 0;
+        $rejectionRate = $periodRequests > 0 ? (Leave::where('status', 'rejected')->whereBetween('created_at', [$startDate, $endDate])->count() / $periodRequests) * 100 : 0;
+
         return view('HRM::pages.leaves.dashboard', compact(
-            'onLeaveToday', 
-            'pendingRequests', 
-            'monthlyTrendData', 
-            'typeStats', 
-            'upcomingHolidays', 
-            'recentRequests',
-            'whoIsOut',
-            'calendarEvents',
-            'weeklyHolidays'
+            'onLeaveToday', 'pendingRequests', 'periodRequests', 'periodApproved', 'totalEmployees',
+            'startDate', 'endDate', 'preset', 'interval', 'today',
+            'sparklineRequests', 'sparklineApproved', 'sparklinePending', 'sparklineRejected',
+            'typeStats', 'upcomingHolidays', 'recentRequests', 'whoIsOut',
+            'calendarEvents', 'weeklyHolidays', 'trendData',
+            'approvalRate', 'utilizationRate', 'rejectionRate'
         ));
+    }
+
+    private function getTrendData($start, $end, $interval)
+    {
+        $labels = [];
+        $buckets = [];
+        $current = $start->copy();
+        $endC = $end->copy();
+        
+        while ($current <= $endC) {
+            if ($interval == 'day') {
+                $key = $current->format('Y-m-d');
+                $label = $current->format('d M');
+                $next = $current->copy()->addDay();
+            } elseif ($interval == 'week') {
+                $key = $current->format('o-W');
+                $label = 'W' . $current->format('W') . ' ' . $current->format('M');
+                $next = $current->copy()->addWeek();
+            } else { // month default
+                $key = $current->format('Y-m');
+                $label = $current->format('M Y');
+                $next = $current->copy()->addMonth();
+            }
+            
+            $labels[] = $label;
+            $buckets[$key] = [
+                'start' => $current->copy(),
+                'end' => $interval == 'day' ? $current->copy()->endOfDay() : ($interval == 'week' ? $current->copy()->endOfWeek() : $current->copy()->endOfMonth())
+            ];
+            
+            $current = $next;
+        }
+
+        $requestsData = [];
+        $approvedData = [];
+        $pendingData = [];
+        $rejectedData = [];
+        
+        foreach ($buckets as $bucket) {
+            $requestsData[] = Leave::whereBetween('created_at', [$bucket['start'], $bucket['end']])->count();
+            $approvedData[] = Leave::where('status', 'approved')->whereBetween('created_at', [$bucket['start'], $bucket['end']])->count();
+            $pendingData[] = Leave::where('status', 'pending')->whereBetween('created_at', [$bucket['start'], $bucket['end']])->count();
+            $rejectedData[] = Leave::where('status', 'rejected')->whereBetween('created_at', [$bucket['start'], $bucket['end']])->count();
+        }
+        
+        return [
+            'labels' => $labels,
+            'requests' => $requestsData,
+            'approved' => $approvedData,
+            'pending' => $pendingData,
+            'rejected' => $rejectedData
+        ];
     }
 
     private function getCalendarEvents($currentYear)

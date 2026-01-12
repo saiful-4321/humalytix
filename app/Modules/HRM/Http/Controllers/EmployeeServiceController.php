@@ -277,9 +277,47 @@ class EmployeeServiceController extends Controller
         $year = now()->year;
 
         // 1. Fetch Holidays
+        // 1. Fetch Holidays for Calendar (All active)
         $holidays = Holiday::active()
             // ->whereYear('start_date', $year) // Optional: restrict to current year? functionality wise better to show all.
             ->get();
+
+        // 2. Fetch Upcoming Holidays for List (Grouped by Month)
+        // Adjust logic to handle recurring holidays properly for the list view if needed, 
+        // but for now let's assume standard start_date ordering for non-recurring or already projected ones.
+        // Actually, the current logic calculates events for recurring. 
+        // Best approach: Use the calculated $events (which handles recurring) to build the list?
+        // No, $events structure is for FullCalendar. 
+        // Let's create a collection for display.
+        
+        $displayHolidays = collect();
+        $processedForList = [];
+
+        foreach ($holidays as $holiday) {
+             if ($holiday->is_recurring) {
+                // Prevent duplicates matching existing logic
+                if (in_array($holiday->name, $processedForList)) {
+                    continue;
+                }
+                $processedForList[] = $holiday->name;
+
+                $startDate = $holiday->start_date->copy()->year($year);
+             } else {
+                $startDate = $holiday->start_date;
+             }
+             
+             // Only show if in current year and in future (or including today)
+             if ($startDate->year == $year && $startDate->gte(today())) {
+                 $displayHolidays->push([
+                     'name' => $holiday->name,
+                     'date' => $startDate,
+                     'month' => $startDate->format('F Y'),
+                     'day' => $startDate->format('l')
+                 ]);
+             }
+        }
+        
+        $groupedHolidays = $displayHolidays->sortBy('date')->groupBy('month');
 
         $events = [];
 
@@ -386,7 +424,7 @@ class EmployeeServiceController extends Controller
             $currentDate->addDay();
         }
 
-        return view('HRM::pages.ess.holidays', compact('holidays', 'events'));
+        return view('HRM::pages.ess.holidays', compact('holidays', 'events', 'groupedHolidays'));
     }
     public function expenses()
     {
