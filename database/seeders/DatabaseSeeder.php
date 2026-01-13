@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             
             // HRM Module Seeders
             \App\Modules\HRM\database\seeders\HRMPermissionSeeder::class, // HRM Permissions first
+            \App\Modules\HRM\database\seeders\HRMRoleSeeder::class, // Then HRM Roles
             \App\Modules\HRM\database\seeders\HRMSeeder::class, // Then all HRM data
 
             // Finance Module Seeders

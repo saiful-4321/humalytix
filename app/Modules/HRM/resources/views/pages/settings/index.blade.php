@@ -16,174 +16,343 @@
 </div>
 
 <div class="row clearfix">
-    <div class="col-lg-3">
-        <!-- Vertical Settings Menu -->
-        <div class="card bg-white">
-            <div class="card-body p-0">
-                <div class="list-group list-group-flush">
-                    <!-- Payroll Settings -->
-                    <div class="list-group-item bg-light border-0">
-                        <h6 class="text-uppercase text-muted mb-0 font-size-11 fw-bold">
-                            <i class="mdi mdi-cash-multiple me-1"></i> Payroll Configuration
-                        </h6>
-                    </div>
-                    <a href="{{ route('hrm.settings.salary-components.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.settings.salary-components.*') ? 'active' : '' }}">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-cash-plus me-2 font-size-18"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-size-13">Salary Components</h6>
-                                <small class="text-muted">Earnings & Deductions</small>
+    <div class="col-12">
+        <!-- General & Automation -->
+        <div class="settings-section mb-5">
+            <div class="section-header mb-4">
+                <h5 class="section-title">General & Automation</h5>
+                <div class="section-divider"></div>
+            </div>
+            <div class="row g-4">
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.general') }}" target="_blank" class="modern-card gradient-primary">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-cog-outline"></i>
                             </div>
-                            <i class="mdi mdi-chevron-right"></i>
+                        </div>
+                        <h6 class="card-title">General Settings</h6>
+                        <p class="card-description">Configure system preferences and core settings</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
                         </div>
                     </a>
-                    <a href="{{ route('hrm.settings.salary-structures.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.settings.salary-structures.*') ? 'active' : '' }}">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-file-tree me-2 font-size-18"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-size-13">Salary Structures</h6>
-                                <small class="text-muted">Templates & Grades</small>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.automation') }}" target="_blank" class="modern-card gradient-warning">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-robot"></i>
                             </div>
-                            <i class="mdi mdi-chevron-right"></i>
+                        </div>
+                        <h6 class="card-title">Automation</h6>
+                        <p class="card-description">Manage schedulers and automated actions</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
                         </div>
                     </a>
-                    <a href="{{ route('hrm.settings.tax-slabs.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.settings.tax-slabs.*') ? 'active' : '' }}">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-percent me-2 font-size-18"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-size-13">Tax Slabs</h6>
-                                <small class="text-muted">Income Tax Rules</small>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.workflows.index') }}" target="_blank" class="modern-card gradient-info">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-sitemap"></i>
                             </div>
-                            <i class="mdi mdi-chevron-right"></i>
                         </div>
-                    </a>
-                    <a href="{{ route('hrm.skills.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.skills.*') ? 'active' : '' }}">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-school me-2 font-size-18"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-size-13">Skills</h6>
-                                <small class="text-muted">Competencies & Qualifications</small>
-                            </div>
-                            <i class="mdi mdi-chevron-right"></i>
-                        </div>
-                    </a>
-
-                    <!-- Leave Settings -->
-                    <div class="list-group-item bg-light border-0 mt-2">
-                        <h6 class="text-uppercase text-muted mb-0 font-size-11 fw-bold">
-                            <i class="mdi mdi-calendar-check me-1"></i> Leave Management
-                        </h6>
-                    </div>
-                    <a href="{{ route('hrm.settings.leave-types.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.settings.leave-types.*') ? 'active' : '' }}">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-calendar-clock me-2 font-size-18"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-size-13">Leave Policies</h6>
-                                <small class="text-muted">Types & Rules</small>
-                            </div>
-                            <i class="mdi mdi-chevron-right"></i>
-                        </div>
-                    </a>
-                    <a href="{{ route('hrm.settings.approval-chains.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.settings.approval-chains.*') ? 'active' : '' }}">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-account-multiple-check me-2 font-size-18"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-size-13">Approval Chains</h6>
-                                <small class="text-muted">Workflow Setup</small>
-                            </div>
-                            <i class="mdi mdi-chevron-right"></i>
-                        </div>
-                    </a>
-
-                    <!-- Document Templates -->
-                    <div class="list-group-item bg-light border-0 mt-2">
-                        <h6 class="text-uppercase text-muted mb-0 font-size-11 fw-bold">
-                            <i class="mdi mdi-file-document-multiple me-1"></i> Documents
-                        </h6>
-                    </div>
-                    <a href="{{ route('hrm.settings.letter-templates.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.settings.letter-templates.*') ? 'active' : '' }}">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-text-box-multiple me-2 font-size-18"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-size-13">Letter Templates</h6>
-                                <small class="text-muted">Digital Documents</small>
-                            </div>
-                            <i class="mdi mdi-chevron-right"></i>
-                        </div>
-                    </a>
-                    <a href="{{ route('hrm.document-types.index') }}" class="list-group-item list-group-item-action border-0 {{ request()->routeIs('hrm.document-types.*') ? 'active' : '' }}">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-file-cog me-2 font-size-18"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-size-13">Document Types</h6>
-                                <small class="text-muted">Upload Categories</small>
-                            </div>
-                            <i class="mdi mdi-chevron-right"></i>
+                        <h6 class="card-title">Workflows</h6>
+                        <p class="card-description">Design process automation flows</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
                         </div>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="card bg-gradient-primary text-white border-0 mt-3">
-            <div class="card-body">
-                <h6 class="text-white mb-3">Configuration Status</h6>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="font-size-13">Components</span>
-                    <span class="fw-bold">{{ \App\Modules\HRM\Models\SalaryComponent::count() }}</span>
+        <!-- Organization Structure -->
+        <div class="settings-section mb-5">
+            <div class="section-header mb-4">
+                <h5 class="section-title">Organization Structure</h5>
+                <div class="section-divider"></div>
+            </div>
+            <div class="row g-4">
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.departments.index') }}" target="_blank" class="modern-card gradient-purple">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-domain"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Departments</h6>
+                        <p class="card-description">Manage organizational departments</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
                 </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="font-size-13">Structures</span>
-                    <span class="fw-bold">{{ \App\Modules\HRM\Models\SalaryStructure::count() }}</span>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.branches.index') }}" target="_blank" class="modern-card gradient-purple">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-office-building-marker"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Branches</h6>
+                        <p class="card-description">Configure office locations and branches</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
                 </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="font-size-13">Leave Types</span>
-                    <span class="fw-bold">{{ \App\Modules\HRM\Models\LeaveType::count() }}</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="font-size-13">Document Types</span>
-                    <span class="fw-bold">{{ \App\Modules\HRM\Models\DocumentType::count() }}</span>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.business-units.index') }}" target="_blank" class="modern-card gradient-purple">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-briefcase-outline"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Business Units</h6>
+                        <p class="card-description">Manage strategic business units</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-9">
-        <!-- Welcome Card -->
-        <div class="card bg-white">
-            <div class="card-body text-center py-5">
-                <div class="mb-4">
-                    <i class="mdi mdi-cog-outline font-size-48 text-primary"></i>
+        <!-- Payroll Configuration -->
+        <div class="settings-section mb-5">
+            <div class="section-header mb-4">
+                <h5 class="section-title">Payroll Configuration</h5>
+                <div class="section-divider"></div>
+            </div>
+            <div class="row g-4">
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.salary-components.index') }}" target="_blank" class="modern-card gradient-success">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-cash-plus"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Salary Components</h6>
+                        <p class="card-description">Configure earnings and deductions</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
                 </div>
-                <h4 class="mb-3">HRM Settings Dashboard</h4>
-                <p class="text-muted mb-4">
-                    Configure your payroll, leave management, and document templates from the menu on the left.<br>
-                    All your HRM settings are organized for easy access and management.
-                </p>
-                
-                <div class="row mt-5">
-                    <div class="col-md-4">
-                        <div class="p-3 border rounded">
-                            <i class="mdi mdi-shield-check-outline text-success font-size-24 d-block mb-2"></i>
-                            <h6 class="mb-1">Secure</h6>
-                            <p class="text-muted small mb-0">Role-based access control</p>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.salary-structures.index') }}" target="_blank" class="modern-card gradient-success">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-file-tree"></i>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3 border rounded">
-                            <i class="mdi mdi-lightning-bolt-outline text-warning font-size-24 d-block mb-2"></i>
-                            <h6 class="mb-1">Fast</h6>
-                            <p class="text-muted small mb-0">Quick configuration updates</p>
+                        <h6 class="card-title">Salary Structures</h6>
+                        <p class="card-description">Define templates and salary grades</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3 border rounded">
-                            <i class="mdi mdi-chart-line text-info font-size-24 d-block mb-2"></i>
-                            <h6 class="mb-1">Scalable</h6>
-                            <p class="text-muted small mb-0">Grows with your business</p>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.tax-slabs.index') }}" target="_blank" class="modern-card gradient-success">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-percent"></i>
+                            </div>
                         </div>
-                    </div>
+                        <h6 class="card-title">Tax Slabs</h6>
+                        <p class="card-description">Setup income tax rules and slabs</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave & Attendance -->
+        <div class="settings-section mb-5">
+            <div class="section-header mb-4">
+                <h5 class="section-title">Leave & Attendance</h5>
+                <div class="section-divider"></div>
+            </div>
+            <div class="row g-4">
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.leave-types.index') }}" target="_blank" class="modern-card gradient-danger">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-calendar-clock"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Leave Policies</h6>
+                        <p class="card-description">Configure leave types and rules</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.approval-chains.index') }}" target="_blank" class="modern-card gradient-danger">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-account-multiple-check"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Approval Chains</h6>
+                        <p class="card-description">Setup approval workflow chains</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.holidays.index') }}" target="_blank" class="modern-card gradient-danger">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-calendar-star"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Holidays</h6>
+                        <p class="card-description">Manage public and weekly holidays</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents & Assets -->
+        <div class="settings-section mb-5">
+            <div class="section-header mb-4">
+                <h5 class="section-title">Documents & Assets</h5>
+                <div class="section-divider"></div>
+            </div>
+            <div class="row g-4">
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.policies.index') }}" target="_blank" class="modern-card gradient-teal">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-shield-check"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Policies</h6>
+                        <p class="card-description">Manage company policies</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.letter-templates.index') }}" target="_blank" class="modern-card gradient-teal">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-text-box-multiple"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Letter Templates</h6>
+                        <p class="card-description">Create digital document templates</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.document-types.index') }}" target="_blank" class="modern-card gradient-teal">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-file-cog"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Document Types</h6>
+                        <p class="card-description">Define upload categories</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.assets.index') }}" target="_blank" class="modern-card gradient-teal">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-laptop"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Asset Categories</h6>
+                        <p class="card-description">Manage equipment types</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.settings.expenses.index') }}" target="_blank" class="modern-card gradient-teal">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-receipt"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Expense Categories</h6>
+                        <p class="card-description">Setup reimbursement types</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Talent & Performance -->
+        <div class="settings-section mb-5">
+            <div class="section-header mb-4">
+                <h5 class="section-title">Talent & Performance</h5>
+                <div class="section-divider"></div>
+            </div>
+            <div class="row g-4">
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.skills.index') }}" target="_blank" class="modern-card gradient-orange">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-school"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Skills</h6>
+                        <p class="card-description">Define competencies and qualifications</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.competencies.index') }}" target="_blank" class="modern-card gradient-orange">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-certificate"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Competencies</h6>
+                        <p class="card-description">Manage core competencies</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <a href="{{ route('hrm.certifications.index') }}" target="_blank" class="modern-card gradient-orange">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <i class="mdi mdi-seal"></i>
+                            </div>
+                        </div>
+                        <h6 class="card-title">Certifications</h6>
+                        <p class="card-description">Track professional certifications</p>
+                        <div class="card-arrow">
+                            <i class="mdi mdi-arrow-right"></i>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -191,19 +360,232 @@
 </div>
 
 <style>
-.list-group-item-action.active {
-    background-color: #556ee6;
-    border-color: #556ee6;
+/* Modern Card Styles - Theme Aware */
+.modern-card {
+    position: relative;
+    display: block;
+    padding: 30px;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    text-decoration: none;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Dark mode support */
+body[data-layout-mode="dark"] .modern-card {
+    background: #1a1d2e;
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.modern-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modern-card:hover::before {
+    opacity: 1;
+}
+
+.modern-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+    border-color: transparent;
+}
+
+body[data-layout-mode="dark"] .modern-card:hover {
+    box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+}
+
+.card-icon-wrapper {
+    margin-bottom: 20px;
+}
+
+.card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    transition: transform 0.3s ease;
+}
+
+.modern-card:hover .card-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.card-icon i {
+    font-size: 28px;
     color: white;
 }
-.list-group-item-action.active small {
-    color: rgba(255,255,255,0.8);
+
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 8px;
+    transition: color 0.3s ease;
 }
-.list-group-item-action:hover {
-    background-color: #f8f9fa;
+
+body[data-layout-mode="dark"] .card-title {
+    color: #e2e8f0;
 }
-.list-group-item-action.active:hover {
-    background-color: #4961dc;
+
+.modern-card:hover .card-title {
+    color: var(--gradient-start);
+}
+
+.card-description {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 0;
+    line-height: 1.6;
+}
+
+body[data-layout-mode="dark"] .card-description {
+    color: #a0aec0;
+}
+
+.card-arrow {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f7fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+body[data-layout-mode="dark"] .card-arrow {
+    background: #2d3748;
+}
+
+.modern-card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+}
+
+.card-arrow i {
+    font-size: 18px;
+    color: #4a5568;
+}
+
+body[data-layout-mode="dark"] .card-arrow i {
+    color: #cbd5e0;
+}
+
+.modern-card:hover .card-arrow i {
+    color: white;
+}
+
+/* Gradient Variations */
+.gradient-primary {
+    --gradient-start: #667eea;
+    --gradient-end: #764ba2;
+}
+
+.gradient-success {
+    --gradient-start: #11998e;
+    --gradient-end: #38ef7d;
+}
+
+.gradient-danger {
+    --gradient-start: #ee0979;
+    --gradient-end: #ff6a00;
+}
+
+.gradient-warning {
+    --gradient-start: #f2994a;
+    --gradient-end: #f2c94c;
+}
+
+.gradient-info {
+    --gradient-start: #2196f3;
+    --gradient-end: #00bcd4;
+}
+
+.gradient-purple {
+    --gradient-start: #8e2de2;
+    --gradient-end: #4a00e0;
+}
+
+.gradient-teal {
+    --gradient-start: #0ba360;
+    --gradient-end: #3cba92;
+}
+
+.gradient-orange {
+    --gradient-start: #ff6b6b;
+    --gradient-end: #feca57;
+}
+
+/* Section Headers */
+.section-header {
+    position: relative;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 12px;
+    display: inline-block;
+}
+
+body[data-layout-mode="dark"] .section-title {
+    color: #e2e8f0;
+}
+
+.section-divider {
+    height: 3px;
+    width: 60px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modern-card {
+        padding: 24px;
+    }
+    
+    .card-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .card-icon i {
+        font-size: 24px;
+    }
+    
+    .card-title {
+        font-size: 16px;
+    }
+    
+    .card-arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 </style>
+
 @endsection

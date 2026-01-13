@@ -1,246 +1,378 @@
-@extends("Main::layouts.app")
-
-@section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{ __('Create New Role') }}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard.home') }}"><i class="fas fa-home"></i></a></li>
-                    <li class="breadcrumb-item">Access Control</li>
-                    <li class="breadcrumb-item active">Create Role</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex align-items-center justify-content-between">
-                    <h5 class="card-title mb-0">
-                        <i class="bx bx-shield-plus me-2"></i>
-                        Configure New Role Permissions
-                    </h5>
-                    @can('role-list')
-                    <a href="{{ route('dashboard.role') }}" class="btn btn-soft-secondary btn-sm">
-                        <i class="bx bx-list-ul me-1"></i> Back to Roles
-                    </a>
-                    @endcan
-                </div>
-            </div>
-
-            @include('Main::widgets.message.sweet-alert')
-
-            <div class="card-body">
-                {{ Form::open(['route' => 'dashboard.role.has-permission.store', 'id' => 'rolePermissionForm']) }}
-
-                <!-- Role Name Section -->
-                <!-- Role Name and Stats - Compact -->
-                <div class="row mb-3 g-2">
-                    <div class="col-lg-9">
-                        <div class="card border shadow-none bg-light mb-0">
-                            <div class="card-body p-2">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="flex-grow-1">
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text"><i class="bx bx-shield"></i></span>
-                                            <input type="text" name="name" class="form-control" 
-                                                   placeholder="Role Name" 
-                                                   value="{{ old('name') }}" 
-                                                   required>
-                                        </div>
-                                    </div>
-                                    <div class="flex-shrink-0">
-                                         <button class="btn btn-success btn-sm" type="submit">
-                                            <i class="bx bx-save me-1"></i> Save
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="card border shadow-none bg-success bg-gradient mb-0 h-100">
-                            <div class="card-body p-2 text-white d-flex align-items-center justify-content-between">
-                                <span class="fs-12">Selected:</span>
-                                <span class="fw-bold fs-14" id="selectedCount">0</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-soft-success btn-sm" id="selectAllBtn">
-                                <i class="bx bx-check-double me-1"></i> Select All
-                            </button>
-                            <button type="button" class="btn btn-soft-danger btn-sm" id="deselectAllBtn">
-                                <i class="bx bx-x me-1"></i> Deselect All
-                            </button>
-                            <button type="button" class="btn btn-soft-info btn-sm" id="expandAllBtn">
-                                <i class="bx bx-expand me-1"></i> Expand All
-                            </button>
-                            <button type="button" class="btn btn-soft-warning btn-sm" id="collapseAllBtn">
-                                <i class="bx bx-collapse me-1"></i> Collapse All
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Search Box -->
-                <div class="row mb-2">
-                    <div class="col-lg-4">
-                        <div class="search-box">
-                            <input type="text" class="form-control form-control-sm" id="searchPermissions" 
-                                   placeholder="Search permissions...">
-                            <i class="bx bx-search search-icon"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Permissions Grid -->
-                <div class="row g-2" id="permissionsGrid">
-                    @foreach($modules as $module => $permissions)
-                    <div class="col-lg-6 col-xl-3 permission-module" data-module="{{ strtolower($module) }}">
-                        <div class="card border shadow-none h-100 module-card mb-0">
-                            <!-- Added data-toggle for BS4 and data-bs-toggle for BS5 -->
-                            <div class="card-header bg-light-subtle p-2 cursor-pointer" 
-                                 data-bs-toggle="collapse" data-toggle="collapse"
-                                 data-bs-target="#module{{ $loop->index }}" data-target="#module{{ $loop->index }}" 
-                                 aria-expanded="true">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="form-check mb-0">
-                                        <input class="form-check-input module-checkbox" type="checkbox" 
-                                               id="module_{{ $loop->index }}" data-module-id="{{ $loop->index }}">
-                                        <label class="form-check-label fw-semibold fs-13" for="module_{{ $loop->index }}">
-                                            {{ $module ?? '' }}
-                                        </label>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-1">
-                                        <span class="badge bg-success-subtle text-success permission-count">
-                                            {{ count($permissions) }}
-                                        </span>
-                                        <i class="bx bx-chevron-down fs-14 text-muted"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="module{{ $loop->index }}" class="collapse show">
-                                <div class="card-body p-2">
-                                    <div class="permission-list">
-                                        @foreach($permissions as $permission)
-                                        <div class="form-check mb-1 permission-item" 
-                                             data-permission="{{ strtolower($permission->name) }}">
-                                            <input class="form-check-input permission-checkbox" 
-                                                   type="checkbox" 
-                                                   name="permissions[]" 
-                                                   id="perm_{{ $permission->id }}" 
-                                                   value="{{ $permission->name }}" 
-                                                   data-module="{{ $loop->parent->index }}"
-                                                   {{ $permission->checked }}>
-                                            <label class="form-check-label text-muted fs-12" for="perm_{{ $permission->id }}">
-                                                {{ $permission->name }}
-                                            </label>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-
-                <!-- No Results Message -->
-                <div class="row d-none" id="noResults">
-                    <div class="col-12">
-                        <div class="text-center py-5">
-                            <i class="bx bx-search-alt display-4 text-muted"></i>
-                            <h5 class="mt-3">No permissions found</h5>
-                            <p class="text-muted">Try adjusting your search terms</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="text-end">
-                            <a href="{{ route('dashboard.role') }}" class="btn btn-light me-2">
-                                <i class="bx bx-x me-1"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-success">
-                                <i class="bx bx-save me-1"></i> Create Role
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {{ Form::close() }}
-            </div>
-        </div>
-    </div>
-</div>
+<div class="card-body">
+{{ Form::open(['route' => 'dashboard.role.has-permission.store', 'id' => 'rolePermissionForm']) }}
 
 <style>
-.module-card {
-    transition: all 0.3s ease;
+/* Inline styles for offcanvas */
+.modern-role-form .role-name-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    color: white;
 }
 
-.module-card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
-    transform: translateY(-2px);
+.modern-role-form .role-name-input {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 600;
 }
 
-.cursor-pointer {
-    cursor: pointer;
+.modern-role-form .role-name-input::placeholder {
+    color: rgba(255,255,255,0.7);
 }
 
-.permission-item {
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+.modern-role-form .role-name-input:focus {
+    background: rgba(255,255,255,0.3);
+    border-color: white;
+    color: white;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.1);
 }
 
-.permission-item:hover {
-    background-color: rgba(0, 0, 0, 0.02);
+.modern-role-form .stats-badge {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 12px 20px;
+    text-align: center;
 }
 
-.form-check-input:checked ~ .form-check-label {
-    color: var(--bs-success) !important;
-    font-weight: 500;
+.modern-role-form .stats-value {
+    font-size: 28px;
+    font-weight: 700;
+    display: block;
 }
 
-.search-box {
+.modern-role-form .stats-label {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.modern-role-form .action-bar {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.modern-role-form .search-box-modern {
     position: relative;
 }
 
-.search-box .search-icon {
+.modern-role-form .search-box-modern i {
     position: absolute;
-    right: 13px;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 18px;
     color: #adb5bd;
+    font-size: 18px;
 }
 
-.card-header i.bx-chevron-down {
+.modern-role-form .search-box-modern input {
+    padding-left: 45px;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+
+.modern-role-form .search-box-modern input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.modern-role-form .action-btn {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+.modern-role-form .permissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.modern-role-form .permission-module-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.modern-role-form .permission-module-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.12);
+    transform: translateY(-2px);
+}
+
+.modern-role-form .module-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 14px 16px;
+    cursor: pointer;
+}
+
+.modern-role-form .module-header:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+}
+
+.modern-role-form .module-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+.modern-role-form .permission-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.modern-role-form .toggle-icon {
+    font-size: 18px;
+    color: #6c757d;
     transition: transform 0.3s ease;
 }
 
-.card-header[aria-expanded="false"] i.bx-chevron-down {
+.modern-role-form .module-header[aria-expanded="false"] .toggle-icon {
     transform: rotate(-90deg);
 }
 
-.permission-count {
-    font-size: 11px;
-    padding: 2px 8px;
+.modern-role-form .module-body {
+    padding: 12px;
+}
+
+.modern-role-form .permissions-list {
+    display: grid;
+    gap: 4px;
+}
+
+.modern-role-form .permission-item {
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.modern-role-form .permission-item:hover {
+    background: #f8f9fa;
+}
+
+.modern-role-form .permission-label {
+    display: flex;
+    align-items: center;
+    justify-content-space-between;
+    cursor: pointer;
+    margin: 0;
+    font-size: 13px;
+    color: #4a5568;
+}
+
+.modern-role-form .permission-type {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.modern-role-form .permission-type.view { background: rgba(33, 150, 243, 0.1); color: #2196f3; }
+.modern-role-form .permission-type.create { background: rgba(76, 175, 80, 0.1); color: #4caf50; }
+.modern-role-form .permission-type.edit { background: rgba(255, 152, 0, 0.1); color: #ff9800; }
+.modern-role-form .permission-type.delete { background: rgba(244, 67, 54, 0.1); color: #f44336; }
+.modern-role-form .permission-type.approve { background: rgba(156, 39, 176, 0.1); color: #9c27b0; }
+
+.modern-role-form .form-check-input {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    border: 2px solid #cbd5e0;
+    cursor: pointer;
+}
+
+.modern-role-form .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.modern-role-form .form-check-input:checked ~ .permission-label {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.modern-role-form .module-checkbox {
+    width: 18px;
+    height: 18px;
+}
+
+.modern-role-form .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #a0aec0;
+}
+
+.modern-role-form .no-results i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+/* Dark mode */
+body[data-layout-mode="dark"] .modern-role-form .permission-module-card {
+    background: #242736;
+    border-color: rgba(255,255,255,0.1);
+}
+
+body[data-layout-mode="dark"] .modern-role-form .module-header {
+    background: linear-gradient(135deg, #2d3142 0%, #242736 100%);
+}
+
+body[data-layout-mode="dark"] .modern-role-form .module-title,
+body[data-layout-mode="dark"] .modern-role-form .permission-label {
+    color: #e2e8f0;
+}
+
+body[data-layout-mode="dark"] .modern-role-form .action-bar {
+    background: #242736;
+}
+
+@media (max-width: 768px) {
+    .modern-role-form .permissions-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
-@endsection
+
+<div class="modern-role-form">
+    <!-- Role Name Section -->
+    <div class="role-name-section">
+        <div class="row">
+            <div class="col-md-8 mb-3 mb-md-0">
+                <label class="form-label mb-2 text-white">
+                    <i class="bx bx-shield me-1"></i>
+                    Role Name
+                </label>
+                <input type="text" name="name" class="form-control role-name-input" 
+                       placeholder="e.g., Content Manager, Sales Executive" 
+                       value="{{ old('name') }}" 
+                       required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label mb-2 text-white opacity-75">Permissions</label>
+                <div class="stats-badge" style="height: 50px; display: flex; flex-direction: column; justify-content: center;">
+                    <span class="stats-value" id="selectedCount">0</span>
+                    <span class="stats-label">selected</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="row g-2 align-items-center">
+            <div class="col-lg-6">
+                <div class="search-box-modern">
+                    <i class="bx bx-search"></i>
+                    <input type="text" class="form-control" id="searchPermissions" 
+                           placeholder="Search permissions...">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="d-flex gap-2 justify-content-lg-end flex-wrap">
+                    <button type="button" class="btn btn-soft-success btn-sm action-btn" id="selectAllBtn">
+                        <i class="bx bx-check-double"></i> All
+                    </button>
+                    <button type="button" class="btn btn-soft-danger btn-sm action-btn" id="deselectAllBtn">
+                        <i class="bx bx-x"></i> Clear
+                    </button>
+                    <button type="button" class="btn btn-soft-info btn-sm action-btn" id="expandAllBtn">
+                        <i class="bx bx-expand"></i> Expand
+                    </button>
+                    <button type="button" class="btn btn-soft-warning btn-sm action-btn" id="collapseAllBtn">
+                        <i class="bx bx-collapse"></i> Collapse
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permissions Grid -->
+    <div class="permissions-grid" id="permissionsGrid">
+        @foreach($modules as $module => $permissions)
+        <div class="permission-module-card permission-module" data-module="{{ strtolower($module) }}">
+            <div class="module-header" data-bs-toggle="collapse" data-bs-target="#module{{ $loop->index }}" aria-expanded="true">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input module-checkbox" type="checkbox" 
+                               id="module_{{ $loop->index }}" data-module-id="{{ $loop->index }}">
+                        <label class="form-check-label module-title" for="module_{{ $loop->index }}">
+                            <i class="bx bx-folder text-primary me-1"></i>
+                            {{ $module ?? '' }}
+                        </label>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="permission-badge">{{ count($permissions) }}</span>
+                        <i class="bx bx-chevron-down toggle-icon"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="module{{ $loop->index }}" class="collapse show">
+                <div class="module-body">
+                    <div class="permissions-list">
+                        @foreach($permissions as $permission)
+                        <div class="permission-item" data-permission="{{ strtolower($permission->name) }}">
+                            <div class="form-check">
+                                <input class="form-check-input permission-checkbox" 
+                                       type="checkbox" 
+                                       name="permissions[]" 
+                                       id="perm_{{ $permission->id }}" 
+                                       value="{{ $permission->name }}" 
+                                       data-module="{{ $loop->parent->index }}"
+                                       {{ $permission->checked }}>
+                                <label class="form-check-label permission-label" for="perm_{{ $permission->id }}">
+                                    <span>{{ $permission->name }}</span>
+                                    @if(str_contains($permission->name, '.view'))
+                                        <span class="permission-type view">View</span>
+                                    @elseif(str_contains($permission->name, '.create'))
+                                        <span class="permission-type create">Create</span>
+                                    @elseif(str_contains($permission->name, '.edit'))
+                                        <span class="permission-type edit">Edit</span>
+                                    @elseif(str_contains($permission->name, '.delete'))
+                                        <span class="permission-type delete">Delete</span>
+                                    @elseif(str_contains($permission->name, '.approve'))
+                                        <span class="permission-type approve">Approve</span>
+                                    @endif
+                                </label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    <!-- No Results -->
+    <div class="no-results d-none" id="noResults">
+        <i class="bx bx-search-alt"></i>
+        <h6>No permissions found</h6>
+        <p class="small">Try adjusting your search</p>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-end pt-3 border-top">
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="bx bx-save me-1"></i> Create Role
+        </button>
+    </div>
+</div>
+
+{{ Form::close() }}
+</div>
